@@ -27,6 +27,10 @@ public class Lote {
         this.eliminadoLogicamente = false;
     }
 
+    /**
+     * Registra un nuevo Lote validando que no se cree directamente en estado Tostado
+     * y que la cantidad inicial sea mayor a cero.
+     */
     public static Lote registrar(CodigoDeLote codigoDeLote, Cantidad cantidadDisponible, String fincaid, ProcesoDeBeneficio
             procesoDeBeneficio, EstadoDelCafe estado, Cosecha cosecha, VariedadDeCafe variedad){
         if (estado == EstadoDelCafe.TOSTADO){
@@ -40,6 +44,10 @@ public class Lote {
         return new Lote(codigoDeLote, cantidadDisponible, fincaid, procesoDeBeneficio, estado, cosecha, variedad);
     }
 
+    /**
+     * Descuenta cantidad disponible del Lote.
+     * No permite operar sobre un Lote ya eliminado lógicamente.
+     */
     public void descontar(Cantidad cantidadUsada) {
         if (eliminadoLogicamente) {
             throw new ReglaDominioException("No se puede transformar un Lote eliminado.");
@@ -47,6 +55,7 @@ public class Lote {
         this.cantidadDisponible = this.cantidadDisponible.restar(cantidadUsada);
     }
 
+    /** Marca el Lote como eliminado (borrado lógico, no físico). */
     public void eliminarLogicamente() {
         this.eliminadoLogicamente = true;
     }
