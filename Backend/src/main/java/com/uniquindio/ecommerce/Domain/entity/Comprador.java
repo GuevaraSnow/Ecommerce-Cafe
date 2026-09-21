@@ -1,4 +1,4 @@
-package main.java.com.uniquindio.ecommerce.Domain.entity;
+package com.uniquindio.ecommerce.Domain.entity;
 
 public class Comprador {
     private String id;
@@ -34,32 +34,16 @@ public class Comprador {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
     public Email getEmail() {
         return email;
-    }
-
-    public void setEmail(Email email) {
-        this.email = email;
     }
 
     public Contraseña getContraseña() {
         return contraseña;
     }
 
-    public void setContraseña(Contraseña contraseña) {
-        this.contraseña = contraseña;
-
-
     public Telefono getTelefono() {
         return telefono;
-    }
-
-    public void setTelefono(Telefono telefono) {
-        this.telefono = telefono;
     }
 
     public FechaDeNacimiento getFechaNacimiento() {

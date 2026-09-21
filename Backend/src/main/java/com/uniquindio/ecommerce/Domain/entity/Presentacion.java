@@ -1,10 +1,10 @@
 package com.uniquindio.ecommerce.Domain.entity;
 
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
-import com.uniquindio.ecommerce.Domain.valueobject.Precio;
-import com.uniquindio.ecommerce.Domain.valueobject.TipoProducto;
+import com.uniquindio.ecommerce.Domain.valueobject.*;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
@@ -19,43 +19,76 @@ public class Presentacion {
     private final String id;
     private final String idLote;
     private final String idTransformacion;
+    private final String vendedorId;
     private final String titulo;
-    private final Precio precio;
     private final TipoProducto tipoProducto;
-    private final LocalDate fechaTueste;
+    private final PerfilTueste perfilDeTueste;
+    private final FechaDeTueste fechaTueste;
+    private Precio precio;
+    private Cantidad cantidadDisponible;
+    private Galeria galeria;
+    private NotaDeCata notaDeCata;
+    private EstadoDePublicacion estado;
     private boolean eliminada;
 
-    private Presentacion(String id, String idLote, String idTransformacion, String titulo, Precio precio,
-                        TipoProducto tipoProducto, LocalDate fechaTueste) {
+    private Presentacion(String id, String idLote, String idTransformacion, String vendedorId, String titulo,
+                          TipoProducto tipoProducto, Precio precio, Cantidad cantidadDisponible, Galeria galeria,
+                          PerfilTueste perfilDeTueste, FechaDeTueste fechaTueste) {
         this.id = id;
         this.idLote = idLote;
         this.idTransformacion = idTransformacion;
+        this.vendedorId = vendedorId;
         this.titulo = titulo;
-        this.precio = precio;
         this.tipoProducto = tipoProducto;
+        this.precio = precio;
+        this.cantidadDisponible = cantidadDisponible;
+        this.galeria = galeria;
+        this.perfilDeTueste = perfilDeTueste;
         this.fechaTueste = fechaTueste;
+        this.notaDeCata = null;
+        this.estado = EstadoDePublicacion.ACTIVA;
         this.eliminada = false;
     }
 
     /**
-     * Crea una Presentación validando identificador, precio y tipo de producto;
-     * origen exclusivo desde un Lote
-     * o una Transformación según el TipoProducto; y, para café
-     * tostado, fecha de tueste dentro de los días de frescura.
+     * Crea una Presentación validando identificador, vendedor, precio, cantidad
+     * inicial y galería; origen exclusivo desde un Lote o una Transformación
+     * según el TipoProducto; y, para café tostado, fecha y perfil de tueste
+     * vigentes (regla D) y compatibles con el rol de quien publica (regla A).
      *
      * @throws ReglaDominioException si se incumple alguna regla de negocio
      */
-    public static Presentacion publicar(String id, String loteId, String transformacionId,
-                                        String titulo, Precio precio, TipoProducto tipoProducto,
-                                        LocalDate fechaTueste) {
+    public static Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
+                                         String titulo, TipoProducto tipoProducto, Precio precio,
+                                         Cantidad cantidadDisponible, Galeria galeria,
+                                         PerfilTueste perfilDeTueste, RolVendedor rolVendedor,
+                                         FechaDeTueste fechaTueste) {
         if (id == null || id.isBlank()) {
             throw new ReglaDominioException("La Presentación debe tener un identificador");
+        }
+        if (vendedorId == null || vendedorId.isBlank()) {
+            throw new ReglaDominioException("La Presentación debe tener un Vendedor");
+        }
+        if (titulo == null || titulo.isBlank()) {
+            throw new ReglaDominioException("La Presentación debe tener un título");
         }
         if (precio == null) {
             throw new ReglaDominioException("La Presentación debe tener un Precio");
         }
         if (tipoProducto == null) {
             throw new ReglaDominioException("La Presentación debe especificar un TipoProducto");
+        }
+        if (cantidadDisponible == null) {
+            throw new ReglaDominioException("La Presentación debe tener una Cantidad disponible");
+        }
+        if (cantidadDisponible.valor() <= 0) {
+            throw new ReglaDominioException("La cantidad inicial de una Presentación debe ser mayor a cero");
+        }
+        if (galeria == null) {
+            throw new ReglaDominioException("La Presentación debe tener una Galería");
+        }
+        if (rolVendedor == null) {
+            throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
         }
 
         boolean vieneDeLote = loteId != null && !loteId.isBlank();
@@ -84,23 +117,102 @@ public class Presentacion {
             if (fechaTueste == null) {
                 throw new ReglaDominioException("El café tostado debe indicar su fecha de tueste");
             }
-            long dias = java.time.temporal.ChronoUnit.DAYS.between(fechaTueste, LocalDate.now());
+            if (perfilDeTueste == null) {
+                throw new ReglaDominioException("El café tostado debe indicar un Perfil de Tueste");
+            }
+            long dias = ChronoUnit.DAYS.between(fechaTueste.valor(), LocalDate.now());
             if (dias > DIAS_MAXIMOS_FRESCURA) {
                 throw new ReglaDominioException(
                         "No se puede publicar: han pasado " + dias + " días desde el tueste (máximo "
                                 + DIAS_MAXIMOS_FRESCURA + ")");
             }
+        } else if (fechaTueste != null || perfilDeTueste != null) {
+            throw new ReglaDominioException("Solo el café tostado admite fecha y perfil de tueste");
         }
 
-        if (titulo == null || titulo.isBlank()) {
-            throw new ReglaDominioException("La Presentación debe tener un título");
+        if (perfilDeTueste != null && rolVendedor == RolVendedor.CAFICULTOR
+                && perfilDeTueste != PerfilTueste.TRADICIONAL) {
+            throw new ReglaDominioException(
+                    "Un Caficultor solo puede publicar café tostado con Perfil de Tueste TRADICIONAL");
         }
 
-        return new Presentacion(id, loteId, transformacionId, titulo, precio, tipoProducto, fechaTueste);
+        return new Presentacion(id, loteId, transformacionId, vendedorId, titulo, tipoProducto, precio,
+                cantidadDisponible, galeria, perfilDeTueste, fechaTueste);
     }
 
-    /** Marca la Presentación como eliminada. */
-    public void eliminar() {this.eliminada = true;}
+    /**
+     * Descuenta cantidad disponible (p. ej. al confirmarse una compra).
+     * Si la cantidad llega a cero, la Presentación queda AGOTADA.
+     */
+    public void descontarCantidad(Cantidad cantidadUsada) {
+        validarNoEliminada();
+        this.cantidadDisponible = this.cantidadDisponible.restar(cantidadUsada);
+        if (this.cantidadDisponible.valor() == 0) {
+            marcarAgotada();
+        }
+    }
+
+    /** Repone cantidad disponible, reactivando la Presentación si estaba AGOTADA. */
+    public void reponerCantidad(Cantidad cantidadNueva) {
+        validarNoEliminada();
+        this.cantidadDisponible = this.cantidadDisponible.sumar(cantidadNueva);
+        if (this.estado == EstadoDePublicacion.AGOTADA && this.cantidadDisponible.valor() > 0) {
+            this.estado = EstadoDePublicacion.ACTIVA;
+        }
+    }
+
+    public void cambiarPrecio(Precio nuevoPrecio) {
+        validarNoEliminada();
+        if (nuevoPrecio == null) {
+            throw new ReglaDominioException("El nuevo Precio no puede ser nulo");
+        }
+        this.precio = nuevoPrecio;
+    }
+
+    public void registrarNotaCata(NotaDeCata nota) {
+        validarNoEliminada();
+        if (nota == null) {
+            throw new ReglaDominioException("La Nota de Cata no puede ser nula");
+        }
+        this.notaDeCata = nota;
+    }
+
+    public void reemplazarGaleria(Galeria nuevaGaleria) {
+        validarNoEliminada();
+        if (nuevaGaleria == null) {
+            throw new ReglaDominioException("La Galería no puede ser nula");
+        }
+        this.galeria = nuevaGaleria;
+    }
+
+    /**
+     * Indica si la Presentación sigue dentro de los días de frescura tras el
+     * tueste (regla D). Las Presentaciones sin fecha de tueste (café
+     * verde/pergamino) siempre se consideran frescas.
+     */
+    public boolean estaFresca() {
+        if (fechaTueste == null) {
+            return true;
+        }
+        long dias = ChronoUnit.DAYS.between(fechaTueste.valor(), LocalDate.now());
+        return dias <= DIAS_MAXIMOS_FRESCURA;
+    }
+
+    public void marcarAgotada() {
+        validarNoEliminada();
+        this.estado = EstadoDePublicacion.AGOTADA;
+    }
+
+    /** Da de baja la Presentación (borrado lógico); nunca se elimina físicamente. */
+    public void darDeBaja() {
+        this.eliminada = true;
+    }
+
+    private void validarNoEliminada() {
+        if (eliminada) {
+            throw new ReglaDominioException("No se puede operar sobre una Presentación dada de baja");
+        }
+    }
 
     public String getId() {return id;}
 
@@ -108,13 +220,25 @@ public class Presentacion {
 
     public String getIdTransformacion() {return idTransformacion;}
 
+    public String getVendedorId() {return vendedorId;}
+
     public String getTitulo() {return titulo;}
 
     public Precio getPrecio() {return precio;}
 
     public TipoProducto getTipoProducto() {return tipoProducto;}
 
-    public LocalDate getFechaTueste() {return fechaTueste;}
+    public Cantidad getCantidadDisponible() {return cantidadDisponible;}
+
+    public Galeria getGaleria() {return galeria;}
+
+    public PerfilTueste getPerfilDeTueste() {return perfilDeTueste;}
+
+    public FechaDeTueste getFechaTueste() {return fechaTueste;}
+
+    public NotaDeCata getNotaDeCata() {return notaDeCata;}
+
+    public EstadoDePublicacion getEstado() {return estado;}
 
     public boolean isEliminada() {return eliminada;}
 
