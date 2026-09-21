@@ -4,5 +4,6 @@ package com.uniquindio.ecommerce.Domain.valueobject;
 public enum EstadoDePublicacion {
     ACTIVA,
     AGOTADA,
-    VENCIDA
+    VENCIDA,
+    INACTIVA
 }
