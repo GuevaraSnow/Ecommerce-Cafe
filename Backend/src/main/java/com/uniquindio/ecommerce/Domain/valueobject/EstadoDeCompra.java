@@ -1,6 +1,6 @@
 package com.uniquindio.ecommerce.Domain.valueobject;
 
-public enum EstadoCompra {
+public enum EstadoDeCompra {
     PENDIENTE,
     CONFIRMADA,
     ENVIADA,

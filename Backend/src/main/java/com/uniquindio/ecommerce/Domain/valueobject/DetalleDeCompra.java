@@ -2,8 +2,8 @@ package com.uniquindio.ecommerce.Domain.valueobject;
 
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 
-public record DetalleCompra(String compraId, String presentacionId, PrecioCongelado precioCongelado, Cantidad cantidad) {
-    public DetalleCompra{
+public record DetalleDeCompra(String compraId, String presentacionId, Precio precioCongelado, Cantidad cantidad) {
+    public DetalleDeCompra {
         if (compraId == null || compraId.isBlank()) {
             throw new ReglaDominioException("No esta asociado a ninguna compra");
         }
