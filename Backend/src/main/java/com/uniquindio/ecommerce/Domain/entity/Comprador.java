@@ -1,13 +1,19 @@
 package com.uniquindio.ecommerce.Domain.entity;
 
+import com.uniquindio.ecommerce.Domain.valueobject.Email;
+import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
+import com.uniquindio.ecommerce.Domain.valueobject.Telefono;
+import com.uniquindio.ecommerce.Domain.valueobject.FechaDeNacimiento;
+import com.uniquindio.ecommerce.Domain.valueobject.TipoDeComprador;
+
 public class Comprador {
     private String id;
     private String nombre;
     private Email email;
-    private Contraseña contraseña;
+    private Contrasena contrasena;
     private Telefono telefono;
     private FechaDeNacimiento fechaNacimiento;
-    private TipoComprador tipo;
+    private TipoDeComprador tipo;
     private boolean eliminadoLogicamente;
 
     public Comprador(String id, String nombre, Email email, Contrasena contrasena,
@@ -15,7 +21,7 @@ public class Comprador {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
-        this.contraseña = contraseña;
+        this.contrasena = contrasena;
         this.telefono = telefono;
         this.fechaNacimiento = fechaNacimiento;
         this.tipo = tipo;
@@ -38,8 +44,8 @@ public class Comprador {
         return email;
     }
 
-    public Contraseña getContraseña() {
-        return contraseña;
+    public Contrasena getContraseña() {
+        return contrasena;
     }
 
     public Telefono getTelefono() {
