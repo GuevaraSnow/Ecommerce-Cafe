@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.Domain.valueobject;
 
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeLote;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
