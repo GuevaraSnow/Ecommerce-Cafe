@@ -47,6 +47,10 @@ public class PresentacionTrazable extends Presentacion {
         if (rolVendedor == null) {
             throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
         }
+        if ("unidad".equals(cantidadDisponible.unidad())) {
+            throw new ReglaDominioException(
+                    "Una Presentación Trazable no se cuenta en 'unidad', debe indicar peso o volumen (kg, g, ml)");
+        }
 
         OrigenDePresentacion origen = OrigenDePresentacion.desde(loteId, transformacionId);
 

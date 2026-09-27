@@ -38,6 +38,10 @@ public class ArticuloDeMerchandising extends Presentacion {
         if (descripcion == null || descripcion.isBlank()) {
             throw new ReglaDominioException("El Artículo de Merchandising debe tener una descripción");
         }
+        if (!"unidad".equals(cantidadDisponible.unidad())) {
+            throw new ReglaDominioException(
+                    "Un Artículo de Merchandising se cuenta en 'unidad', no en " + cantidadDisponible.unidad());
+        }
         return new ArticuloDeMerchandising(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
                 galeria, material, descripcion);
     }
