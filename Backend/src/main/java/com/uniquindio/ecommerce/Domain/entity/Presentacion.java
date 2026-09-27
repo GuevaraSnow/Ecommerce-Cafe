@@ -3,8 +3,6 @@ package com.uniquindio.ecommerce.Domain.entity;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
@@ -28,6 +26,31 @@ public abstract class Presentacion {
 
     protected Presentacion(String id, String vendedorId, String titulo,
                           TipoDePresentacion tipoPresentacion, Precio precio, Cantidad cantidadDisponible, Galeria galeria) {
+        this.id = id;
+        this.vendedorId = vendedorId;
+        this.titulo = titulo;
+        this.tipoPresentacion = tipoPresentacion;
+        this.precio = precio;
+        this.cantidadDisponible = cantidadDisponible;
+        this.galeria = galeria;
+        this.estado = EstadoDePublicacion.ACTIVA;
+        this.eliminada = false;
+    }
+
+    /**
+     * Crea una Presentación validando identificador, vendedor, precio, cantidad
+     * inicial y galería. El Tipo de Presentación decide la subclase: si es
+     * MERCHANDISING delega en {@link ArticuloDeMerchandising#publicar}; en
+     * cualquier otro caso delega en {@link PresentacionTrazable#publicar},
+     * que valida sus propias reglas (Origen, frescura, perfil de tueste).
+     *
+     * @throws ReglaDominioException si se incumple alguna regla de negocio
+     */
+    public static Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
+                                         String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
+                                         Cantidad cantidadDisponible, Galeria galeria,
+                                         PerfilTueste perfilDeTueste, RolVendedor rolVendedor,
+                                         FechaDeTueste fechaTueste, String material, String descripcion) {
         if (id == null || id.isBlank()) {
             throw new ReglaDominioException("La Presentación debe tener un identificador");
         }
@@ -52,80 +75,15 @@ public abstract class Presentacion {
         if (galeria == null) {
             throw new ReglaDominioException("La Presentación debe tener una Galería");
         }
-        this.id = id;
-        this.vendedorId = vendedorId;
-        this.titulo = titulo;
-        this.tipoPresentacion = tipoPresentacion;
-        this.precio = precio;
-        this.cantidadDisponible = cantidadDisponible;
-        this.galeria = galeria;
-        this.estado = EstadoDePublicacion.ACTIVA;
-        this.eliminada = false;
-    }
-
-    /**
-     * Crea una Presentación validando identificador, vendedor, precio, cantidad
-     * inicial y galería. El Tipo de Presentación decide la subclase: si es
-     * MERCHANDISING crea un Artículo de Merchandising (sin Origen); en
-     * cualquier otro caso crea una Presentación Trazable, exigiendo Origen
-     * exclusivo desde un Lote o una Transformación (regla B) y, para café
-     * tostado, fecha y perfil de tueste vigentes (regla D) y compatibles con
-     * el rol de quien publica (regla A).
-     *
-     * @throws ReglaDominioException si se incumple alguna regla de negocio
-     */
-    public static Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
-                                         String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
-                                         Cantidad cantidadDisponible, Galeria galeria,
-                                         PerfilTueste perfilDeTueste, RolVendedor rolVendedor,
-                                         FechaDeTueste fechaTueste) {
-        if (rolVendedor == null) {
-            throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
-        }
-
         if (tipoPresentacion == TipoDePresentacion.MERCHANDISING) {
             if (fechaTueste != null || perfilDeTueste != null) {
                 throw new ReglaDominioException("Solo una Presentación Trazable admite fecha y perfil de tueste");
             }
-            return new ArticuloDeMerchandising(id, vendedorId, titulo, tipoPresentacion, precio,
-                    cantidadDisponible, galeria);
+            return ArticuloDeMerchandising.publicar(id, vendedorId, titulo, tipoPresentacion, precio,
+                    cantidadDisponible, galeria, material, descripcion);
         }
-
-        OrigenDePresentacion origen = OrigenDePresentacion.desde(loteId, transformacionId);
-
-        if (tipoPresentacion == TipoDePresentacion.CAFE_VERDE && origen.transformacionId() != null) {
-            throw new ReglaDominioException("Una Presentación de café verde debe provenir directamente de un Lote");
-        }
-        if ((tipoPresentacion == TipoDePresentacion.CAFE_TOSTADO || tipoPresentacion == TipoDePresentacion.DERIVADO_CONSUMIBLE)
-                && origen.loteId() != null) {
-            throw new ReglaDominioException("Una Presentación tostada o derivada debe provenir de una Transformación");
-        }
-
-        if (tipoPresentacion == TipoDePresentacion.CAFE_TOSTADO) {
-            if (fechaTueste == null) {
-                throw new ReglaDominioException("El café tostado debe indicar su fecha de tueste");
-            }
-            if (perfilDeTueste == null) {
-                throw new ReglaDominioException("El café tostado debe indicar un Perfil de Tueste");
-            }
-            long dias = ChronoUnit.DAYS.between(fechaTueste.valor(), LocalDate.now());
-            if (dias > PresentacionTrazable.DIAS_MAXIMOS_FRESCURA) {
-                throw new ReglaDominioException(
-                        "No se puede publicar: han pasado " + dias + " días desde el tueste (máximo "
-                                + PresentacionTrazable.DIAS_MAXIMOS_FRESCURA + ")");
-            }
-        } else if (fechaTueste != null || perfilDeTueste != null) {
-            throw new ReglaDominioException("Solo el café tostado admite fecha y perfil de tueste");
-        }
-
-        if (perfilDeTueste != null && rolVendedor == RolVendedor.CAFICULTOR
-                && perfilDeTueste != PerfilTueste.TRADICIONAL) {
-            throw new ReglaDominioException(
-                    "Un Caficultor solo puede publicar café tostado con Perfil de Tueste TRADICIONAL");
-        }
-
-        return new PresentacionTrazable(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
-                galeria, origen, perfilDeTueste, fechaTueste);
+        return PresentacionTrazable.publicar(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
+                galeria, loteId, transformacionId, perfilDeTueste, fechaTueste, rolVendedor);
     }
 
     /**
