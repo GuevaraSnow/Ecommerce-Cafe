@@ -5,7 +5,7 @@ import java.util.Set;
 
 public record Cantidad(double valor, String unidad) {
 
-    private static final Set<String> UNIDADES_VALIDAS = Set.of("kg", "g", "ml");
+    private static final Set<String> UNIDADES_VALIDAS = Set.of("kg", "g", "ml", "unidad");
 
     public Cantidad {
         if (valor < 0) {
