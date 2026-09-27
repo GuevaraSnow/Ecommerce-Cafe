@@ -30,11 +30,6 @@ public class PublicarPresentacion {
                                   String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
                                   Cantidad cantidadDisponible, Galeria galeria, PerfilTueste perfilDeTueste,
                                   RolVendedor rolVendedor, FechaDeTueste fechaTueste) {
-        if (tipoPresentacion == TipoDePresentacion.MERCHANDISING) {
-            throw new ReglaDominioException(
-                    "PublicarPresentacion es solo para Presentaciones Trazables; use PublicarArticuloMerchandising");
-        }
-
         Presentacion presentacion = Presentacion.publicar(id, vendedorId, loteId, transformacionId, titulo,
                 tipoPresentacion, precio, cantidadDisponible, galeria, perfilDeTueste, rolVendedor, fechaTueste,
                 null, null);
