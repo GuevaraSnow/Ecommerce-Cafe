@@ -102,6 +102,13 @@ public class PresentacionTrazable extends Presentacion {
         return dias <= DIAS_MAXIMOS_FRESCURA;
     }
 
+    /** Marca la Presentación como Vencida si ya superó los días de frescura (regla D). */
+    public void verificarVencimiento() {
+        if (!estaFresca()) {
+            marcarVencida();
+        }
+    }
+
     public void registrarNotaCata(NotaDeCata nota) {
         validarNoEliminada();
         if (nota == null) {
