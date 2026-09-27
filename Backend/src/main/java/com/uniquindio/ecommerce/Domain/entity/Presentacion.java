@@ -137,6 +137,26 @@ public abstract class Presentacion {
         this.estado = EstadoDePublicacion.AGOTADA;
     }
 
+    /** Pausa temporalmente la Presentación (reversible), sin darla de baja. */
+    public void desactivar() {
+        validarNoEliminada();
+        this.estado = EstadoDePublicacion.INACTIVA;
+    }
+
+    /** Reactiva una Presentación que estaba pausada manualmente. */
+    public void activar() {
+        validarNoEliminada();
+        if (this.estado != EstadoDePublicacion.INACTIVA) {
+            throw new ReglaDominioException("Solo una Presentación Inactiva puede reactivarse manualmente");
+        }
+        this.estado = EstadoDePublicacion.ACTIVA;
+    }
+
+    /** Marca la Presentación como Vencida; usado por subclases con regla de frescura (regla D). */
+    protected void marcarVencida() {
+        this.estado = EstadoDePublicacion.VENCIDA;
+    }
+
     /** Da de baja la Presentación (borrado lógico); nunca se elimina físicamente. */
     public void darDeBaja() {
         this.eliminada = true;
