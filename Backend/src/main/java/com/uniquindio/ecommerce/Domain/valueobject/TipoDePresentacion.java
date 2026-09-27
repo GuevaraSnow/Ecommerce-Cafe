@@ -1,17 +1,16 @@
 package com.uniquindio.ecommerce.Domain.valueobject;
 
 /**
- * Clasifica el producto que ofrece una Presentacion,
- * determinando de dónde debe originarse (Lote o Transformación) y qué
- * validaciones adicionales aplican.
+ * Clasifica qué es una Presentación, determinando de dónde debe originarse
+ * (Lote o Transformación) y qué validaciones adicionales aplican.
  */
-public enum TipoProducto {
+public enum TipoDePresentacion {
     /** Café sin procesar, vendido directamente desde un Lote. */
     CAFE_VERDE,
     /** Café en pergamino, vendido directamente desde un Lote. */
     CAFE_PERGAMINO,
     /** Café tostado; requiere provenir de una Transformación y tener fecha de tueste vigente. */
     CAFE_TOSTADO,
-    /** Producto derivado del café; requiere provenir de una Transformación. */
+    /** Derivado del café (miel, licor, cosmético, merchandising); requiere provenir de una Transformación. */
     DERIVADO
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Producto digital publicado por un Formador: un conjunto de Lecciones que un
+ * Curso virtual publicado por un Formador, compuesto por Lecciones, que un
  * Comprador adquiere mediante una Inscripción. A diferencia de una
  * Presentación física, no maneja cantidad disponible ni frescura (por diseño:
  * esas reglas son propias del café físico).

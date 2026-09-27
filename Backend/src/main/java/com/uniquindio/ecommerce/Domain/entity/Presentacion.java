@@ -8,10 +8,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
- * Producto publicado para la venta, originado a partir de un Lote (café
- * verde/pergamino) o de una Transformación (café tostado/derivado), nunca
- * de ambos. Se crea únicamente mediante publicar para garantizar
- * que las reglas de negocio del dominio se cumplan desde su origen.
+ * Unidad final empacada que el Comprador puede adquirir. Proviene
+ * directamente de un Lote (verde/pergamino, venta B2B) o de una
+ * Transformación (tostada/derivada), nunca de ambos. Se crea únicamente
+ * mediante publicar para garantizar que las reglas de negocio del dominio
+ * se cumplan desde su origen.
  */
 public class Presentacion {
     private static final int DIAS_MAXIMOS_FRESCURA = 30;
@@ -21,7 +22,7 @@ public class Presentacion {
     private final String idTransformacion;
     private final String vendedorId;
     private final String titulo;
-    private final TipoProducto tipoProducto;
+    private final TipoDePresentacion tipoPresentacion;
     private final PerfilTueste perfilDeTueste;
     private final FechaDeTueste fechaTueste;
     private Precio precio;
@@ -32,14 +33,14 @@ public class Presentacion {
     private boolean eliminada;
 
     private Presentacion(String id, String idLote, String idTransformacion, String vendedorId, String titulo,
-                          TipoProducto tipoProducto, Precio precio, Cantidad cantidadDisponible, Galeria galeria,
+                          TipoDePresentacion tipoPresentacion, Precio precio, Cantidad cantidadDisponible, Galeria galeria,
                           PerfilTueste perfilDeTueste, FechaDeTueste fechaTueste) {
         this.id = id;
         this.idLote = idLote;
         this.idTransformacion = idTransformacion;
         this.vendedorId = vendedorId;
         this.titulo = titulo;
-        this.tipoProducto = tipoProducto;
+        this.tipoPresentacion = tipoPresentacion;
         this.precio = precio;
         this.cantidadDisponible = cantidadDisponible;
         this.galeria = galeria;
@@ -53,13 +54,13 @@ public class Presentacion {
     /**
      * Crea una Presentación validando identificador, vendedor, precio, cantidad
      * inicial y galería; origen exclusivo desde un Lote o una Transformación
-     * según el TipoProducto; y, para café tostado, fecha y perfil de tueste
-     * vigentes (regla D) y compatibles con el rol de quien publica (regla A).
+     * según el Tipo de Presentación; y, para café tostado, fecha y perfil de
+     * tueste vigentes (regla D) y compatibles con el rol de quien publica (regla A).
      *
      * @throws ReglaDominioException si se incumple alguna regla de negocio
      */
     public static Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
-                                         String titulo, TipoProducto tipoProducto, Precio precio,
+                                         String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
                                          Cantidad cantidadDisponible, Galeria galeria,
                                          PerfilTueste perfilDeTueste, RolVendedor rolVendedor,
                                          FechaDeTueste fechaTueste) {
@@ -75,8 +76,8 @@ public class Presentacion {
         if (precio == null) {
             throw new ReglaDominioException("La Presentación debe tener un Precio");
         }
-        if (tipoProducto == null) {
-            throw new ReglaDominioException("La Presentación debe especificar un TipoProducto");
+        if (tipoPresentacion == null) {
+            throw new ReglaDominioException("La Presentación debe especificar un Tipo de Presentación");
         }
         if (cantidadDisponible == null) {
             throw new ReglaDominioException("La Presentación debe tener una Cantidad disponible");
@@ -99,21 +100,21 @@ public class Presentacion {
                     "La Presentación debe provenir de un Lote directo o de una Transformación, no de ambos ni de ninguno");
         }
 
-        if (tipoProducto == TipoProducto.CAFE_VERDE || tipoProducto == TipoProducto.CAFE_PERGAMINO) {
+        if (tipoPresentacion == TipoDePresentacion.CAFE_VERDE || tipoPresentacion == TipoDePresentacion.CAFE_PERGAMINO) {
             if (!vieneDeLote) {
                 throw new ReglaDominioException(
                         "Una Presentación de café verde o pergamino debe provenir directamente de un Lote");
             }
         }
 
-        if (tipoProducto == TipoProducto.CAFE_TOSTADO || tipoProducto == TipoProducto.DERIVADO) {
+        if (tipoPresentacion == TipoDePresentacion.CAFE_TOSTADO || tipoPresentacion == TipoDePresentacion.DERIVADO) {
             if (!vieneDeTransformacion) {
                 throw new ReglaDominioException(
                         "Una Presentación tostada o derivada debe provenir de una Transformación");
             }
         }
 
-        if (tipoProducto == TipoProducto.CAFE_TOSTADO) {
+        if (tipoPresentacion == TipoDePresentacion.CAFE_TOSTADO) {
             if (fechaTueste == null) {
                 throw new ReglaDominioException("El café tostado debe indicar su fecha de tueste");
             }
@@ -136,7 +137,7 @@ public class Presentacion {
                     "Un Caficultor solo puede publicar café tostado con Perfil de Tueste TRADICIONAL");
         }
 
-        return new Presentacion(id, loteId, transformacionId, vendedorId, titulo, tipoProducto, precio,
+        return new Presentacion(id, loteId, transformacionId, vendedorId, titulo, tipoPresentacion, precio,
                 cantidadDisponible, galeria, perfilDeTueste, fechaTueste);
     }
 
@@ -226,7 +227,7 @@ public class Presentacion {
 
     public Precio getPrecio() {return precio;}
 
-    public TipoProducto getTipoProducto() {return tipoProducto;}
+    public TipoDePresentacion getTipoPresentacion() {return tipoPresentacion;}
 
     public Cantidad getCantidadDisponible() {return cantidadDisponible;}
 
