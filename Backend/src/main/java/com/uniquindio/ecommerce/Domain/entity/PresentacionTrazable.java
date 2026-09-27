@@ -21,7 +21,7 @@ public class PresentacionTrazable extends Presentacion {
     private final FechaDeTueste fechaTueste;
     private NotaDeCata notaDeCata;
 
-    PresentacionTrazable(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
+    private PresentacionTrazable(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
                           Precio precio, Cantidad cantidadDisponible, Galeria galeria,
                           OrigenDePresentacion origen, PerfilTueste perfilDeTueste, FechaDeTueste fechaTueste) {
         super(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
@@ -29,6 +29,60 @@ public class PresentacionTrazable extends Presentacion {
         this.perfilDeTueste = perfilDeTueste;
         this.fechaTueste = fechaTueste;
         this.notaDeCata = null;
+    }
+
+    /**
+     * Valida y crea una Presentación Trazable: Origen exclusivo desde un Lote
+     * o una Transformación según el Tipo de Presentación (regla B) y, para
+     * café tostado, fecha y perfil de tueste vigentes (regla D) y
+     * compatibles con el rol de quien publica (regla A).
+     *
+     * @throws ReglaDominioException si se incumple alguna regla de negocio
+     */
+    static PresentacionTrazable publicar(String id, String vendedorId, String titulo,
+                                          TipoDePresentacion tipoPresentacion, Precio precio,
+                                          Cantidad cantidadDisponible, Galeria galeria, String loteId,
+                                          String transformacionId, PerfilTueste perfilDeTueste,
+                                          FechaDeTueste fechaTueste, RolVendedor rolVendedor) {
+        if (rolVendedor == null) {
+            throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
+        }
+
+        OrigenDePresentacion origen = OrigenDePresentacion.desde(loteId, transformacionId);
+
+        if (tipoPresentacion == TipoDePresentacion.CAFE_VERDE && origen.transformacionId() != null) {
+            throw new ReglaDominioException("Una Presentación de café verde debe provenir directamente de un Lote");
+        }
+        if ((tipoPresentacion == TipoDePresentacion.CAFE_TOSTADO || tipoPresentacion == TipoDePresentacion.DERIVADO_CONSUMIBLE)
+                && origen.loteId() != null) {
+            throw new ReglaDominioException("Una Presentación tostada o derivada debe provenir de una Transformación");
+        }
+
+        if (tipoPresentacion == TipoDePresentacion.CAFE_TOSTADO) {
+            if (fechaTueste == null) {
+                throw new ReglaDominioException("El café tostado debe indicar su fecha de tueste");
+            }
+            if (perfilDeTueste == null) {
+                throw new ReglaDominioException("El café tostado debe indicar un Perfil de Tueste");
+            }
+            long dias = ChronoUnit.DAYS.between(fechaTueste.valor(), LocalDate.now());
+            if (dias > DIAS_MAXIMOS_FRESCURA) {
+                throw new ReglaDominioException(
+                        "No se puede publicar: han pasado " + dias + " días desde el tueste (máximo "
+                                + DIAS_MAXIMOS_FRESCURA + ")");
+            }
+        } else if (fechaTueste != null || perfilDeTueste != null) {
+            throw new ReglaDominioException("Solo el café tostado admite fecha y perfil de tueste");
+        }
+
+        if (perfilDeTueste != null && rolVendedor == RolVendedor.CAFICULTOR
+                && perfilDeTueste != PerfilTueste.TRADICIONAL) {
+            throw new ReglaDominioException(
+                    "Un Caficultor solo puede publicar café tostado con Perfil de Tueste TRADICIONAL");
+        }
+
+        return new PresentacionTrazable(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
+                galeria, origen, perfilDeTueste, fechaTueste);
     }
 
     /**
