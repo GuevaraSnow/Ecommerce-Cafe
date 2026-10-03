@@ -9,21 +9,30 @@ import java.util.Map;
 import java.util.Optional;
 
 public class CompradorRepositorioMemoria implements CompradorRepositorio {
-    private final Map compradores = new HashMap<>();
+    private final Map<String, Comprador> compradores = new HashMap<>();
 
     @Override
     public boolean existePorEmail(Email email) {
         if (email == null) return false;
-        return compradores.values().stream()
-                .anyMatch(c -> c.getEmail() != null && c.getEmail().equals(email));
+
+        for (Comprador comprador : compradores.values()) {
+            if (comprador.getEmail() != null && comprador.getEmail().equals(email)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
-    public Optional buscarPorEmail(Email email) {
+    public Optional<Comprador> buscarPorEmail(Email email) {
         if (email == null) return Optional.empty();
-        return compradores.values().stream()
-                .filter(c -> c.getEmail() != null && c.getEmail().equals(email))
-                .findFirst();
+
+        for (Comprador comprador : compradores.values()) {
+            if (comprador.getEmail() != null && comprador.getEmail().equals(email)) {
+                return Optional.of(comprador);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -32,4 +41,3 @@ public class CompradorRepositorioMemoria implements CompradorRepositorio {
         return comprador;
     }
 }
-
