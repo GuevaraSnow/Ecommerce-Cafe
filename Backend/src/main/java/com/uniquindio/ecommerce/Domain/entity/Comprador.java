@@ -1,10 +1,6 @@
 package com.uniquindio.ecommerce.Domain.entity;
 
-import com.uniquindio.ecommerce.Domain.valueobject.Email;
-import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
-import com.uniquindio.ecommerce.Domain.valueobject.Telefono;
-import com.uniquindio.ecommerce.Domain.valueobject.FechaDeNacimiento;
-import com.uniquindio.ecommerce.Domain.valueobject.TipoDeComprador;
+import com.uniquindio.ecommerce.Domain.valueobject.*;
 
 public class Comprador {
     private String id;
@@ -15,6 +11,7 @@ public class Comprador {
     private FechaDeNacimiento fechaNacimiento;
     private TipoDeComprador tipo;
     private boolean eliminadoLogicamente;
+    private CodigoDeRecuperacion codigoRecuperacion;
 
     public Comprador(String id, String nombre, Email email, Contrasena contrasena,
                      Telefono telefono, FechaDeNacimiento fechaNacimiento, TipoDeComprador tipo) {
@@ -75,5 +72,18 @@ public class Comprador {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
+    }
+
+    public void asignarCodigoRecuperacion(CodigoDeRecuperacion codigo) {
+        this.codigoRecuperacion = codigo;
+    }
+
+    public void cambiarContrasena(Contrasena nuevaContrasena) {
+        this.contrasena = nuevaContrasena;
+        this.codigoRecuperacion = null;
+    }
+
+    public CodigoDeRecuperacion getCodigoRecuperacion() {
+        return codigoRecuperacion;
     }
 }
