@@ -38,7 +38,7 @@ class RealizarCompraTest {
                 "Cafe verde " + id, TipoDePresentacion.CAFE_VERDE,
                 new Precio(precio, "COP"), new Cantidad(kg, "kg"),
                 new Galeria(List.of(new ImagenDePresentacion("https://img.cafe/" + id + ".jpg", true))),
-                null, RolVendedor.CAFICULTOR, null);
+                null, RolVendedor.CAFICULTOR, null, null, null);
         repositorioPresentacion.guardar(presentacion);
         return presentacion;
     }
