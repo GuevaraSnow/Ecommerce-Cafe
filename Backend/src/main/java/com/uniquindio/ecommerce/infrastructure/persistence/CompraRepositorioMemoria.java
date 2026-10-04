@@ -20,4 +20,10 @@ public class CompraRepositorioMemoria implements CompraRepositorio {
     public void guardar(Compra compra) {
         compras.put(compra.getId(), compra);
     }
+
+    @Override
+    public boolean existeCompraActivaConPresentacion(String presentacionId) {
+        return compras.values().stream()
+                .anyMatch(compra -> compra.estaActiva() && compra.incluye(presentacionId));
+    }
 }

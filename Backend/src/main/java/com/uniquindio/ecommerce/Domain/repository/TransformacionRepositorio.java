@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface TransformacionRepositorio {
     void guardar(Transformacion transformacion);
-    Optional buscarPorId(String id);
+    Optional<Transformacion> buscarPorId(String id);
 }
