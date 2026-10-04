@@ -136,6 +136,11 @@ public class Curso {
         this.eliminadoLogicamente = true;
     }
 
+    /** Indica si el Curso puede comprarse: está publicado (Activo) y no fue eliminado. */
+    public boolean estaDisponibleParaVenta() {
+        return !eliminadoLogicamente && estado == EstadoDePublicacion.ACTIVA;
+    }
+
     private void validarNoEliminado() {
         if (eliminadoLogicamente) {
             throw new ReglaDominioException("No se puede operar sobre un Curso eliminado");
