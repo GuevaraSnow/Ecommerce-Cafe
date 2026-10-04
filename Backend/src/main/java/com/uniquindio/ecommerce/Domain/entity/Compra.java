@@ -51,7 +51,49 @@ public class Compra {
         detalles.add(new DetalleDeCompra(id, presentacionId, precioCongelado, cantidad));
     }
 
-    /** Una Compra está activa mientras siga en curso: Pendiente, Confirmada o Enviada. */
+    public void confirmar() {
+        if (estado != EstadoDeCompra.PENDIENTE) {
+            throw new ReglaDominioException("Solo se puede confirmar una compra pendiente (estado actual: " + estado + ")");
+        }
+        if (detalles.isEmpty()) {
+            throw new ReglaDominioException("No se puede confirmar una compra sin detalles");
+        }
+        cambiarEstado(EstadoDeCompra.CONFIRMADA);
+    }
+
+    public boolean puedeCancelarse() {
+        return estado.puedeTransicionarA(EstadoDeCompra.CANCELADA);
+    }
+
+    public void cancelar() {
+        if (!puedeCancelarse()) {
+            throw new ReglaDominioException("No se puede cancelar una compra en estado " + estado);
+        }
+        cambiarEstado(EstadoDeCompra.CANCELADA);
+    }
+
+    public void marcarEnviada() {
+        if (estado != EstadoDeCompra.CONFIRMADA) {
+            throw new ReglaDominioException("Solo se puede enviar una compra confirmada (estado actual: " + estado + ")");
+        }
+        cambiarEstado(EstadoDeCompra.ENVIADA);
+    }
+
+    public void marcarEntregada() {
+        if (estado != EstadoDeCompra.ENVIADA) {
+            throw new ReglaDominioException("Solo se puede entregar una compra enviada (estado actual: " + estado + ")");
+        }
+        cambiarEstado(EstadoDeCompra.ENTREGADA);
+        this.fechaEntrega = LocalDate.now();
+    }
+
+    private void cambiarEstado(EstadoDeCompra nuevo) {
+        if (!estado.puedeTransicionarA(nuevo)) {
+            throw new ReglaDominioException("Transicion de estado invalida: " + estado + " -> " + nuevo);
+        }
+        this.estado = nuevo;
+    }
+
     public boolean estaActiva() {
         return estado == EstadoDeCompra.PENDIENTE
                 || estado == EstadoDeCompra.CONFIRMADA
