@@ -1,6 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.Compra;
+import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
@@ -47,7 +47,7 @@ class RealizarCompraTest {
         return new RealizarCompra.ItemSolicitado(presentacionId, new Cantidad(kg, "kg"));
     }
 
-    private Compra comprar(List<RealizarCompra.ItemSolicitado> items) {
+    private CompraFisica comprar(List<RealizarCompra.ItemSolicitado> items) {
         return realizarCompra.ejecutar("comprador-1", items, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
     }
 
@@ -55,7 +55,7 @@ class RealizarCompraTest {
     void comprarDescuentaElStockYDejaLaCompraGuardadaYPendiente() {
         Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
 
-        Compra compra = comprar(List.of(item("pres-1", 3)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3)));
 
         assertEquals(new Cantidad(7, "kg"), presentacion.getCantidadDisponible());
         assertEquals(EstadoDeCompra.PENDIENTE, compra.getEstado());
@@ -66,7 +66,7 @@ class RealizarCompraTest {
     void elDetalleCongelaElPrecioVigenteAlMomentoDeComprar() {
         Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
 
-        Compra compra = comprar(List.of(item("pres-1", 2)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 2)));
         presentacion.cambiarPrecio(new Precio(80000, "COP"));
 
         assertEquals(new Precio(50000, "COP"), compra.getDetalles().get(0).precioCongelado());
@@ -77,7 +77,7 @@ class RealizarCompraTest {
         Presentacion primera = presentacionDisponible("pres-1", 10, 50000);
         Presentacion segunda = presentacionDisponible("pres-2", 5, 30000);
 
-        Compra compra = comprar(List.of(item("pres-1", 3), item("pres-2", 2)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3), item("pres-2", 2)));
 
         assertEquals(2, compra.getDetalles().size());
         assertEquals(new Cantidad(7, "kg"), primera.getCantidadDisponible());
@@ -135,5 +135,46 @@ class RealizarCompraTest {
                 "comprador-1", List.of(item("pres-1", 3)), "   ", "Calle 10 # 5-20", "Carlos Perez"));
 
         assertEquals(new Cantidad(10, "kg"), presentacion.getCantidadDisponible());
+    }
+
+    @Test
+    void noSePuedeComprarUnaPresentacionPausada() {
+        Presentacion pausada = presentacionDisponible("pres-1", 10, 50000);
+        pausada.desactivar();
+
+        assertThrows(ReglaDominioException.class, () -> comprar(List.of(item("pres-1", 1))));
+
+        assertEquals(new Cantidad(10, "kg"), pausada.getCantidadDisponible());
+    }
+
+    @Test
+    void noSePuedeComprarUnaPresentacionMarcadaComoAgotada() {
+        Presentacion agotada = presentacionDisponible("pres-1", 10, 50000);
+        agotada.marcarAgotada();
+
+        assertThrows(ReglaDominioException.class, () -> comprar(List.of(item("pres-1", 1))));
+    }
+
+    @Test
+    void unaPresentacionPausadaImpideLaCompraYElStockDeLasOtrasNoCambia() {
+        Presentacion activa = presentacionDisponible("pres-1", 10, 50000);
+        Presentacion pausada = presentacionDisponible("pres-2", 5, 30000);
+        pausada.desactivar();
+
+        assertThrows(ReglaDominioException.class,
+                () -> comprar(List.of(item("pres-1", 3), item("pres-2", 1))));
+
+        assertEquals(new Cantidad(10, "kg"), activa.getCantidadDisponible());
+    }
+
+    @Test
+    void unaPresentacionReactivadaSePuedeComprar() {
+        Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
+        presentacion.desactivar();
+        presentacion.activar();
+
+        comprar(List.of(item("pres-1", 2)));
+
+        assertEquals(new Cantidad(8, "kg"), presentacion.getCantidadDisponible());
     }
 }

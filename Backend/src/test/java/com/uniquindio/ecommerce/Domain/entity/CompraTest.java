@@ -16,14 +16,14 @@ class CompraTest {
         return new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez");
     }
 
-    private Compra compraValida() {
-        return Compra.iniciar("comprador-1", direccionValida());
+    private CompraFisica compraValida() {
+        return CompraFisica.iniciar("comprador-1", direccionValida());
     }
 
     @Test
     void dosComprasConLosMismosDatosNoSonLaMismaPorqueElIdEsUnico() {
-        Compra primera = compraValida();
-        Compra segunda = compraValida();
+        CompraFisica primera = compraValida();
+        CompraFisica segunda = compraValida();
 
         assertNotEquals(primera, segunda);
         assertNotEquals(primera.getId(), segunda.getId());
@@ -31,17 +31,17 @@ class CompraTest {
 
     @Test
     void noSePuedeIniciarUnaCompraSinComprador() {
-        assertThrows(ReglaDominioException.class, () -> Compra.iniciar("   ", direccionValida()));
+        assertThrows(ReglaDominioException.class, () -> CompraFisica.iniciar("   ", direccionValida()));
     }
 
     @Test
     void noSePuedeIniciarUnaCompraSinDireccionDeEnvio() {
-        assertThrows(ReglaDominioException.class, () -> Compra.iniciar("comprador-1", null));
+        assertThrows(ReglaDominioException.class, () -> CompraFisica.iniciar("comprador-1", null));
     }
 
     @Test
     void unaCompraRecienIniciadaEstaPendienteYSinDetalles() {
-        Compra compra = compraValida();
+        CompraFisica compra = compraValida();
 
         assertEquals(EstadoDeCompra.PENDIENTE, compra.getEstado());
         assertTrue(compra.getDetalles().isEmpty());
@@ -50,7 +50,7 @@ class CompraTest {
 
     @Test
     void agregarDetalleLoAsociaALaCompraYCongelaElPrecio() {
-        Compra compra = compraValida();
+        CompraFisica compra = compraValida();
 
         compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
@@ -64,10 +64,19 @@ class CompraTest {
 
     @Test
     void laListaDeDetallesQueSeExponeNoPermiteModificarLaCompraDesdeAfuera() {
-        Compra compra = compraValida();
+        CompraFisica compra = compraValida();
         compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
         assertThrows(UnsupportedOperationException.class, () -> compra.getDetalles().clear());
         assertEquals(1, compra.getDetalles().size());
+    }
+
+    @Test
+    void incluyeIndicaSiLaPresentacionEstaEnLosDetalles() {
+        CompraFisica compra = compraValida();
+        compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
+
+        assertTrue(compra.incluye("presentacion-1"));
+        assertFalse(compra.incluye("presentacion-2"));
     }
 }

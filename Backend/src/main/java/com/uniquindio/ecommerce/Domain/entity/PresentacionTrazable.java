@@ -102,6 +102,16 @@ public class PresentacionTrazable extends Presentacion {
         return dias <= DIAS_MAXIMOS_FRESCURA;
     }
 
+    /**
+     * Además de lo común, exige frescura (regla D): una Presentación cuyo
+     * tueste ya pasó los días permitidos no se vende, aunque su estado
+     * todavía no se haya actualizado a Vencida.
+     */
+    @Override
+    public boolean estaDisponibleParaVenta() {
+        return estaFresca() && super.estaDisponibleParaVenta();
+    }
+
     /** Marca la Presentación como Vencida si ya superó los días de frescura (regla D). */
     public void verificarVencimiento() {
         if (!estaFresca()) {

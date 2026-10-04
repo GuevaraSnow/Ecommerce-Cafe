@@ -1,64 +1,44 @@
 package com.uniquindio.ecommerce.Domain.entity;
 
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
-import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
-import com.uniquindio.ecommerce.Domain.valueobject.DetalleDeCompra;
-import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
-import com.uniquindio.ecommerce.Domain.valueobject.Precio;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
-public class Compra {
+/**
+ * Raíz abstracta del agregado Compra: concentra lo común a sus dos
+ * subclases, {@link CompraFisica} (Presentaciones con dirección de envío y
+ * tramo logístico) y {@link CompraDigital} (Cursos, sin envío).
+ */
+public abstract class Compra {
 
     private final String id;
     private final String compradorId;
-    private final List<DetalleDeCompra> detalles;
-    private EstadoDeCompra estado;
-    private final DireccionDeEnvio direccionEnvio;
     private final LocalDate fechaCompra;
-    private LocalDate fechaEntrega;
+    private EstadoDeCompra estado;
 
-    private Compra(String compradorId, DireccionDeEnvio direccionEnvio) {
-        this.id = UUID.randomUUID().toString();
-        this.compradorId = compradorId;
-        this.detalles = new ArrayList<>();
-        this.estado = EstadoDeCompra.PENDIENTE;
-        this.direccionEnvio = direccionEnvio;
-        this.fechaCompra = LocalDate.now();
-        this.fechaEntrega = null;
-    }
-
-    public static Compra iniciar(String compradorId, DireccionDeEnvio direccionEnvio) {
+    protected Compra(String compradorId) {
         if (compradorId == null || compradorId.isBlank()) {
             throw new ReglaDominioException("La compra debe estar asociada a un comprador");
         }
-        if (direccionEnvio == null) {
-            throw new ReglaDominioException("La compra debe tener una direccion de envio");
-        }
-        return new Compra(compradorId, direccionEnvio);
-    }
-
-    public void agregarDetalle(String presentacionId, Precio precioCongelado, Cantidad cantidad) {
-        if (estado != EstadoDeCompra.PENDIENTE) {
-            throw new ReglaDominioException("Solo se pueden agregar detalles a una compra pendiente");
-        }
-        detalles.add(new DetalleDeCompra(id, presentacionId, precioCongelado, cantidad));
+        this.id = UUID.randomUUID().toString();
+        this.compradorId = compradorId;
+        this.fechaCompra = LocalDate.now();
+        this.estado = EstadoDeCompra.PENDIENTE;
     }
 
     public void confirmar() {
         if (estado != EstadoDeCompra.PENDIENTE) {
             throw new ReglaDominioException("Solo se puede confirmar una compra pendiente (estado actual: " + estado + ")");
         }
-        if (detalles.isEmpty()) {
-            throw new ReglaDominioException("No se puede confirmar una compra sin detalles");
-        }
+        validarConfirmable();
         cambiarEstado(EstadoDeCompra.CONFIRMADA);
+    }
+
+    /** Punto de extensión: cada subclase puede exigir condiciones propias antes de confirmar. */
+    protected void validarConfirmable() {
     }
 
     public boolean puedeCancelarse() {
@@ -72,37 +52,22 @@ public class Compra {
         cambiarEstado(EstadoDeCompra.CANCELADA);
     }
 
-    public void marcarEnviada() {
-        if (estado != EstadoDeCompra.CONFIRMADA) {
-            throw new ReglaDominioException("Solo se puede enviar una compra confirmada (estado actual: " + estado + ")");
-        }
-        cambiarEstado(EstadoDeCompra.ENVIADA);
-    }
-
-    public void marcarEntregada() {
-        if (estado != EstadoDeCompra.ENVIADA) {
-            throw new ReglaDominioException("Solo se puede entregar una compra enviada (estado actual: " + estado + ")");
-        }
-        cambiarEstado(EstadoDeCompra.ENTREGADA);
-        this.fechaEntrega = LocalDate.now();
-    }
-
-    private void cambiarEstado(EstadoDeCompra nuevo) {
+    protected void cambiarEstado(EstadoDeCompra nuevo) {
         if (!estado.puedeTransicionarA(nuevo)) {
             throw new ReglaDominioException("Transicion de estado invalida: " + estado + " -> " + nuevo);
         }
         this.estado = nuevo;
     }
 
+    /** Una Compra está activa mientras siga en curso: Pendiente, Confirmada o Enviada. */
     public boolean estaActiva() {
         return estado == EstadoDeCompra.PENDIENTE
                 || estado == EstadoDeCompra.CONFIRMADA
                 || estado == EstadoDeCompra.ENVIADA;
     }
 
-    public boolean incluye(String presentacionId) {
-        return detalles.stream().anyMatch(detalle -> detalle.presentacionId().equals(presentacionId));
-    }
+    /** Indica si la Compra incluye esa Presentación; una Compra digital nunca incluye Presentaciones. */
+    public abstract boolean incluye(String presentacionId);
 
     public String getId() {
         return id;
@@ -112,24 +77,12 @@ public class Compra {
         return compradorId;
     }
 
-    public List<DetalleDeCompra> getDetalles() {
-        return List.copyOf(detalles);
-    }
-
     public EstadoDeCompra getEstado() {
         return estado;
     }
 
-    public DireccionDeEnvio getDireccionEnvio() {
-        return direccionEnvio;
-    }
-
     public LocalDate getFechaCompra() {
         return fechaCompra;
-    }
-
-    public Optional<LocalDate> getFechaEntrega() {
-        return Optional.ofNullable(fechaEntrega);
     }
 
     @Override

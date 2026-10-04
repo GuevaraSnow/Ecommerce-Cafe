@@ -157,6 +157,11 @@ public abstract class Presentacion {
         this.estado = EstadoDePublicacion.VENCIDA;
     }
 
+    /** Indica si la Presentación puede venderse: está Activa y no fue dada de baja. */
+    public boolean estaDisponibleParaVenta() {
+        return !eliminada && estado == EstadoDePublicacion.ACTIVA;
+    }
+
     /** Da de baja la Presentación (borrado lógico); nunca se elimina físicamente. */
     public void darDeBaja() {
         this.eliminada = true;
