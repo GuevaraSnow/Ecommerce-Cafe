@@ -1,5 +1,6 @@
 package com.uniquindio.ecommerce.Domain.entity;
 
+import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 
 public class Comprador {
@@ -15,6 +16,10 @@ public class Comprador {
 
     public Comprador(String id, String nombre, Email email, Contrasena contrasena,
                      Telefono telefono, FechaDeNacimiento fechaNacimiento, TipoDeComprador tipo) {
+        if (fechaNacimiento == null || !fechaNacimiento.esMayorDeEdad()) {
+            throw new ReglaDominioException("El comprador debe ser mayor de edad (mínimo 18 años).");
+        }
+
         this.id = id;
         this.nombre = nombre;
         this.email = email;
