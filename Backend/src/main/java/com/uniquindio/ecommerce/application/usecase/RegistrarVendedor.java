@@ -13,6 +13,10 @@ public class RegistrarVendedor {
         this.repositorio = repositorio;
     }
 
+    /**
+     * Registra un nuevo Vendedor validando que el email no este
+     * ya registrado por otro vendedor antes de persistirlo.
+     */
     public Vendedor ejecutar(String nombre, Email email, Contrasena contrasena, Telefono telefono, RolVendedor rol) {
         if (repositorio.existePorEmail(email.email())) {
             throw new ReglaDominioException("Ya existe un vendedor registrado con ese email");
