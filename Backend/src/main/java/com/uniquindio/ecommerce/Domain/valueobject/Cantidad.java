@@ -42,4 +42,12 @@ public record Cantidad(double valor, String unidad) {
                     + this.unidad + " vs " + otra.unidad);
         }
     }
+
+    public Cantidad aplicarMerma(PorcentajeDeMerma merma) {
+        if (merma == null) {
+            throw new ReglaDominioException("El porcentaje de merma no puede ser nulo");
+        }
+        double resultado = this.valor * (1.0 - merma.valor());
+        return new Cantidad(resultado, this.unidad);
+    }
 }
