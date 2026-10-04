@@ -1,12 +1,15 @@
 package com.uniquindio.ecommerce.Domain.entity;
 
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.valueobject.ArchivoDigital;
+import com.uniquindio.ecommerce.Domain.valueobject.Duracion;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDePublicacion;
 import com.uniquindio.ecommerce.Domain.valueobject.NivelDelCurso;
 import com.uniquindio.ecommerce.Domain.valueobject.Precio;
 import com.uniquindio.ecommerce.Domain.valueobject.TematicaDelCurso;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -85,6 +88,32 @@ public class Curso {
         this.lecciones.add(leccion);
     }
 
+    /**
+     * Inserta una nueva Lección en la posición indicada, renumerando (+1) las
+     * Lecciones que quedan después de esa posición. La posición 1 es el
+     * inicio; lecciones.size() + 1 equivale a agregarla al final.
+     */
+    public void insertarLeccion(int posicion, String titulo, ArchivoDigital archivo, Duracion duracion) {
+        validarNoEliminado();
+        if (posicion <= 0 || posicion > lecciones.size() + 1) {
+            throw new ReglaDominioException("La posición de la Lección es inválida: " + posicion);
+        }
+        List<Leccion> renumeradas = new ArrayList<>();
+        for (Leccion existente : lecciones) {
+            if (existente.getNumeroOrden() >= posicion) {
+                renumeradas.add(Leccion.crear(this.id, existente.getNumeroOrden() + 1, existente.getTitulo(),
+                        existente.getArchivo(), existente.getDuracion()));
+            } else {
+                renumeradas.add(existente);
+            }
+        }
+        renumeradas.add(Leccion.crear(this.id, posicion, titulo, archivo, duracion));
+        renumeradas.sort(Comparator.comparingInt(Leccion::getNumeroOrden));
+
+        this.lecciones.clear();
+        this.lecciones.addAll(renumeradas);
+    }
+
     /** Publica el Curso; exige al menos una Lección con Archivo Digital. */
     public void publicar() {
         validarNoEliminado();
@@ -105,6 +134,11 @@ public class Curso {
     /** Da de baja el Curso (borrado lógico); se bloquea si tiene inscritos activos (regla del caso de uso). */
     public void eliminar() {
         this.eliminadoLogicamente = true;
+    }
+
+    /** Indica si el Curso puede comprarse: está publicado (Activo) y no fue eliminado. */
+    public boolean estaDisponibleParaVenta() {
+        return !eliminadoLogicamente && estado == EstadoDePublicacion.ACTIVA;
     }
 
     private void validarNoEliminado() {
