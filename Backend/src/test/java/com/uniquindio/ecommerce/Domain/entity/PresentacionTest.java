@@ -181,4 +181,31 @@ class PresentacionTest {
         assertEquals(p1, p2);
         assertEquals(p1.hashCode(), p2.hashCode());
     }
+
+    @Test
+    void soloEstaDisponibleParaVentaSiEstaActivaYNoEliminada() {
+        assertTrue(publicarMerchandisingValido().estaDisponibleParaVenta());
+
+        Presentacion pausada = publicarMerchandisingValido();
+        pausada.desactivar();
+        assertFalse(pausada.estaDisponibleParaVenta());
+
+        Presentacion agotada = publicarMerchandisingValido();
+        agotada.marcarAgotada();
+        assertFalse(agotada.estaDisponibleParaVenta());
+
+        Presentacion eliminada = publicarMerchandisingValido();
+        eliminada.darDeBaja();
+        assertFalse(eliminada.estaDisponibleParaVenta());
+    }
+
+    @Test
+    void unaPresentacionReactivadaVuelveAEstarDisponibleParaVenta() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.desactivar();
+
+        presentacion.activar();
+
+        assertTrue(presentacion.estaDisponibleParaVenta());
+    }
 }

@@ -1,5 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
+import com.uniquindio.ecommerce.Domain.entity.CompraDigital;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
@@ -64,6 +65,17 @@ class EliminarPresentacionTest {
         Presentacion eliminada = eliminar.ejecutar("pres-3");
 
         assertTrue(eliminada.isEliminada());
+    }
+
+    @Test
+    void unaCompraDigitalActivaNoBloqueaLaEliminacion() {
+        PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
+        CompraRepositorioMemoria compras = new CompraRepositorioMemoria();
+        publicarMerchandising(presentaciones, "pres-6");
+        compras.guardar(CompraDigital.iniciar("comprador-1", "pres-6", new Precio(50000, "COP")));
+        EliminarPresentacion eliminar = new EliminarPresentacion(presentaciones, compras);
+
+        assertTrue(eliminar.ejecutar("pres-6").isEliminada());
     }
 
     @Test

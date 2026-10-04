@@ -184,4 +184,38 @@ class PresentacionTrazableTest {
 
         assertEquals(nota, presentacion.getNotaDeCata());
     }
+
+    private PresentacionTrazable cafeTostadoConFecha(String id, LocalDate fecha) {
+        return PresentacionTrazable.publicar(id, "vendedor-1", "Café Tostado", TipoDePresentacion.CAFE_TOSTADO,
+                new Precio(32000, "COP"), new Cantidad(50, "kg"), galeriaValida(), null, "transformacion-1",
+                PerfilTueste.MEDIO, new FechaDeTueste(fecha), RolVendedor.TOSTADOR);
+    }
+
+    @Test
+    void unaPresentacionFrescaYActivaEstaDisponibleParaVenta() {
+        assertTrue(cafeTostadoConFecha("pres-20", LocalDate.now()).estaDisponibleParaVenta());
+    }
+
+    @Test
+    void enElLimiteDe30DiasSigueDisponibleParaVenta() {
+        assertTrue(cafeTostadoConFecha("pres-21", LocalDate.now().minusDays(30)).estaDisponibleParaVenta());
+    }
+
+    @Test
+    void unaPresentacionMarcadaComoVencidaNoEstaDisponibleParaVenta() {
+        PresentacionTrazable presentacion = cafeTostadoConFecha("pres-22", LocalDate.now());
+
+        presentacion.marcarVencida();
+
+        assertFalse(presentacion.estaDisponibleParaVenta());
+    }
+
+    @Test
+    void unaPresentacionPausadaNoEstaDisponibleParaVentaAunqueEsteFresca() {
+        PresentacionTrazable presentacion = cafeTostadoConFecha("pres-23", LocalDate.now());
+
+        presentacion.desactivar();
+
+        assertFalse(presentacion.estaDisponibleParaVenta());
+    }
 }

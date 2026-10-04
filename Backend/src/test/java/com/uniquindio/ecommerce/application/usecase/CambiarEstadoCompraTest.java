@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.Compra;
+import com.uniquindio.ecommerce.Domain.entity.CompraDigital;
+import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
@@ -37,7 +38,7 @@ class CambiarEstadoCompraTest {
                 null, RolVendedor.CAFICULTOR, null, null, null);
         repositorioPresentacion.guardar(presentacion);
 
-        Compra compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
+        CompraFisica compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
                 "comprador-1",
                 List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))),
                 "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
@@ -57,7 +58,7 @@ class CambiarEstadoCompraTest {
     void unaCompraEnviadaPuedePasarAEntregadaYRegistraLaFecha() {
         cambiarEstadoCompra.ejecutar(compraId, EstadoDeCompra.ENVIADA);
 
-        Compra compra = cambiarEstadoCompra.ejecutar(compraId, EstadoDeCompra.ENTREGADA);
+        CompraFisica compra = cambiarEstadoCompra.ejecutar(compraId, EstadoDeCompra.ENTREGADA);
 
         assertEquals(EstadoDeCompra.ENTREGADA, compra.getEstado());
         assertTrue(compra.getFechaEntrega().isPresent());
@@ -90,5 +91,16 @@ class CambiarEstadoCompraTest {
     @Test
     void noSePuedeCambiarElEstadoSinIndicarElNuevoEstado() {
         assertThrows(ReglaDominioException.class, () -> cambiarEstadoCompra.ejecutar(compraId, null));
+    }
+
+    @Test
+    void unaCompraDigitalNoTieneTramoLogistico() {
+        CompraDigital digital = CompraDigital.iniciar("comprador-1", "curso-1", new Precio(50000, "COP"));
+        digital.confirmar();
+        repositorioCompra.guardar(digital);
+
+        assertThrows(ReglaDominioException.class,
+                () -> cambiarEstadoCompra.ejecutar(digital.getId(), EstadoDeCompra.ENVIADA));
+        assertEquals(EstadoDeCompra.CONFIRMADA, digital.getEstado());
     }
 }

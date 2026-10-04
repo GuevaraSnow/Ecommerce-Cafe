@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.Compra;
+import com.uniquindio.ecommerce.Domain.entity.CompraDigital;
+import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
@@ -48,7 +49,7 @@ class CancelarCompraTest {
         return presentacion;
     }
 
-    private Compra comprar(List<RealizarCompra.ItemSolicitado> items) {
+    private CompraFisica comprar(List<RealizarCompra.ItemSolicitado> items) {
         return new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
                 "comprador-1", items, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
     }
@@ -59,7 +60,7 @@ class CancelarCompraTest {
 
     @Test
     void cancelarUnaCompraDevuelveElStockYLaDejaCancelada() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3)));
         assertEquals(new Cantidad(7, "kg"), primera.getCantidadDisponible());
 
         cancelarCompra.ejecutar(compra.getId());
@@ -70,7 +71,7 @@ class CancelarCompraTest {
 
     @Test
     void cancelarUnaCompraConVariosItemsDevuelveElStockDeCadaPresentacion() {
-        Compra compra = comprar(List.of(item("pres-1", 3), item("pres-2", 2)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3), item("pres-2", 2)));
 
         cancelarCompra.ejecutar(compra.getId());
 
@@ -80,7 +81,7 @@ class CancelarCompraTest {
 
     @Test
     void noSePuedeCancelarUnaCompraYaEnviadaYElStockNoCambia() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3)));
         compra.confirmar();
         compra.marcarEnviada();
 
@@ -92,7 +93,7 @@ class CancelarCompraTest {
 
     @Test
     void noSePuedeCancelarDosVecesNiDevolverElStockDosVeces() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3)));
         cancelarCompra.ejecutar(compra.getId());
 
         assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(compra.getId()));
@@ -102,7 +103,7 @@ class CancelarCompraTest {
 
     @Test
     void cancelarUnaCompraConfirmadaTambienDevuelveElStock() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3)));
         compra.confirmar();
 
         cancelarCompra.ejecutar(compra.getId());
@@ -112,7 +113,7 @@ class CancelarCompraTest {
 
     @Test
     void cancelarSigueFuncionandoSiUnaPresentacionFueDadaDeBaja() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
+        CompraFisica compra = comprar(List.of(item("pres-1", 3)));
         primera.darDeBaja();
 
         cancelarCompra.ejecutar(compra.getId());
@@ -123,7 +124,7 @@ class CancelarCompraTest {
 
     @Test
     void siUnaPresentacionDelDetalleNoExisteNoSeCancelaNadaNiSeTocaElStock() {
-        Compra manual = Compra.iniciar("comprador-1",
+        CompraFisica manual = CompraFisica.iniciar("comprador-1",
                 new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
         manual.agregarDetalle("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
         manual.agregarDetalle("fantasma", new Precio(1000, "COP"), new Cantidad(1, "kg"));
@@ -138,5 +139,14 @@ class CancelarCompraTest {
     @Test
     void noSePuedeCancelarUnaCompraInexistente() {
         assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar("no-existe"));
+    }
+
+    @Test
+    void noSePuedeCancelarAquiUnaCompraDigital() {
+        CompraDigital digital = CompraDigital.iniciar("comprador-1", "curso-1", new Precio(50000, "COP"));
+        repositorioCompra.guardar(digital);
+
+        assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(digital.getId()));
+        assertEquals(EstadoDeCompra.PENDIENTE, digital.getEstado());
     }
 }

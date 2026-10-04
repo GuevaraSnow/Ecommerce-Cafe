@@ -11,15 +11,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CompraEstadoTest {
 
-    private Compra compraConDetalle() {
-        Compra compra = Compra.iniciar("comprador-1",
+    private CompraFisica compraConDetalle() {
+        CompraFisica compra = CompraFisica.iniciar("comprador-1",
                 new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
         compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
         return compra;
     }
 
-    private Compra compraEnviada() {
-        Compra compra = compraConDetalle();
+    private CompraFisica compraEnviada() {
+        CompraFisica compra = compraConDetalle();
         compra.confirmar();
         compra.marcarEnviada();
         return compra;
@@ -27,7 +27,7 @@ class CompraEstadoTest {
 
     @Test
     void confirmarPasaLaCompraDePendienteAConfirmada() {
-        Compra compra = compraConDetalle();
+        CompraFisica compra = compraConDetalle();
 
         compra.confirmar();
 
@@ -36,7 +36,7 @@ class CompraEstadoTest {
 
     @Test
     void unaMismaCompraNoPuedeConfirmarseDosVeces() {
-        Compra compra = compraConDetalle();
+        CompraFisica compra = compraConDetalle();
         compra.confirmar();
 
         assertThrows(ReglaDominioException.class, compra::confirmar);
@@ -45,7 +45,7 @@ class CompraEstadoTest {
 
     @Test
     void noSePuedeConfirmarUnaCompraSinDetalles() {
-        Compra vacia = Compra.iniciar("comprador-1",
+        CompraFisica vacia = CompraFisica.iniciar("comprador-1",
                 new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
 
         assertThrows(ReglaDominioException.class, vacia::confirmar);
@@ -54,7 +54,7 @@ class CompraEstadoTest {
 
     @Test
     void despuesDeConfirmadaYaNoSePuedenAgregarDetalles() {
-        Compra compra = compraConDetalle();
+        CompraFisica compra = compraConDetalle();
         compra.confirmar();
 
         assertThrows(ReglaDominioException.class,
@@ -64,7 +64,7 @@ class CompraEstadoTest {
 
     @Test
     void sePuedeCancelarUnaCompraPendiente() {
-        Compra compra = compraConDetalle();
+        CompraFisica compra = compraConDetalle();
 
         compra.cancelar();
 
@@ -73,7 +73,7 @@ class CompraEstadoTest {
 
     @Test
     void sePuedeCancelarUnaCompraConfirmadaMientrasNoSeHayaEnviado() {
-        Compra compra = compraConDetalle();
+        CompraFisica compra = compraConDetalle();
         compra.confirmar();
 
         assertTrue(compra.puedeCancelarse());
@@ -84,7 +84,7 @@ class CompraEstadoTest {
 
     @Test
     void noSePuedeCancelarUnaCompraYaEnviada() {
-        Compra compra = compraEnviada();
+        CompraFisica compra = compraEnviada();
 
         assertFalse(compra.puedeCancelarse());
         assertThrows(ReglaDominioException.class, compra::cancelar);
@@ -93,7 +93,7 @@ class CompraEstadoTest {
 
     @Test
     void noSePuedeCancelarDosVeces() {
-        Compra compra = compraConDetalle();
+        CompraFisica compra = compraConDetalle();
         compra.cancelar();
 
         assertThrows(ReglaDominioException.class, compra::cancelar);
@@ -101,7 +101,7 @@ class CompraEstadoTest {
 
     @Test
     void soloSePuedeEnviarUnaCompraConfirmada() {
-        Compra pendiente = compraConDetalle();
+        CompraFisica pendiente = compraConDetalle();
 
         assertThrows(ReglaDominioException.class, pendiente::marcarEnviada);
         assertEquals(EstadoDeCompra.PENDIENTE, pendiente.getEstado());
@@ -109,7 +109,7 @@ class CompraEstadoTest {
 
     @Test
     void entregarUnaCompraEnviadaRegistraLaFechaDeEntrega() {
-        Compra compra = compraEnviada();
+        CompraFisica compra = compraEnviada();
 
         compra.marcarEntregada();
 
@@ -119,7 +119,7 @@ class CompraEstadoTest {
 
     @Test
     void noSePuedeEntregarUnaCompraQueNoFueEnviada() {
-        Compra compra = compraConDetalle();
+        CompraFisica compra = compraConDetalle();
         compra.confirmar();
 
         assertThrows(ReglaDominioException.class, compra::marcarEntregada);
@@ -128,7 +128,7 @@ class CompraEstadoTest {
 
     @Test
     void unaCompraEntregadaYaNoSePuedeCancelar() {
-        Compra compra = compraEnviada();
+        CompraFisica compra = compraEnviada();
         compra.marcarEntregada();
 
         assertThrows(ReglaDominioException.class, compra::cancelar);

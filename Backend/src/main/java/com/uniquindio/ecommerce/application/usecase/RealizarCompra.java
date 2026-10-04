@@ -1,6 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.Compra;
+import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
@@ -30,22 +30,24 @@ public class RealizarCompra {
      * descuenta la cantidad disponible. Todo o nada: si algun item no se
      * puede comprar, no se descuenta el stock de ninguno.
      */
-    public Compra ejecutar(String compradorId, List<ItemSolicitado> items,
-                           String ciudad, String direccion, String destinatario) {
+    public CompraFisica ejecutar(String compradorId, List<ItemSolicitado> items,
+                                 String ciudad, String direccion, String destinatario) {
         if (items == null || items.isEmpty()) {
             throw new ReglaDominioException("La compra debe tener al menos un item");
         }
 
         DireccionDeEnvio direccionEnvio = new DireccionDeEnvio(ciudad, direccion, destinatario);
-        Compra compra = Compra.iniciar(compradorId, direccionEnvio);
+        CompraFisica compra = CompraFisica.iniciar(compradorId, direccionEnvio);
 
         // Primera pasada: validar todo SIN modificar nada
         List<Presentacion> presentaciones = new ArrayList<>();
         for (ItemSolicitado item : items) {
             Presentacion presentacion = repositorioPresentacion.buscarPorId(item.presentacionId())
                     .orElseThrow(() -> new ReglaDominioException("Presentacion no encontrada: " + item.presentacionId()));
-            if (presentacion.isEliminada()) {
-                throw new ReglaDominioException("La Presentacion fue dada de baja: " + item.presentacionId());
+            if (!presentacion.estaDisponibleParaVenta()) {
+                throw new ReglaDominioException(
+                        "La Presentacion no esta disponible para la venta (eliminada, pausada, agotada o vencida): "
+                                + item.presentacionId());
             }
             // restar() devuelve una Cantidad nueva (no modifica nada) y lanza si no alcanza el stock
             presentacion.getCantidadDisponible().restar(item.cantidad());
