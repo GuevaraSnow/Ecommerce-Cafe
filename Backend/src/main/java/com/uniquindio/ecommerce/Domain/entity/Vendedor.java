@@ -29,6 +29,10 @@ public class Vendedor {
         this.eliminadoLogicamente = false;
     }
 
+    /**
+     * Registra un nuevo Vendedor validando que todos los campos obligatorios
+     * esten presentes. Email, Contrasena y Telefono ya llegan validados como VO.
+     */
     public static Vendedor registrar(String nombre, Email email, Contrasena contrasena, Telefono telefono, RolVendedor rol) {
         if (nombre == null || nombre.isBlank()) {
             throw new ReglaDominioException("El vendedor debe tener un nombre");

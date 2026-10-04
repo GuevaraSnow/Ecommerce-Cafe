@@ -6,14 +6,6 @@ import com.uniquindio.ecommerce.Domain.valueobject.Ubicacion;
 
 import java.util.Objects;
 
-/**
- * Terreno de cultivo con nombre, ubicación y altura (msnm), propiedad de
- * un Caficultor. Es el punto de partida de toda la trazabilidad: de una
- * Finca surgen las Cosechas, y de estas los Lotes.
- *
- * Se crea únicamente mediante registrar para garantizar que las reglas
- * de negocio del dominio se cumplan desde su origen.
- */
 public class Finca {
 
     private final String id;
@@ -32,12 +24,7 @@ public class Finca {
         this.eliminadaLogicamente = false;
     }
 
-    /**
-     * Crea una Finca validando identificador, propietario, nombre,
-     * ubicación y altura.
-     *
-     * @throws ReglaDominioException si se incumple alguna regla de negocio
-     */
+    /** Registra una nueva Finca validando identificador, propietario, nombre, ubicacion y altura. */
     public static Finca registrar(String id, String propietarioId, String nombre,
                                   Ubicacion ubicacion, Altitud altitud) {
         if (id == null || id.isBlank()) {
@@ -46,11 +33,11 @@ public class Finca {
         if (propietarioId == null || propietarioId.isBlank()) {
             throw new ReglaDominioException("La Finca debe tener un Caficultor propietario");
         }
-        if(ubicacion == null ){
-            throw  new ReglaDominioException("La Finca debe tener un Ubicacion");
+        if (ubicacion == null) {
+            throw new ReglaDominioException("La Finca debe tener un Ubicacion");
         }
-        if(altitud == null ){
-            throw  new ReglaDominioException("La Finca debe tener una altitud");
+        if (altitud == null) {
+            throw new ReglaDominioException("La Finca debe tener una altitud");
         }
         if (nombre == null || nombre.isBlank()) {
             throw new ReglaDominioException("La Finca debe tener un nombre");
@@ -86,8 +73,6 @@ public class Finca {
     public boolean isEliminada() {
         return eliminadaLogicamente;
     }
-
-
 
     @Override
     public boolean equals(Object o) {
