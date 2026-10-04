@@ -51,6 +51,17 @@ public class Compra {
         detalles.add(new DetalleDeCompra(id, presentacionId, precioCongelado, cantidad));
     }
 
+    /** Una Compra está activa mientras siga en curso: Pendiente, Confirmada o Enviada. */
+    public boolean estaActiva() {
+        return estado == EstadoDeCompra.PENDIENTE
+                || estado == EstadoDeCompra.CONFIRMADA
+                || estado == EstadoDeCompra.ENVIADA;
+    }
+
+    public boolean incluye(String presentacionId) {
+        return detalles.stream().anyMatch(detalle -> detalle.presentacionId().equals(presentacionId));
+    }
+
     public String getId() {
         return id;
     }
