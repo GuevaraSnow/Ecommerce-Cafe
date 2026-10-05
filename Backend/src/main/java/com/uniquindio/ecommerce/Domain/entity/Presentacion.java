@@ -88,6 +88,10 @@ public abstract class Presentacion {
             if (fechaTueste != null || perfilDeTueste != null) {
                 throw new ReglaDominioException("Solo una Presentación Trazable admite fecha y perfil de tueste");
             }
+            if ((loteId != null && !loteId.isBlank()) || (transformacionId != null && !transformacionId.isBlank())) {
+                throw new ReglaDominioException(
+                        "Un Artículo de Merchandising no tiene Origen: no puede provenir de un Lote ni de una Transformación");
+            }
             return ArticuloDeMerchandising.publicar(id, vendedorId, titulo, tipoPresentacion, precio,
                     cantidadDisponible, galeria, material, descripcion);
         }
