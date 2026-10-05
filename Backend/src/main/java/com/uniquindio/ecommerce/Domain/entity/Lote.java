@@ -11,7 +11,7 @@ public class Lote {
     private final Cosecha cosecha;
     private final ProcesoDeBeneficio procesoDeBeneficio;
     private final VariedadDeCafe variedad;
-    private EstadoDelCafe estado;
+    private final EstadoDelCafe estado;
     private Cantidad cantidadDisponible;
     private boolean eliminadoLogicamente;
 
@@ -28,11 +28,32 @@ public class Lote {
     }
 
     /**
-     * Registra un nuevo Lote validando que no se cree directamente en estado Tostado
-     * y que la cantidad inicial sea mayor a cero.
+     * Registra un nuevo Lote validando que tenga todos sus datos de origen, que no se
+     * cree directamente en estado Tostado y que la cantidad inicial sea mayor a cero.
      */
     public static Lote registrar(CodigoDeLote codigoDeLote, Cantidad cantidadDisponible, String fincaid, ProcesoDeBeneficio
             procesoDeBeneficio, EstadoDelCafe estado, Cosecha cosecha, VariedadDeCafe variedad){
+        if (codigoDeLote == null) {
+            throw new ReglaDominioException("El Lote debe tener un Código de Lote.");
+        }
+        if (fincaid == null || fincaid.isBlank()) {
+            throw new ReglaDominioException("El Lote debe provenir de una Finca.");
+        }
+        if (cosecha == null) {
+            throw new ReglaDominioException("El Lote debe indicar su Cosecha.");
+        }
+        if (procesoDeBeneficio == null) {
+            throw new ReglaDominioException("El Lote debe indicar su Proceso de Beneficio.");
+        }
+        if (variedad == null) {
+            throw new ReglaDominioException("El Lote debe indicar su Variedad de Café.");
+        }
+        if (estado == null) {
+            throw new ReglaDominioException("El Lote debe indicar su Estado del Café.");
+        }
+        if (cantidadDisponible == null) {
+            throw new ReglaDominioException("El Lote debe tener una Cantidad inicial.");
+        }
         if (estado == EstadoDelCafe.TOSTADO){
             throw new ReglaDominioException(
                     "Un Lote solo puede registrarse en estado Verde o Pergamino, nunca Tostado.");
