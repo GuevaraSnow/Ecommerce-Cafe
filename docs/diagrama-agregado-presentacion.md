@@ -32,7 +32,8 @@ publica y solo VENDEDOR_DERIVADOS publica Merchandising) y no se guarda.
 
 2. **Una Presentación de `MERCHANDISING` nunca puede tener Origen, Perfil ni Fecha de Tueste, y
    cualquier otro tipo siempre debe tener exactamente uno de `loteId` o `transformacionId`**
-   (regla B). El record `OrigenDePresentacion` rechaza traer los dos o ninguno. El origen además
+   (regla B). Si una Presentación de `MERCHANDISING` llega con `loteId` o `transformacionId`, se
+   rechaza. El record `OrigenDePresentacion` rechaza traer los dos o ninguno. El origen además
    debe corresponder al tipo: `CAFE_VERDE` viene de un Lote; `CAFE_TOSTADO` y
    `DERIVADO_CONSUMIBLE`, de una Transformación.
 
@@ -42,9 +43,10 @@ publica y solo VENDEDOR_DERIVADOS publica Merchandising) y no se guarda.
    exige `estaFresca()` en la Presentación Trazable: un café pasado de fecha nunca puede venderse, aunque
    su estado aún no se haya actualizado.
 
-4. **Una Presentación publicada por un Caficultor siempre debe tener Perfil de Tueste
-   `TRADICIONAL`** (regla A). Un `FORMADOR` nunca puede publicar Presentaciones, y solo un
-   `VENDEDOR_DERIVADOS` puede publicar un Artículo de Merchandising.
+4. **Los perfiles de tueste especializados (`CLARO`, `MEDIO`, `OSCURO`) solo puede publicarlos un
+   `TOSTADOR`; cualquier otro rol que publique café tostado siempre lo hace en `TRADICIONAL`**
+   (regla A). El café sin tostar no lleva perfil. Un `FORMADOR` nunca puede publicar
+   Presentaciones, y solo un `VENDEDOR_DERIVADOS` puede publicar un Artículo de Merchandising.
 
 5. **Un Artículo de Merchandising siempre se cuenta en `unidad` y siempre debe tener material y
    descripción; una Presentación Trazable nunca se cuenta en `unidad`**, siempre en peso o volumen
@@ -52,7 +54,10 @@ publica y solo VENDEDOR_DERIVADOS publica Merchandising) y no se guarda.
 
 6. **Una Presentación dada de baja nunca puede volver a operarse y nunca se borra físicamente.**
    `darDeBaja()` marca `eliminada` y `validarNoEliminada()` bloquea los métodos posteriores. Pausar
-   la venta es otra cosa: `desactivar()` la deja `INACTIVA` y `activar()` la devuelve a `ACTIVA`.
+   la venta es otra cosa: `desactivar()` pausa una Presentación `ACTIVA` y `activar()` la devuelve a
+   `ACTIVA`. **Pausar y reactivar nunca puede devolver a la venta una Presentación `AGOTADA` o
+   `VENCIDA`:** solo se pausa lo que está activo, `AGOTADA` se marca sola al quedar sin stock y una
+   Presentación sin cantidad disponible nunca queda `ACTIVA`.
 
 7. **La Galería siempre debe tener entre 1 y 10 imágenes con exactamente una principal, y el Precio
    siempre debe ser mayor que cero.** Se validan en el constructor de cada record.
@@ -64,8 +69,8 @@ No son lo mismo, y por eso conviven:
 | | `INACTIVA` (estado) | `eliminada` (boolean) |
 | --- | --- | --- |
 | Significado | Pausa de la venta | Baja definitiva |
-| Se activa con | `desactivar()` | `darDeBaja()` |
-| ¿Reversible? | Sí, con `activar()` (solo desde `INACTIVA`) | No |
+| Se activa con | `desactivar()` (solo desde `ACTIVA`) | `darDeBaja()` |
+| ¿Reversible? | Sí, con `activar()` (solo desde `INACTIVA` y con cantidad disponible) | No |
 | ¿La Presentación sigue existiendo? | Sí, el Vendedor puede reactivarla | Ya no se puede operar; nunca se borra físicamente |
 
 Una Presentación `INACTIVA` sigue existiendo y puede volver a `ACTIVA`; una `eliminada` ya no existe
@@ -100,4 +105,11 @@ para el negocio, y cualquier método posterior falla en `validarNoEliminada()`.
 
 ## Regla de transacción
 
-Cada método de negocio de la raíz se guarda en **una única transacción** y deja el agregado en estado válido. Si alguna invariante falla, se lanza `ReglaDominioException` y no se modifica nada. Cuando una operación toca otro agregado (por ejemplo, validar el Lote de origen al publicar), la coordinación vive en el caso de uso, no en la entidad.
+Cada método de negocio de la raíz se guarda en **una única transacción** y deja el agregado en estado válido. Si alguna invariante falla, se lanza `ReglaDominioException` y no se modifica nada.
+
+Cuando una operación toca otro agregado, la coordinación vive en el caso de uso, no en la entidad. Al
+publicar una Presentación Trazable, `PublicarPresentacion` busca su Origen y le descuenta la cantidad
+publicada: si es café sin tostar, verifica que el **Lote** exista y llama a `Lote.descontar()`; si es
+tostado o derivado, verifica que la **Transformación** exista y llama a
+`Transformacion.asignarCantidad()`. Así nunca se publica más café del que realmente tiene el origen, y
+si el origen no existe o no alcanza, la Presentación no se crea.
