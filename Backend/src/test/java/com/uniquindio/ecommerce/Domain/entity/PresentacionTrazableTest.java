@@ -211,6 +211,29 @@ class PresentacionTrazableTest {
     }
 
     @Test
+    void noSePuedePausarUnaPresentacionVencidaYElEstadoNoCambia() {
+        PresentacionTrazable presentacion = cafeTostadoConFecha("pres-24", LocalDate.now());
+        presentacion.marcarVencida();
+
+        assertThrows(ReglaDominioException.class, presentacion::desactivar);
+
+        assertEquals(EstadoDePublicacion.VENCIDA, presentacion.getEstado());
+    }
+
+    @Test
+    void unaPresentacionVencidaNoVuelveALaVentaAunqueSeVendaTodoYSeReponga() {
+        PresentacionTrazable presentacion = cafeTostadoConFecha("pres-25", LocalDate.now());
+        presentacion.marcarVencida();
+        Cantidad todo = presentacion.getCantidadDisponible();
+
+        presentacion.descontarCantidad(todo);
+        presentacion.reponerCantidad(todo);
+
+        assertEquals(EstadoDePublicacion.VENCIDA, presentacion.getEstado());
+        assertFalse(presentacion.estaDisponibleParaVenta());
+    }
+
+    @Test
     void unaPresentacionPausadaNoEstaDisponibleParaVentaAunqueEsteFresca() {
         PresentacionTrazable presentacion = cafeTostadoConFecha("pres-23", LocalDate.now());
 

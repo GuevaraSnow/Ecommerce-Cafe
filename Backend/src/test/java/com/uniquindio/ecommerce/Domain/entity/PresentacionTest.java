@@ -135,12 +135,37 @@ class PresentacionTest {
     }
 
     @Test
-    void marcarAgotadaCambiaElEstado() {
+    void noSePuedePausarUnaPresentacionAgotadaYElEstadoNoCambia() {
         Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.descontarCantidad(new Cantidad(20, "unidad"));
 
-        presentacion.marcarAgotada();
+        assertThrows(ReglaDominioException.class, presentacion::desactivar);
 
         assertEquals(EstadoDePublicacion.AGOTADA, presentacion.getEstado());
+        assertFalse(presentacion.estaDisponibleParaVenta());
+    }
+
+    @Test
+    void noSePuedeReactivarUnaPresentacionPausadaSinCantidadDisponible() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.desactivar();
+        presentacion.descontarCantidad(new Cantidad(20, "unidad"));
+
+        assertThrows(ReglaDominioException.class, presentacion::activar);
+
+        assertEquals(EstadoDePublicacion.INACTIVA, presentacion.getEstado());
+    }
+
+    @Test
+    void unaPresentacionPausadaQueSeQuedaSinStockSigueInactivaYSeReactivaAlReponer() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.desactivar();
+        presentacion.descontarCantidad(new Cantidad(20, "unidad"));
+
+        presentacion.reponerCantidad(new Cantidad(5, "unidad"));
+        presentacion.activar();
+
+        assertEquals(EstadoDePublicacion.ACTIVA, presentacion.getEstado());
     }
 
     @Test
@@ -191,7 +216,7 @@ class PresentacionTest {
         assertFalse(pausada.estaDisponibleParaVenta());
 
         Presentacion agotada = publicarMerchandisingValido();
-        agotada.marcarAgotada();
+        agotada.descontarCantidad(new Cantidad(20, "unidad"));
         assertFalse(agotada.estaDisponibleParaVenta());
 
         Presentacion eliminada = publicarMerchandisingValido();
