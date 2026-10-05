@@ -4,7 +4,7 @@
 Programación Avanzada · Universidad del Quindío · 2026-2
 Grupo: Santiago Guevara · Santiago Ramírez Bernal · Joseph Cortés
 
-Diagrama: [`diagrama-agregado-presentacion.png`](./diagrama-agregado-presentacion.png)
+Diagrama: [`diagrama-agregado-presentacionV2.png`](./diagrama-agregado-presentacionV2.png)
 
 ---
 
