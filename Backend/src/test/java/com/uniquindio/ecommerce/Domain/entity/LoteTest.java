@@ -42,6 +42,27 @@ class LoteTest {
     }
 
     @Test
+    void noSePuedeRegistrarUnLoteSinCodigo() {
+        assertThrows(ReglaDominioException.class, () -> Lote.registrar(null, new Cantidad(100, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL), new VariedadDeCafe("Castillo")));
+    }
+
+    @Test
+    void noSePuedeRegistrarUnLoteSinCantidadYSeRechazaComoReglaDeDominio() {
+        assertThrows(ReglaDominioException.class, () -> Lote.registrar(new CodigoDeLote("LOT-2024-049"), null,
+                "finca-1", ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL), new VariedadDeCafe("Castillo")));
+    }
+
+    @Test
+    void noSePuedeRegistrarUnLoteSinFinca() {
+        assertThrows(ReglaDominioException.class, () -> Lote.registrar(new CodigoDeLote("LOT-2024-050"),
+                new Cantidad(100, "kg"), " ", ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL), new VariedadDeCafe("Castillo")));
+    }
+
+    @Test
     void noSePuedeDescontarMasCantidadDeLaDisponibleYElEstadoNoCambia() {
         Lote lote = loteValido("LOT-2024-047", 50);
 

@@ -88,6 +88,10 @@ public abstract class Presentacion {
             if (fechaTueste != null || perfilDeTueste != null) {
                 throw new ReglaDominioException("Solo una Presentación Trazable admite fecha y perfil de tueste");
             }
+            if ((loteId != null && !loteId.isBlank()) || (transformacionId != null && !transformacionId.isBlank())) {
+                throw new ReglaDominioException(
+                        "Un Artículo de Merchandising no tiene Origen: no puede provenir de un Lote ni de una Transformación");
+            }
             return ArticuloDeMerchandising.publicar(id, vendedorId, titulo, tipoPresentacion, precio,
                     cantidadDisponible, galeria, material, descripcion);
         }
@@ -97,12 +101,13 @@ public abstract class Presentacion {
 
     /**
      * Descuenta cantidad disponible (p. ej. al confirmarse una compra).
-     * Si la cantidad llega a cero, la Presentación queda AGOTADA.
+     * Si una Presentación ACTIVA llega a cero, queda AGOTADA; una Vencida o
+     * Inactiva conserva su estado, para que reponer stock no la devuelva a la venta.
      */
     public void descontarCantidad(Cantidad cantidadUsada) {
         validarNoEliminada();
         this.cantidadDisponible = this.cantidadDisponible.restar(cantidadUsada);
-        if (this.cantidadDisponible.valor() == 0) {
+        if (this.cantidadDisponible.valor() == 0 && this.estado == EstadoDePublicacion.ACTIVA) {
             marcarAgotada();
         }
     }
@@ -132,22 +137,32 @@ public abstract class Presentacion {
         this.galeria = nuevaGaleria;
     }
 
-    public void marcarAgotada() {
-        validarNoEliminada();
+    /** AGOTADA no se asigna desde afuera: solo ocurre cuando una Presentación activa se queda sin stock. */
+    private void marcarAgotada() {
         this.estado = EstadoDePublicacion.AGOTADA;
     }
 
-    /** Pausa temporalmente la Presentación (reversible), sin darla de baja. */
+    /**
+     * Pausa temporalmente la Presentación (reversible), sin darla de baja. Solo
+     * se pausa lo que está a la venta: una Presentación Agotada o Vencida no se
+     * pausa, porque reactivarla después la devolvería a la venta.
+     */
     public void desactivar() {
         validarNoEliminada();
+        if (this.estado != EstadoDePublicacion.ACTIVA) {
+            throw new ReglaDominioException("Solo una Presentación Activa puede pausarse (estado actual: " + estado + ")");
+        }
         this.estado = EstadoDePublicacion.INACTIVA;
     }
 
-    /** Reactiva una Presentación que estaba pausada manualmente. */
+    /** Reactiva una Presentación que estaba pausada manualmente; exige cantidad disponible. */
     public void activar() {
         validarNoEliminada();
         if (this.estado != EstadoDePublicacion.INACTIVA) {
             throw new ReglaDominioException("Solo una Presentación Inactiva puede reactivarse manualmente");
+        }
+        if (this.cantidadDisponible.valor() == 0) {
+            throw new ReglaDominioException("No se puede reactivar una Presentación sin cantidad disponible");
         }
         this.estado = EstadoDePublicacion.ACTIVA;
     }

@@ -79,10 +79,10 @@ public class PresentacionTrazable extends Presentacion {
             throw new ReglaDominioException("Solo el café tostado admite fecha y perfil de tueste");
         }
 
-        if (perfilDeTueste != null && rolVendedor == RolVendedor.CAFICULTOR
-                && perfilDeTueste != PerfilTueste.TRADICIONAL) {
-            throw new ReglaDominioException(
-                    "Un Caficultor solo puede publicar café tostado con Perfil de Tueste TRADICIONAL");
+        if (perfilDeTueste != null && perfilDeTueste != PerfilTueste.TRADICIONAL
+                && rolVendedor != RolVendedor.TOSTADOR) {
+            throw new ReglaDominioException("Los perfiles de tueste CLARO, MEDIO y OSCURO son exclusivos del "
+                    + "Tostador; un " + rolVendedor + " solo puede publicar café tostado con Perfil TRADICIONAL");
         }
 
         return new PresentacionTrazable(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,

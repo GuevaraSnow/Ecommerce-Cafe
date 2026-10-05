@@ -121,6 +121,24 @@ class PresentacionTrazableTest {
     }
 
     @Test
+    void unVendedorDeDerivadosNoPuedePublicarCafeTostadoConPerfilEspecializado() {
+        assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-26", "vendedor-1",
+                "Café Tostado", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"),
+                galeriaValida(), null, "transformacion-1", PerfilTueste.OSCURO, new FechaDeTueste(LocalDate.now()),
+                RolVendedor.VENDEDOR_DERIVADOS));
+    }
+
+    @Test
+    void unTostadorPuedePublicarCualquierPerfilEspecializado() {
+        PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-27", "vendedor-1", "Café Tostado",
+                TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"), galeriaValida(),
+                null, "transformacion-1", PerfilTueste.OSCURO, new FechaDeTueste(LocalDate.now()),
+                RolVendedor.TOSTADOR);
+
+        assertEquals(PerfilTueste.OSCURO, presentacion.getPerfilDeTueste());
+    }
+
+    @Test
     void sinRolDeVendedorFalla() {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-13", "vendedor-1",
                 "Café Verde", TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"),
@@ -207,6 +225,29 @@ class PresentacionTrazableTest {
 
         presentacion.marcarVencida();
 
+        assertFalse(presentacion.estaDisponibleParaVenta());
+    }
+
+    @Test
+    void noSePuedePausarUnaPresentacionVencidaYElEstadoNoCambia() {
+        PresentacionTrazable presentacion = cafeTostadoConFecha("pres-24", LocalDate.now());
+        presentacion.marcarVencida();
+
+        assertThrows(ReglaDominioException.class, presentacion::desactivar);
+
+        assertEquals(EstadoDePublicacion.VENCIDA, presentacion.getEstado());
+    }
+
+    @Test
+    void unaPresentacionVencidaNoVuelveALaVentaAunqueSeVendaTodoYSeReponga() {
+        PresentacionTrazable presentacion = cafeTostadoConFecha("pres-25", LocalDate.now());
+        presentacion.marcarVencida();
+        Cantidad todo = presentacion.getCantidadDisponible();
+
+        presentacion.descontarCantidad(todo);
+        presentacion.reponerCantidad(todo);
+
+        assertEquals(EstadoDePublicacion.VENCIDA, presentacion.getEstado());
         assertFalse(presentacion.estaDisponibleParaVenta());
     }
 

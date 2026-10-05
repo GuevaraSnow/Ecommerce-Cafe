@@ -18,7 +18,7 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 
 | Caso de uso | Actor | Descripción | Repository(s) |
 | --- | --- | --- | --- |
-| `PublicarPresentacion` | Caficultor / Tostador / Vendedor de Derivados | Publica una Presentación Trazable; asigna cantidad desde la Transformación | `PresentacionRepositorio`, `TransformacionRepositorio` |
+| `PublicarPresentacion` | Caficultor / Tostador / Vendedor de Derivados | Publica una Presentación Trazable; verifica que su Origen exista y le descuenta la cantidad publicada (al Lote si es café sin tostar, a la Transformación si es tostado o derivado) | `PresentacionRepositorio`, `LoteRepositorio`, `TransformacionRepositorio` |
 | `PublicarArticuloMerchandising` | Vendedor de Derivados | Publica un Artículo de Merchandising (sin Origen) | `PresentacionRepositorio` |
 | `ActualizarPresentacion` | Vendedor | Cambia precio, cantidad, estado, galería o nota de cata | `PresentacionRepositorio` |
 | `EliminarPresentacion` | Vendedor | Baja lógica; se bloquea con compras activas | `PresentacionRepositorio`, `CompraRepositorio` |

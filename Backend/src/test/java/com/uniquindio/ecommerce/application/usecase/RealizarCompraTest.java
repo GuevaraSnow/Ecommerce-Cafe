@@ -148,9 +148,9 @@ class RealizarCompraTest {
     }
 
     @Test
-    void noSePuedeComprarUnaPresentacionMarcadaComoAgotada() {
+    void noSePuedeComprarUnaPresentacionAgotada() {
         Presentacion agotada = presentacionDisponible("pres-1", 10, 50000);
-        agotada.marcarAgotada();
+        agotada.descontarCantidad(new Cantidad(10, "kg"));
 
         assertThrows(ReglaDominioException.class, () -> comprar(List.of(item("pres-1", 1))));
     }

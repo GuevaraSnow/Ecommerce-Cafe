@@ -1,5 +1,6 @@
 package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 
+import com.uniquindio.ecommerce.Domain.entity.Lote;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
@@ -10,12 +11,14 @@ import com.uniquindio.ecommerce.application.dto.response.*;
 import com.uniquindio.ecommerce.application.usecase.ActualizarPresentacion;
 import com.uniquindio.ecommerce.application.usecase.PublicarArticuloMerchandising;
 import com.uniquindio.ecommerce.application.usecase.PublicarPresentacion;
+import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.TransformacionRepositorioMemoria;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.RecordComponent;
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +30,7 @@ class PresentacionMapperTest {
 
     private final PresentacionMapper mapper = new PresentacionMapper();
     private final PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
+    private final LoteRepositorioMemoria lotes = new LoteRepositorioMemoria();
     private final TransformacionRepositorioMemoria transformaciones = new TransformacionRepositorioMemoria();
 
     private List<ImagenRequest> galeria() {
@@ -35,16 +39,19 @@ class PresentacionMapperTest {
 
     /** Publica con PublicarPresentacion usando el mapper para armar los parámetros desde el Request. */
     private Presentacion publicar(PublicarPresentacionRequest r, RolVendedor rol) {
-        return new PublicarPresentacion(presentaciones, transformaciones).ejecutar(
+        return new PublicarPresentacion(presentaciones, lotes, transformaciones).ejecutar(
                 "pres-1", "vendedor-1", r.loteId(), r.transformacionId(), r.titulo(), r.tipo(),
                 mapper.toPrecio(r.precio()), mapper.toCantidad(r.cantidad()), mapper.toGaleria(r.galeria()),
                 r.perfilTueste(), rol, mapper.toFechaDeTueste(r.fechaTueste()));
     }
 
     private PublicarPresentacionRequest cafeVerdeDesdeLote() {
+        lotes.guardar(Lote.registrar(new CodigoDeLote("LOT-2026-001"), new Cantidad(500, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL), new VariedadDeCafe("Caturra")));
         return new PublicarPresentacionRequest("Café Verde", TipoDePresentacion.CAFE_VERDE,
                 new PrecioRequest(28000.0, "COP"), new CantidadRequest(200.0, "kg"), galeria(),
-                "lote-1", null, null, null);
+                "LOT-2026-001", null, null, null);
     }
 
     private PublicarPresentacionRequest cafeTostadoDesdeTransformacion() {
@@ -86,7 +93,7 @@ class PresentacionMapperTest {
         PresentacionTrazableResponse trazable =
                 assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(presentacion));
 
-        assertEquals(new OrigenResponse("lote-1", null), trazable.origen());
+        assertEquals(new OrigenResponse("LOT-2026-001", null), trazable.origen());
         assertNull(trazable.perfilTueste());
         assertNull(trazable.fechaTueste());
     }
