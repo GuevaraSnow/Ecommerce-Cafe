@@ -177,6 +177,20 @@ public abstract class Presentacion {
         return !eliminada && estado == EstadoDePublicacion.ACTIVA;
     }
 
+    /**
+     * Verifica, sin modificar nada, que se puede vender esa cantidad: la
+     * Presentación está disponible para la venta y su stock alcanza.
+     *
+     * @throws ReglaDominioException si no está disponible o no hay stock suficiente
+     */
+    public void verificarQueSePuedeVender(Cantidad cantidad) {
+        if (!estaDisponibleParaVenta()) {
+            throw new ReglaDominioException("La Presentación " + id
+                    + " no está disponible para la venta (dada de baja, pausada, agotada o vencida)");
+        }
+        cantidadDisponible.restar(cantidad); // Cantidad es inmutable: solo valida que alcance
+    }
+
     /** Da de baja la Presentación (borrado lógico); nunca se elimina físicamente. */
     public void darDeBaja() {
         this.eliminada = true;
