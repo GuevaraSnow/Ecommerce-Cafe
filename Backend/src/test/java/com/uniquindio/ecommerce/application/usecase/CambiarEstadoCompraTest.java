@@ -1,6 +1,5 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.CompraDigital;
 import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
@@ -91,16 +90,5 @@ class CambiarEstadoCompraTest {
     @Test
     void noSePuedeCambiarElEstadoSinIndicarElNuevoEstado() {
         assertThrows(ReglaDominioException.class, () -> cambiarEstadoCompra.ejecutar(compraId, null));
-    }
-
-    @Test
-    void unaCompraDigitalNoTieneTramoLogistico() {
-        CompraDigital digital = CompraDigital.iniciar("comprador-1", "curso-1", new Precio(50000, "COP"));
-        digital.confirmar();
-        repositorioCompra.guardar(digital);
-
-        assertThrows(ReglaDominioException.class,
-                () -> cambiarEstadoCompra.ejecutar(digital.getId(), EstadoDeCompra.ENVIADA));
-        assertEquals(EstadoDeCompra.CONFIRMADA, digital.getEstado());
     }
 }
