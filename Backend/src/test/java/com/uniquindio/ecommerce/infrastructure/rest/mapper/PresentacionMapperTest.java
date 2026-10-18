@@ -5,6 +5,7 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.*;
 import com.uniquindio.ecommerce.application.dto.response.*;
@@ -39,7 +40,7 @@ class PresentacionMapperTest {
 
     /** Publica con PublicarPresentacion usando el mapper para armar los parámetros desde el Request. */
     private Presentacion publicar(PublicarPresentacionRequest r, RolVendedor rol) {
-        return new PublicarPresentacion(presentaciones, lotes, transformaciones).ejecutar(
+        return new PublicarPresentacion(presentaciones, new ServicioDePublicacion(lotes, transformaciones)).ejecutar(
                 "pres-1", "vendedor-1", r.loteId(), r.transformacionId(), r.titulo(), r.tipo(),
                 mapper.toPrecio(r.precio()), mapper.toCantidad(r.cantidad()), mapper.toGaleria(r.galeria()),
                 r.perfilTueste(), rol, mapper.toFechaDeTueste(r.fechaTueste()));
