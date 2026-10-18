@@ -84,13 +84,6 @@ class PresentacionTest {
     }
 
     @Test
-    void unFormadorNoPuedePublicarNingunaPresentacion() {
-        assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null, null,
-                "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.FORMADOR, null, "material", "descripcion"));
-    }
-
-    @Test
     void unArticuloDeMerchandisingNoPuedeProvenirDeUnLote() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", "LOT-2026-045",
                 null, "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),

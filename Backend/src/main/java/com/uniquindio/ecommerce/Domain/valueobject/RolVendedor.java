@@ -8,6 +8,5 @@ package com.uniquindio.ecommerce.Domain.valueobject;
 public enum RolVendedor {
     CAFICULTOR,
     TOSTADOR,
-    VENDEDOR_DERIVADOS,
-    FORMADOR
+    VENDEDOR_DERIVADOS
 }
