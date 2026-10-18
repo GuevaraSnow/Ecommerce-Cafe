@@ -5,6 +5,7 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
@@ -22,7 +23,8 @@ class PublicarPresentacionTest {
     private final PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
     private final LoteRepositorioMemoria lotes = new LoteRepositorioMemoria();
     private final TransformacionRepositorioMemoria transformaciones = new TransformacionRepositorioMemoria();
-    private final PublicarPresentacion publicar = new PublicarPresentacion(presentaciones, lotes, transformaciones);
+    private final PublicarPresentacion publicar = new PublicarPresentacion(presentaciones,
+            new ServicioDePublicacion(lotes, transformaciones));
 
     private Galeria galeriaValida() {
         return new Galeria(List.of(new ImagenDePresentacion("http://img/cafe.png", true)));
