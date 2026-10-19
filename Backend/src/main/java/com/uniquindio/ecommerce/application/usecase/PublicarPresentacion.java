@@ -4,6 +4,9 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Caso de uso: PublicarPresentacion.
@@ -12,17 +15,14 @@ import com.uniquindio.ecommerce.Domain.valueobject.*;
  * {@link ServicioDePublicacion}, que valida y descuenta del Origen, y guarda
  * la Presentación resultante.
  */
+@Service
+@RequiredArgsConstructor
 public class PublicarPresentacion {
 
     private final PresentacionRepositorio presentacionRepositorio;
     private final ServicioDePublicacion servicioDePublicacion;
 
-    public PublicarPresentacion(PresentacionRepositorio presentacionRepositorio,
-                                 ServicioDePublicacion servicioDePublicacion) {
-        this.presentacionRepositorio = presentacionRepositorio;
-        this.servicioDePublicacion = servicioDePublicacion;
-    }
-
+    @Transactional
     public Presentacion ejecutar(String id, String vendedorId, String loteId, String transformacionId,
                                   String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
                                   Cantidad cantidadDisponible, Galeria galeria, PerfilTueste perfilDeTueste,

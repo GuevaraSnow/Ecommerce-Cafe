@@ -8,20 +8,22 @@ import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
 import com.uniquindio.ecommerce.Domain.valueobject.Precio;
 import com.uniquindio.ecommerce.Domain.valueobject.RolVendedor;
 import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Caso de uso: PublicarArticuloMerchandising.
  * (Actor: Vendedor de Derivados) — publica un Artículo de Merchandising no
  * alimenticio, sin Origen ni Ficha de Origen (regla 7-B).
  */
+@Service
+@RequiredArgsConstructor
 public class PublicarArticuloMerchandising {
 
     private final PresentacionRepositorio repositorio;
 
-    public PublicarArticuloMerchandising(PresentacionRepositorio repositorio) {
-        this.repositorio = repositorio;
-    }
-
+    @Transactional
     public ArticuloDeMerchandising ejecutar(String id, String vendedorId, String titulo, Precio precio,
                                              Cantidad cantidadDisponible, Galeria galeria, String material,
                                              String descripcion, RolVendedor rolVendedor) {
