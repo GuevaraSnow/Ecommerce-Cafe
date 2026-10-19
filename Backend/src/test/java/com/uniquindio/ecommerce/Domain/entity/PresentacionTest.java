@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -293,5 +294,108 @@ class PresentacionTest {
         presentacion.activar();
 
         assertTrue(presentacion.estaDisponibleParaVenta());
+    }
+
+    private static final LocalDate INICIO = LocalDate.of(2026, 12, 1);
+    private static final LocalDate FIN = LocalDate.of(2026, 12, 31);
+
+    private Descuento descuento20() {
+        return new Descuento(20, INICIO, FIN);
+    }
+
+    @Test
+    void sinDescuentoElPrecioVigenteEsElPrecioNormal() {
+        Presentacion presentacion = publicarMerchandisingValido();
+
+        assertEquals(new Precio(15000, "COP"), presentacion.precioVigente(INICIO));
+    }
+
+    @Test
+    void conDescuentoVigenteElPrecioVigenteEsElPrecioReducido() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        assertEquals(new Precio(12000, "COP"), presentacion.precioVigente(LocalDate.of(2026, 12, 15)));
+    }
+
+    @Test
+    void elDescuentoRigeElPrimerYElUltimoDia() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        assertEquals(new Precio(12000, "COP"), presentacion.precioVigente(INICIO));
+        assertEquals(new Precio(12000, "COP"), presentacion.precioVigente(FIN));
+    }
+
+    @Test
+    void conDescuentoNoIniciadoElPrecioVigenteEsElNormal() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        assertEquals(new Precio(15000, "COP"), presentacion.precioVigente(INICIO.minusDays(1)));
+    }
+
+    @Test
+    void conDescuentoVencidoElPrecioVigenteEsElNormal() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        assertEquals(new Precio(15000, "COP"), presentacion.precioVigente(FIN.plusDays(1)));
+    }
+
+    @Test
+    void programarUnDescuentoNoCambiaElPrecioNormal() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        assertEquals(new Precio(15000, "COP"), presentacion.getPrecio());
+        assertEquals(descuento20(), presentacion.getDescuento());
+    }
+
+    @Test
+    void programarUnDescuentoReemplazaAlAnterior() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        presentacion.programarDescuento(new Descuento(10, INICIO, FIN));
+
+        assertEquals(new Precio(13500, "COP"), presentacion.precioVigente(INICIO));
+    }
+
+    @Test
+    void quitarElDescuentoDevuelveElPrecioNormal() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        presentacion.quitarDescuento();
+
+        assertNull(presentacion.getDescuento());
+        assertEquals(new Precio(15000, "COP"), presentacion.precioVigente(INICIO));
+    }
+
+    @Test
+    void cambiarElPrecioNormalNoQuitaElDescuentoProgramado() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.programarDescuento(descuento20());
+
+        presentacion.cambiarPrecio(new Precio(20000, "COP"));
+
+        assertEquals(new Precio(16000, "COP"), presentacion.precioVigente(INICIO));
+    }
+
+    @Test
+    void noSePuedeProgramarUnDescuentoNulo() {
+        Presentacion presentacion = publicarMerchandisingValido();
+
+        assertThrows(ReglaDominioException.class, () -> presentacion.programarDescuento(null));
+    }
+
+    @Test
+    void unaPresentacionDadaDeBajaNoAdmiteProgramarNiQuitarDescuento() {
+        Presentacion presentacion = publicarMerchandisingValido();
+        presentacion.darDeBaja();
+
+        assertThrows(ReglaDominioException.class, () -> presentacion.programarDescuento(descuento20()));
+        assertThrows(ReglaDominioException.class, presentacion::quitarDescuento);
     }
 }

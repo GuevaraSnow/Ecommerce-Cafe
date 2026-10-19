@@ -38,6 +38,7 @@ que la separa es su id.
 | Concepto | Tipo | Por qué es VO (sin ID · sin historia · intercambiable) |
 | --- | --- | --- |
 | **Precio** | record | Par monto + moneda; si cambia es otro valor, no "el mismo precio editado" |
+| **Descuento** | record | Porcentaje (1–50 %) y rango de fechas; se identifica por sus valores, y programar otro reemplaza al anterior |
 | **Cantidad** | record | Valor + unidad (kg, g, ml, unidad); igual por valor y unidad (no convierte: `0,5 kg` y `500 g` son valores distintos); restar devuelve una nueva |
 | **DetalleDeCompra** | record | Línea de una Compra física (compraId, presentacionId, precio congelado, cantidad); sin identidad propia, se compara por valor |
 | **PorcentajeDeMerma** | record | Porcentaje de peso perdido al tostar (12 %–22 %); dos Transformaciones con 18 % comparten el valor |

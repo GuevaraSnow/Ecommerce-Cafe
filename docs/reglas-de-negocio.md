@@ -27,6 +27,7 @@ coordinan. La columna "Dónde vive" indica quién la hace cumplir.
 | 11 (F) | El café verde solo puede publicarse desde un **Lote**; el café tostado y los derivados consumibles, solo desde una **Transformación**. | `PresentacionTrazable.publicar(...)` según `TipoDePresentacion` |
 | 12 (G) | Solo el Vendedor de Derivados puede publicar Artículos de Merchandising, y el Formador no puede publicar Presentaciones (solo cursos). | `Presentacion.publicar(...)` según `rolVendedor` |
 | 13 (H) | No se puede publicar más café del que tiene el Origen: la suma de lo publicado desde una Transformación no supera su cantidad resultante, y el café sin tostar publicado desde un Lote se descuenta de su cantidad disponible. Lo mismo al reponer stock. | `Transformacion.asignarCantidad()` / `Lote.descontar()`, coordinados por `ServicioDePublicacion` y `ServicioDeReposicion` |
+| 14 (I) | El Vendedor puede programar un **Descuento por temporada** sobre una Presentación: un porcentaje **entre 1 % y 50 %** que rige entre dos fechas (ambas incluidas; la de fin no puede ser anterior a la de inicio). Fuera de ese rango de fechas se vende al Precio normal; el Precio original nunca se modifica. | `Descuento` (rango y fechas) / `Precio.aplicarDescuento()` / `Presentacion.precioVigente(hoy)` |
 
 ## Reglas de compra y cursos
 
