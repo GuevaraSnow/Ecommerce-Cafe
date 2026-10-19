@@ -172,6 +172,39 @@ class PresentacionTrazableTest {
     }
 
     @Test
+    void elCafeTostadoSeVuelveVencidoSoloAlPasarLos30DiasSinQueNadieLoMarque() {
+        LocalDate hoy = LocalDate.now();
+        PresentacionTrazable presentacion = cafeTostadoConFecha("pres-30", hoy);
+
+        assertEquals(EstadoDePublicacion.ACTIVA, presentacion.estadoAl(hoy.plusDays(30)));
+        assertEquals(EstadoDePublicacion.VENCIDA, presentacion.estadoAl(hoy.plusDays(31)));
+        assertFalse(presentacion.estaFresca(hoy.plusDays(31)));
+    }
+
+    @Test
+    void elVencimientoMandaSobreElEstadoPausadoOAgotado() {
+        LocalDate hoy = LocalDate.now();
+        PresentacionTrazable pausada = cafeTostadoConFecha("pres-31", hoy);
+        pausada.desactivar();
+        PresentacionTrazable agotada = cafeTostadoConFecha("pres-32", hoy);
+        agotada.descontarCantidad(agotada.getCantidadDisponible());
+
+        assertEquals(EstadoDePublicacion.INACTIVA, pausada.estadoAl(hoy));
+        assertEquals(EstadoDePublicacion.VENCIDA, pausada.estadoAl(hoy.plusDays(31)));
+        assertEquals(EstadoDePublicacion.AGOTADA, agotada.estadoAl(hoy));
+        assertEquals(EstadoDePublicacion.VENCIDA, agotada.estadoAl(hoy.plusDays(31)));
+    }
+
+    @Test
+    void elCafeSinTostarNuncaSeVence() {
+        PresentacionTrazable verde = PresentacionTrazable.publicar("pres-33", "vendedor-1", "Café Verde",
+                TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),
+                "lote-1", null, null, null, RolVendedor.CAFICULTOR);
+
+        assertEquals(EstadoDePublicacion.ACTIVA, verde.estadoAl(LocalDate.now().plusYears(5)));
+    }
+
+    @Test
     void verificarVencimientoNoCambiaElEstadoSiEstaFresca() {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-17", "vendedor-1", "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),

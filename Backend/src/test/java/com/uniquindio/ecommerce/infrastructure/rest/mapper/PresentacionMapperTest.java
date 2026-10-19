@@ -6,12 +6,16 @@ import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.*;
 import com.uniquindio.ecommerce.application.dto.response.*;
-import com.uniquindio.ecommerce.application.usecase.ActualizarPresentacion;
+import com.uniquindio.ecommerce.application.usecase.CambiarPrecioDePresentacion;
+import com.uniquindio.ecommerce.application.usecase.PausarPresentacion;
 import com.uniquindio.ecommerce.application.usecase.PublicarArticuloMerchandising;
 import com.uniquindio.ecommerce.application.usecase.PublicarPresentacion;
+import com.uniquindio.ecommerce.application.usecase.RegistrarNotaDeCata;
+import com.uniquindio.ecommerce.application.usecase.ReponerStockDePresentacion;
 import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.TransformacionRepositorioMemoria;
@@ -172,14 +176,10 @@ class PresentacionMapperTest {
     }
 
     @Test
-    void elRequestDeActualizarAplicaSoloLosCamposQueVienen() {
+    void elRequestDePausarSoloCambiaElEstado() {
         publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
-        ActualizarPresentacion actualizar = new ActualizarPresentacion(presentaciones);
-        ActualizarPresentacionRequest soloPausar = new ActualizarPresentacionRequest(null, null, false, null, null);
 
-        Presentacion pausada = actualizar.ejecutar("pres-1", mapper.toPrecio(soloPausar.nuevoPrecio()),
-                mapper.toCantidad(soloPausar.nuevaCantidadTotal()), soloPausar.activar(),
-                mapper.toGaleria(soloPausar.nuevaGaleria()), mapper.toNotaDeCata(soloPausar.nuevaNotaCata()));
+        Presentacion pausada = new PausarPresentacion(presentaciones).ejecutar("pres-1");
 
         PresentacionTrazableResponse response =
                 assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(pausada));
@@ -189,21 +189,43 @@ class PresentacionMapperTest {
     }
 
     @Test
-    void elRequestDeActualizarCambiaPrecioStockYNotaDeCata() {
+    void elRequestDeCambiarPrecioUsaElPrecioRequestDirectamente() {
         publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
-        ActualizarPresentacion actualizar = new ActualizarPresentacion(presentaciones);
-        ActualizarPresentacionRequest r = new ActualizarPresentacionRequest(new PrecioRequest(30000.0, "COP"),
-                new CantidadRequest(150.0, "kg"), null, null, List.of("Cítrico"));
+        PrecioRequest nuevoPrecio = new PrecioRequest(30000.0, "COP");
 
-        Presentacion actualizada = actualizar.ejecutar("pres-1", mapper.toPrecio(r.nuevoPrecio()),
-                mapper.toCantidad(r.nuevaCantidadTotal()), r.activar(), mapper.toGaleria(r.nuevaGaleria()),
-                mapper.toNotaDeCata(r.nuevaNotaCata()));
+        Presentacion actualizada = new CambiarPrecioDePresentacion(presentaciones)
+                .ejecutar("pres-1", mapper.toPrecio(nuevoPrecio));
 
         PresentacionTrazableResponse response =
                 assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(actualizada));
         assertEquals(new PrecioResponse(30000, "COP"), response.precio());
-        assertEquals(new CantidadResponse(150, "kg"), response.cantidadDisponible());
-        assertEquals(List.of("Cítrico"), response.notaCata());
-        assertEquals("ACTIVA", response.estado());
+    }
+
+    @Test
+    void elRequestDeReponerStockDescuentaDelLoteYSumaALaPresentacion() {
+        publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR); // 500 kg en el Lote, publica 200 -> quedan 300
+        CantidadRequest reposicion = new CantidadRequest(50.0, "kg");
+
+        Presentacion repuesta = new ReponerStockDePresentacion(presentaciones,
+                new ServicioDeReposicion(lotes, transformaciones)).ejecutar("pres-1", mapper.toCantidad(reposicion));
+
+        PresentacionTrazableResponse response =
+                assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(repuesta));
+        assertEquals(new CantidadResponse(250, "kg"), response.cantidadDisponible());
+        assertEquals(new Cantidad(250, "kg"),
+                lotes.buscarPorCodigo(new CodigoDeLote("LOT-2026-001")).get().getCantidadDisponible());
+    }
+
+    @Test
+    void elRequestDeNotaDeCataApareceEnElResponse() {
+        publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        RegistrarNotaDeCataRequest r = new RegistrarNotaDeCataRequest(List.of("Cítrico", "Panela"));
+
+        Presentacion actualizada = new RegistrarNotaDeCata(presentaciones)
+                .ejecutar("pres-1", mapper.toNotaDeCata(r.descriptores()));
+
+        PresentacionTrazableResponse response =
+                assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(actualizada));
+        assertEquals(List.of("Cítrico", "Panela"), response.notaCata());
     }
 }

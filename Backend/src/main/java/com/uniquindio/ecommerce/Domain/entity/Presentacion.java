@@ -104,7 +104,7 @@ public abstract class Presentacion {
     public void descontarCantidad(Cantidad cantidadUsada) {
         validarNoEliminada();
         this.cantidadDisponible = this.cantidadDisponible.restar(cantidadUsada);
-        if (this.cantidadDisponible.valor() == 0 && this.estado == EstadoDePublicacion.ACTIVA) {
+        if (this.cantidadDisponible.valor() == 0 && getEstado() == EstadoDePublicacion.ACTIVA) {
             marcarAgotada();
         }
     }
@@ -113,9 +113,32 @@ public abstract class Presentacion {
     public void reponerCantidad(Cantidad cantidadNueva) {
         validarNoEliminada();
         this.cantidadDisponible = this.cantidadDisponible.sumar(cantidadNueva);
-        if (this.estado == EstadoDePublicacion.AGOTADA && this.cantidadDisponible.valor() > 0) {
+        if (getEstado() == EstadoDePublicacion.AGOTADA && this.cantidadDisponible.valor() > 0) {
             this.estado = EstadoDePublicacion.ACTIVA;
         }
+    }
+
+    /**
+     * Verifica, sin modificar nada, que se puede reponer esa cantidad: la
+     * Presentación no está dada de baja, la cantidad es positiva y viene en la
+     * misma unidad. Permite validar antes de descontar del Origen.
+     *
+     * @throws ReglaDominioException si no se puede reponer
+     */
+    public void verificarQueSePuedeReponer(Cantidad cantidad) {
+        validarNoEliminada();
+        if (cantidad == null || cantidad.valor() <= 0) {
+            throw new ReglaDominioException("La cantidad a reponer debe ser mayor a cero");
+        }
+        cantidadDisponible.sumar(cantidad); // Cantidad es inmutable: aquí solo valida la unidad
+    }
+
+    /**
+     * Registra los descriptores de sabor del vendedor. Por defecto se rechaza:
+     * solo la Presentación Trazable admite Nota de Cata.
+     */
+    public void registrarNotaCata(NotaDeCata nota) {
+        throw new ReglaDominioException("Solo una Presentación Trazable admite Nota de Cata");
     }
 
     public void cambiarPrecio(Precio nuevoPrecio) {
@@ -146,8 +169,9 @@ public abstract class Presentacion {
      */
     public void desactivar() {
         validarNoEliminada();
-        if (this.estado != EstadoDePublicacion.ACTIVA) {
-            throw new ReglaDominioException("Solo una Presentación Activa puede pausarse (estado actual: " + estado + ")");
+        if (getEstado() != EstadoDePublicacion.ACTIVA) {
+            throw new ReglaDominioException(
+                    "Solo una Presentación Activa puede pausarse (estado actual: " + getEstado() + ")");
         }
         this.estado = EstadoDePublicacion.INACTIVA;
     }
@@ -155,7 +179,7 @@ public abstract class Presentacion {
     /** Reactiva una Presentación que estaba pausada manualmente; exige cantidad disponible. */
     public void activar() {
         validarNoEliminada();
-        if (this.estado != EstadoDePublicacion.INACTIVA) {
+        if (getEstado() != EstadoDePublicacion.INACTIVA) {
             throw new ReglaDominioException("Solo una Presentación Inactiva puede reactivarse manualmente");
         }
         if (this.cantidadDisponible.valor() == 0) {
@@ -171,7 +195,7 @@ public abstract class Presentacion {
 
     /** Indica si la Presentación puede venderse: está Activa y no fue dada de baja. */
     public boolean estaDisponibleParaVenta() {
-        return !eliminada && estado == EstadoDePublicacion.ACTIVA;
+        return !eliminada && getEstado() == EstadoDePublicacion.ACTIVA;
     }
 
     /**

@@ -18,10 +18,16 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 
 | Caso de uso | Actor | Descripción | Repository(s) |
 | --- | --- | --- | --- |
-| `PublicarPresentacion` | Caficultor / Tostador / Vendedor de Derivados | Publica una Presentación Trazable; verifica que su Origen exista y le descuenta la cantidad publicada (al Lote si es café sin tostar, a la Transformación si es tostado o derivado) | `PresentacionRepositorio`, `LoteRepositorio`, `TransformacionRepositorio` |
+| `PublicarPresentacion` | Caficultor / Tostador / Vendedor de Derivados | Publica una Presentación Trazable; `ServicioDePublicacion` verifica que su Origen exista y le descuenta la cantidad publicada (al Lote si es café sin tostar, a la Transformación si es tostado o derivado) | `PresentacionRepositorio`, `LoteRepositorio`, `TransformacionRepositorio` |
 | `PublicarArticuloMerchandising` | Vendedor de Derivados | Publica un Artículo de Merchandising (sin Origen) | `PresentacionRepositorio` |
-| `ActualizarPresentacion` | Vendedor | Cambia precio, cantidad, estado, galería o nota de cata | `PresentacionRepositorio` |
-| `EliminarPresentacion` | Vendedor | Baja lógica; se bloquea con compras activas | `PresentacionRepositorio`, `CompraRepositorio` |
+| `CambiarPrecioDePresentacion` | Vendedor | Cambia el precio de una Presentación publicada | `PresentacionRepositorio` |
+| `ReponerStockDePresentacion` | Vendedor | Repone stock; si es Trazable, el café sale de su Origen (`ServicioDeReposicion`) | `PresentacionRepositorio`, `LoteRepositorio`, `TransformacionRepositorio` |
+| `RetirarStockDePresentacion` | Vendedor | Retira stock (merma, daño); no regresa café al Origen | `PresentacionRepositorio` |
+| `PausarPresentacion` | Vendedor | Pausa la venta de una Presentación activa | `PresentacionRepositorio` |
+| `ReactivarPresentacion` | Vendedor | Reactiva una Presentación pausada que tenga stock | `PresentacionRepositorio` |
+| `ReemplazarGaleriaDePresentacion` | Vendedor | Reemplaza la Galería de imágenes | `PresentacionRepositorio` |
+| `RegistrarNotaDeCata` | Vendedor | Registra los descriptores de sabor de una Presentación Trazable | `PresentacionRepositorio` |
+| `EliminarPresentacion` | Vendedor | Baja lógica; `ServicioDeBajaDePresentacion` la bloquea con compras activas | `PresentacionRepositorio`, `CompraRepositorio` |
 | `RealizarCompra` | Comprador | Crea una Compra física: valida disponibilidad y stock, congela el precio y descuenta la cantidad (todo o nada) | `PresentacionRepositorio`, `CompraRepositorio` |
 | `ConfirmarCompra` | Sistema / Comprador | Confirma una Compra pendiente (evita doble confirmación) | `CompraRepositorio` |
 | `CancelarCompra` | Comprador | Cancela una Compra física antes del envío y repone el stock (todo o nada) | `CompraRepositorio`, `PresentacionRepositorio` |
@@ -67,6 +73,8 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 - Diseñados en el modelado pero aún no implementados: `DejarResena`, `ResponderResena`,
   `SolicitarReembolso` (café físico), `GestionarReembolso`, `EnviarNotificacion`,
   `MarcarNotificacionLeida`.
-- Los casos de uso buscan solo coordinar; hoy `RestablecerContrasena` (valida el código) y
-  `ActualizarPresentacion` (decide entre reponer y descontar) todavía contienen decisiones que
-  deberían vivir en el dominio.
+- Los casos de uso solo coordinan. Cuando una regla cruza agregados la resuelve un Domain Service
+  (`Domain/service`): `ServicioDePublicacion`, `ServicioDeReposicion` y `ServicioDeBajaDePresentacion`.
+  Hoy `RestablecerContrasena` (valida el código) todavía contiene una decisión que debería vivir
+  en el dominio.
+- Un caso de uso por operación: no hay un "actualizar" genérico con campos opcionales.

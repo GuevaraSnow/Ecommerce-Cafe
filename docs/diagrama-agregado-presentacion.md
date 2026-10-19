@@ -38,10 +38,11 @@ publica y solo VENDEDOR_DERIVADOS publica Merchandising) y no se guarda.
    `DERIVADO_CONSUMIBLE`, de una Transformación.
 
 3. **Un café tostado nunca puede publicarse si han pasado más de 30 días desde su Fecha de Tueste**
-   (regla D). Después de publicado, `verificarVencimiento()` usa `estaFresca()` y lo pasa a
-   `VENCIDA` cuando se cumple el plazo. Además, `estaDisponibleParaVenta()`
-   exige `estaFresca()` en la Presentación Trazable: un café pasado de fecha nunca puede venderse, aunque
-   su estado aún no se haya actualizado.
+   (regla D). Después de publicado, el estado **se calcula**: pasado el plazo, `getEstado()` devuelve
+   `VENCIDA` aunque nadie la haya marcado, y eso manda sobre cualquier otro estado (activa, agotada o
+   pausada). Por eso un café pasado de fecha nunca puede venderse, pausarse, reactivarse ni volver a la
+   venta al reponer stock. `verificarVencimiento()` solo guarda ese estado cuando se necesita que lo
+   guardado coincida (por ejemplo, para consultar por estado en la base de datos).
 
 4. **Los perfiles de tueste especializados (`CLARO`, `MEDIO`, `OSCURO`) solo puede publicarlos un
    `TOSTADOR`; cualquier otro rol que publique café tostado siempre lo hace en `TRADICIONAL`**
@@ -107,9 +108,17 @@ para el negocio, y cualquier método posterior falla en `validarNoEliminada()`.
 
 Cada método de negocio de la raíz se guarda en **una única transacción** y deja el agregado en estado válido. Si alguna invariante falla, se lanza `ReglaDominioException` y no se modifica nada.
 
-Cuando una operación toca otro agregado, la coordinación vive en el caso de uso, no en la entidad. Al
-publicar una Presentación Trazable, `PublicarPresentacion` busca su Origen y le descuenta la cantidad
-publicada: si es café sin tostar, verifica que el **Lote** exista y llama a `Lote.descontar()`; si es
-tostado o derivado, verifica que la **Transformación** exista y llama a
-`Transformacion.asignarCantidad()`. Así nunca se publica más café del que realmente tiene el origen, y
-si el origen no existe o no alcanza, la Presentación no se crea.
+Cuando una regla cruza agregados, la resuelve un **Domain Service** (`Domain/service`, sin anotaciones
+de Spring); el caso de uso solo lo llama y guarda, sin `if` de negocio.
+
+- **`ServicioDePublicacion`**: al publicar una Presentación Trazable busca su Origen y le descuenta la
+  cantidad publicada. Si es café sin tostar, verifica que el **Lote** exista y llama a
+  `Lote.descontar()`; si es tostado o derivado, verifica que la **Transformación** exista, que el
+  perfil de tueste coincida y llama a `Transformacion.asignarCantidad()`. Así nunca se publica más
+  café del que tiene el origen, y si el origen no existe o no alcanza, la Presentación no se crea.
+- **`ServicioDeReposicion`**: repone stock con la misma regla. Una Presentación Trazable no puede
+  crecer sin que el café salga de su Origen; primero verifica que la Presentación admite la
+  reposición (`verificarQueSePuedeReponer`), luego descuenta del Origen y por último repone. El
+  merchandising no tiene Origen y se repone directamente.
+- **`ServicioDeBajaDePresentacion`**: protege que una Presentación con compras activas no se dé de
+  baja (consulta a `CompraRepositorio`).

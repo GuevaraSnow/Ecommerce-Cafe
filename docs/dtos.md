@@ -36,21 +36,23 @@ saltarse la regla A declarando un rol falso).
 | `cosecha` (año, temporada) | Parte de lo que identifica el origen del café |
 | `variedad` | Castillo, Caturra, Geisha…; dato de trazabilidad |
 
-### `ActualizarPresentacionRequest` → `ActualizarPresentacion.ejecutar(...)`
+### Operaciones sobre una Presentación publicada: un Request por operación
 
-Todos los campos son opcionales: solo se aplica lo que venga.
+No hay un Request genérico de "actualizar": cada operación del dominio tiene su caso de uso y su
+endpoint con nombre propio. El id de la Presentación viaja en la ruta, no en el cuerpo.
 
-| Campo | Por qué es necesario aquí |
-| --- | --- |
-| `nuevoPrecio` | Mapea a `cambiarPrecio()` |
-| `nuevaCantidadTotal` | Cantidad **final** deseada (no un delta), evita ambigüedad al reponer o descontar |
-| `activar` (Boolean) | `true` reactiva (`activar()`), `false` pausa (`desactivar()`), `null` no toca el estado |
-| `nuevaGaleria` | Mapea a `reemplazarGaleria()` |
-| `nuevaNotaCata` | Descriptores sensoriales; solo aplica a `PresentacionTrazable` |
+| Operación (caso de uso) | Cuerpo | Por qué |
+| --- | --- | --- |
+| `CambiarPrecioDePresentacion` → `cambiarPrecio()` | `PrecioRequest` (monto, moneda) | Reutiliza el mismo DTO de la publicación |
+| `ReponerStockDePresentacion` → `ServicioDeReposicion` | `CantidadRequest` (valor, unidad) | Es lo que se **suma**, no el total: así el endpoint no es ambiguo y el café sale del Origen por esa cantidad |
+| `RetirarStockDePresentacion` → `descontarCantidad()` | `CantidadRequest` | Lo que se **resta** del stock (merma, daño) |
+| `PausarPresentacion` → `desactivar()` / `ReactivarPresentacion` → `activar()` | sin cuerpo | La operación es el endpoint (`/pausar`, `/reactivar`) |
+| `ReemplazarGaleriaDePresentacion` → `reemplazarGaleria()` | `ReemplazarGaleriaRequest` (lista de `ImagenRequest`) | Valida la forma; 1 a 10 imágenes con una principal lo valida el dominio |
+| `RegistrarNotaDeCata` → `registrarNotaCata()` | `RegistrarNotaDeCataRequest` (descriptores) | Solo aplica a una Presentación Trazable |
 
 ## Response
 
-### `PresentacionResponse` (interfaz sellada) — respuesta de `PublicarPresentacion`, `PublicarArticuloMerchandising` y `ActualizarPresentacion`
+### `PresentacionResponse` (interfaz sellada) — respuesta de `PublicarPresentacion`, `PublicarArticuloMerchandising` y de las operaciones sobre una Presentación publicada
 
 Refleja la herencia del dominio: cada variante trae **solo** los campos que le corresponden.
 

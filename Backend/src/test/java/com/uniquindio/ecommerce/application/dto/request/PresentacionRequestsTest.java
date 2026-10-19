@@ -80,17 +80,20 @@ class PresentacionRequestsTest {
     }
 
     @Test
-    void actualizarPresentacionSinNingunCampoEsValidoPorqueTodosSonOpcionales() {
-        assertTrue(camposInvalidos(new ActualizarPresentacionRequest(null, null, null, null, null)).isEmpty());
+    void reemplazarGaleriaValidoNoTieneViolaciones() {
+        assertTrue(camposInvalidos(new ReemplazarGaleriaRequest(galeriaValida())).isEmpty());
     }
 
     @Test
-    void actualizarPresentacionValidaLosCamposAnidadosQueVengan() {
-        ActualizarPresentacionRequest anidadosInvalidos = new ActualizarPresentacionRequest(
-                new PrecioRequest(null, " "), new CantidadRequest(null, " "), true,
-                List.of(new ImagenRequest(" ", true)), List.of("Chocolate"));
+    void reemplazarGaleriaReportaLaGaleriaAusenteYLasImagenesInvalidas() {
+        assertEquals(Set.of("galeria"), camposInvalidos(new ReemplazarGaleriaRequest(null)));
+        assertEquals(Set.of("galeria[0].url"),
+                camposInvalidos(new ReemplazarGaleriaRequest(List.of(new ImagenRequest(" ", true)))));
+    }
 
-        assertEquals(Set.of("nuevoPrecio.monto", "nuevoPrecio.moneda", "nuevaCantidadTotal.valor",
-                "nuevaCantidadTotal.unidad", "nuevaGaleria[0].url"), camposInvalidos(anidadosInvalidos));
+    @Test
+    void registrarNotaDeCataReportaLosDescriptoresAusentes() {
+        assertTrue(camposInvalidos(new RegistrarNotaDeCataRequest(List.of("Chocolate"))).isEmpty());
+        assertEquals(Set.of("descriptores"), camposInvalidos(new RegistrarNotaDeCataRequest(null)));
     }
 }

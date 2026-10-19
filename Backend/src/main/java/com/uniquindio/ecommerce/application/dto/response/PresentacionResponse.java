@@ -2,7 +2,7 @@ package com.uniquindio.ecommerce.application.dto.response;
 
 import java.util.List;
 
-// Respuesta de: PublicarPresentacion, PublicarArticuloMerchandising y ActualizarPresentacion.
+// Respuesta de: PublicarPresentacion, PublicarArticuloMerchandising y las operaciones sobre una Presentación publicada (precio, stock, estado, galería, nota de cata).
 // Refleja la jerarquía del dominio: cada variante trae solo los campos que le corresponden,
 // así un artículo de merchandising no lleva origen ni datos de tueste (ni siquiera como null).
 public sealed interface PresentacionResponse

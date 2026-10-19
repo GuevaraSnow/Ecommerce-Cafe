@@ -95,30 +95,47 @@ public class PresentacionTrazable extends Presentacion {
      * siempre se consideran frescas.
      */
     public boolean estaFresca() {
+        return estaFresca(LocalDate.now());
+    }
+
+    /** Igual que {@link #estaFresca()}, pero evaluada en la fecha indicada. */
+    public boolean estaFresca(LocalDate hoy) {
         if (fechaTueste == null) {
             return true;
         }
-        long dias = ChronoUnit.DAYS.between(fechaTueste.valor(), LocalDate.now());
+        long dias = ChronoUnit.DAYS.between(fechaTueste.valor(), hoy);
         return dias <= DIAS_MAXIMOS_FRESCURA;
     }
 
     /**
-     * Además de lo común, exige frescura (regla D): una Presentación cuyo
-     * tueste ya pasó los días permitidos no se vende, aunque su estado
-     * todavía no se haya actualizado a Vencida.
+     * El estado se calcula: pasados los días de frescura la Presentación es
+     * VENCIDA aunque nadie la haya tocado (regla D), y eso manda sobre
+     * cualquier otro estado (activa, agotada o pausada). Así una Presentación
+     * vencida no se vende, no se pausa, no se reactiva y no vuelve a la venta
+     * al reponer stock, sin depender de ninguna tarea que la marque.
      */
     @Override
-    public boolean estaDisponibleParaVenta() {
-        return estaFresca() && super.estaDisponibleParaVenta();
+    public EstadoDePublicacion getEstado() {
+        return estadoAl(LocalDate.now());
     }
 
-    /** Marca la Presentación como Vencida si ya superó los días de frescura (regla D). */
+    /** El estado que tiene la Presentación en la fecha indicada. */
+    public EstadoDePublicacion estadoAl(LocalDate hoy) {
+        return estaFresca(hoy) ? super.getEstado() : EstadoDePublicacion.VENCIDA;
+    }
+
+    /**
+     * Guarda el vencimiento en el estado de la Presentación si ya ocurrió (regla D).
+     * No es necesario para que el estado sea correcto (se calcula); sirve para que
+     * lo guardado coincida cuando el estado se consulta directamente en la base de datos.
+     */
     public void verificarVencimiento() {
         if (!estaFresca()) {
             marcarVencida();
         }
     }
 
+    @Override
     public void registrarNotaCata(NotaDeCata nota) {
         validarNoEliminada();
         if (nota == null) {

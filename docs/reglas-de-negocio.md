@@ -22,11 +22,11 @@ coordinan. La columna "Dónde vive" indica quién la hace cumplir.
 | 6 (A) | Un Caficultor solo puede publicar café tostado bajo Perfil de Tueste **Tradicional**; Claro, Medio y Oscuro son exclusivos del Tostador. | `PresentacionTrazable.publicar(...)` según `rolVendedor` |
 | 7 (B) | Toda Presentación de café o derivado consumible debe tener Origen (un Lote o una Transformación). El merchandising no alimenticio queda exento **por tipo**: es otra subclase sin Origen. | `PresentacionTrazable` (Origen obligatorio) / `ArticuloDeMerchandising` (sin Origen) |
 | 8 (C) | Una Transformación no puede usar más café del que tiene el Lote de origen (ej. no se tuestan 80 kg si quedan 50). | `Lote.descontar()` |
-| 9 (D) | Un café tostado no puede publicarse ni venderse pasados 30 días desde su fecha de tueste (frescura). | `PresentacionTrazable.estaFresca()` |
+| 9 (D) | Un café tostado no puede publicarse ni venderse pasados 30 días desde su fecha de tueste (frescura). Pasado el plazo queda VENCIDA por sí sola: el estado se calcula. | `PresentacionTrazable.estaFresca()` / `getEstado()` |
 | 10 (E) | Toda Transformación de tueste registra una **merma por humedad entre 12 % y 22 %**; la cantidad resultante es `entrada × (1 − merma)`. Al Lote se le descuenta la cantidad de entrada, no la resultante. | `PorcentajeDeMerma` (rango) / `Cantidad.aplicarMerma()` / `Transformacion.registrar()` |
 | 11 (F) | El café verde solo puede publicarse desde un **Lote**; el café tostado y los derivados consumibles, solo desde una **Transformación**. | `PresentacionTrazable.publicar(...)` según `TipoDePresentacion` |
 | 12 (G) | Solo el Vendedor de Derivados puede publicar Artículos de Merchandising, y el Formador no puede publicar Presentaciones (solo cursos). | `Presentacion.publicar(...)` según `rolVendedor` |
-| 13 (H) | No se puede publicar más café del que tiene el Origen: la suma de lo publicado desde una Transformación no supera su cantidad resultante, y el café sin tostar publicado desde un Lote se descuenta de su cantidad disponible. | `Transformacion.asignarCantidad()` / `Lote.descontar()`, coordinados por `PublicarPresentacion` |
+| 13 (H) | No se puede publicar más café del que tiene el Origen: la suma de lo publicado desde una Transformación no supera su cantidad resultante, y el café sin tostar publicado desde un Lote se descuenta de su cantidad disponible. Lo mismo al reponer stock. | `Transformacion.asignarCantidad()` / `Lote.descontar()`, coordinados por `ServicioDePublicacion` y `ServicioDeReposicion` |
 
 ## Reglas de compra y cursos
 

@@ -242,6 +242,31 @@ class PresentacionTest {
     }
 
     @Test
+    void verificarQueSePuedeReponerNoModificaElStock() {
+        Presentacion presentacion = publicarMerchandisingValido();
+
+        presentacion.verificarQueSePuedeReponer(new Cantidad(5, "unidad"));
+
+        assertEquals(new Cantidad(20, "unidad"), presentacion.getCantidadDisponible());
+    }
+
+    @Test
+    void noSePuedeReponerUnaPresentacionDadaDeBajaNiEnOtraUnidadNiEnCero() {
+        Presentacion presentacion = publicarMerchandisingValido();
+
+        assertThrows(ReglaDominioException.class,
+                () -> presentacion.verificarQueSePuedeReponer(new Cantidad(5, "kg")));
+        assertThrows(ReglaDominioException.class,
+                () -> presentacion.verificarQueSePuedeReponer(new Cantidad(0, "unidad")));
+        assertThrows(ReglaDominioException.class, () -> presentacion.verificarQueSePuedeReponer(null));
+
+        presentacion.darDeBaja();
+        assertThrows(ReglaDominioException.class,
+                () -> presentacion.verificarQueSePuedeReponer(new Cantidad(5, "unidad")));
+        assertEquals(new Cantidad(20, "unidad"), presentacion.getCantidadDisponible());
+    }
+
+    @Test
     void noSePuedeVenderMasDeLoDisponibleYElStockNoCambia() {
         Presentacion presentacion = publicarMerchandisingValido();
 
