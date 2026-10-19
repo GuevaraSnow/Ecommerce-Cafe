@@ -44,13 +44,7 @@ public class RealizarCompra {
         for (ItemSolicitado item : items) {
             Presentacion presentacion = repositorioPresentacion.buscarPorId(item.presentacionId())
                     .orElseThrow(() -> new ReglaDominioException("Presentacion no encontrada: " + item.presentacionId()));
-            if (!presentacion.estaDisponibleParaVenta()) {
-                throw new ReglaDominioException(
-                        "La Presentacion no esta disponible para la venta (eliminada, pausada, agotada o vencida): "
-                                + item.presentacionId());
-            }
-            // restar() devuelve una Cantidad nueva (no modifica nada) y lanza si no alcanza el stock
-            presentacion.getCantidadDisponible().restar(item.cantidad());
+            presentacion.verificarQueSePuedeVender(item.cantidad());
             presentaciones.add(presentacion);
         }
 

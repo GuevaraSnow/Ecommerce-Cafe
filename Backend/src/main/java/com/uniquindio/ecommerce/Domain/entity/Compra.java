@@ -8,9 +8,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Raíz abstracta del agregado Compra: concentra lo común a sus dos
- * subclases, {@link CompraFisica} (Presentaciones con dirección de envío y
- * tramo logístico) y {@link CompraDigital} (Cursos, sin envío).
+ * Raíz abstracta del agregado Compra: concentra el estado y sus transiciones.
+ * Su única subclase es {@link CompraFisica} (Presentaciones con dirección de
+ * envío y tramo logístico); se fusionará con ella en una sola Compra.
  */
 public abstract class Compra {
 

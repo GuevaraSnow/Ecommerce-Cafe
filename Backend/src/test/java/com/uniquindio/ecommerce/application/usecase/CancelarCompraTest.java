@@ -1,6 +1,5 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.CompraDigital;
 import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
@@ -139,14 +138,5 @@ class CancelarCompraTest {
     @Test
     void noSePuedeCancelarUnaCompraInexistente() {
         assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar("no-existe"));
-    }
-
-    @Test
-    void noSePuedeCancelarAquiUnaCompraDigital() {
-        CompraDigital digital = CompraDigital.iniciar("comprador-1", "curso-1", new Precio(50000, "COP"));
-        repositorioCompra.guardar(digital);
-
-        assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(digital.getId()));
-        assertEquals(EstadoDeCompra.PENDIENTE, digital.getEstado());
     }
 }

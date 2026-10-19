@@ -1,0 +1,71 @@
+package com.uniquindio.ecommerce.Domain.service;
+
+import com.uniquindio.ecommerce.Domain.entity.Presentacion;
+import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
+import com.uniquindio.ecommerce.Domain.entity.Transformacion;
+import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.valueobject.*;
+import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
+import com.uniquindio.ecommerce.infrastructure.persistence.TransformacionRepositorioMemoria;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ServicioDePublicacionTest {
+
+    private final TransformacionRepositorioMemoria transformaciones = new TransformacionRepositorioMemoria();
+    private final ServicioDePublicacion servicio =
+            new ServicioDePublicacion(new LoteRepositorioMemoria(), transformaciones);
+
+    private Galeria galeriaValida() {
+        return new Galeria(List.of(new ImagenDePresentacion("http://img/cafe.png", true)));
+    }
+
+    private void registrarTransformacion(String id, PerfilTueste perfil) {
+        transformaciones.guardar(Transformacion.registrar(id, List.of("LOT-2026-001"), new Cantidad(50, "kg"),
+                new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(), perfil));
+    }
+
+    private Cantidad disponibleEn(String transformacionId) {
+        return transformaciones.buscarPorId(transformacionId).get().getCantidadResultanteDisponible();
+    }
+
+    @Test
+    void publicarCafeTostadoConElPerfilDeLaTransformacionDescuentaDeElla() {
+        registrarTransformacion("t-1", PerfilTueste.MEDIO); // resultante = 41 kg
+
+        Presentacion presentacion = servicio.publicar("pres-1", "vendedor-1", null, "t-1", "Café Medio",
+                TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(20, "kg"), galeriaValida(),
+                PerfilTueste.MEDIO, RolVendedor.TOSTADOR, new FechaDeTueste(LocalDate.now()));
+
+        assertInstanceOf(PresentacionTrazable.class, presentacion);
+        assertEquals(21, disponibleEn("t-1").valor(), 0.0001);
+    }
+
+    @Test
+    void noSePuedePublicarConUnPerfilDistintoAlDeLaTransformacionYNadaCambia() {
+        registrarTransformacion("t-2", PerfilTueste.MEDIO);
+        Cantidad antes = disponibleEn("t-2");
+
+        assertThrows(ReglaDominioException.class, () -> servicio.publicar("pres-2", "vendedor-1", null, "t-2",
+                "Café Oscuro", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(10, "kg"),
+                galeriaValida(), PerfilTueste.OSCURO, RolVendedor.TOSTADOR, new FechaDeTueste(LocalDate.now())));
+
+        assertEquals(antes, disponibleEn("t-2"));
+    }
+
+    @Test
+    void unDerivadoConsumibleSinPerfilSePublicaDesdeCualquierTransformacion() {
+        registrarTransformacion("t-3", PerfilTueste.OSCURO);
+
+        Presentacion presentacion = servicio.publicar("pres-3", "vendedor-1", null, "t-3", "Licor de café",
+                TipoDePresentacion.DERIVADO_CONSUMIBLE, new Precio(45000, "COP"), new Cantidad(5, "kg"),
+                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null);
+
+        assertInstanceOf(PresentacionTrazable.class, presentacion);
+        assertEquals(36, disponibleEn("t-3").valor(), 0.0001);
+    }
+}
