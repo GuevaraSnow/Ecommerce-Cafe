@@ -3,6 +3,7 @@ package com.uniquindio.ecommerce.Domain.entity;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -19,6 +20,7 @@ public abstract class Presentacion {
     private final String titulo;
     private final TipoDePresentacion tipoPresentacion;
     private Precio precio;
+    private Descuento descuento;
     private Cantidad cantidadDisponible;
     private Galeria galeria;
     private EstadoDePublicacion estado;
@@ -149,6 +151,32 @@ public abstract class Presentacion {
         this.precio = nuevoPrecio;
     }
 
+    /**
+     * Precio al que se vende en esa fecha: el Precio con el Descuento aplicado si
+     * hay uno programado que rige ese día; en cualquier otro caso, el Precio normal.
+     */
+    public Precio precioVigente(LocalDate hoy) {
+        if (descuento != null && descuento.estaVigenteEn(hoy)) {
+            return precio.aplicarDescuento(descuento);
+        }
+        return precio;
+    }
+
+    /** Programa un Descuento por temporada; si ya había uno, lo reemplaza. */
+    public void programarDescuento(Descuento nuevoDescuento) {
+        validarNoEliminada();
+        if (nuevoDescuento == null) {
+            throw new ReglaDominioException("El Descuento no puede ser nulo");
+        }
+        this.descuento = nuevoDescuento;
+    }
+
+    /** Quita el Descuento programado, vigente o no; la Presentación vuelve a su Precio normal. */
+    public void quitarDescuento() {
+        validarNoEliminada();
+        this.descuento = null;
+    }
+
     public void reemplazarGaleria(Galeria nuevaGaleria) {
         validarNoEliminada();
         if (nuevaGaleria == null) {
@@ -230,6 +258,9 @@ public abstract class Presentacion {
     public String getTitulo() {return titulo;}
 
     public Precio getPrecio() {return precio;}
+
+    /** Descuento programado, o {@code null} si no hay ninguno. */
+    public Descuento getDescuento() {return descuento;}
 
     public TipoDePresentacion getTipoPresentacion() {return tipoPresentacion;}
 

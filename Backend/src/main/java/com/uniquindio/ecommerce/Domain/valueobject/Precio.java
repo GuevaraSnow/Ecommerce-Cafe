@@ -19,4 +19,18 @@ public record Precio(double monto, String moneda) {
             throw new ReglaDominioException("El precio debe especificar una moneda válida");
         }
     }
+
+    /**
+     * Devuelve un nuevo Precio con el descuento aplicado, redondeado a centavos.
+     * Este Precio no cambia: es inmutable.
+     *
+     * @throws ReglaDominioException si el descuento es nulo
+     */
+    public Precio aplicarDescuento(Descuento descuento) {
+        if (descuento == null) {
+            throw new ReglaDominioException("El descuento a aplicar no puede ser nulo");
+        }
+        double montoConDescuento = monto * (100 - descuento.porcentaje()) / 100.0;
+        return new Precio(Math.round(montoConDescuento * 100) / 100.0, moneda);
+    }
 }
