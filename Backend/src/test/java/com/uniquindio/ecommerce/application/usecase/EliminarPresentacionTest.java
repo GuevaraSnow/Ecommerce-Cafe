@@ -2,85 +2,71 @@ package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeBajaDePresentacion;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
-import com.uniquindio.ecommerce.infrastructure.persistence.CompraRepositorioMemoria;
-import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class EliminarPresentacionTest {
 
-    private void publicarMerchandising(PresentacionRepositorioMemoria repositorio, String id) {
-        new PublicarArticuloMerchandising(repositorio).ejecutar(id, "vendedor-1", "Manilla", new Precio(15000, "COP"),
-                new Cantidad(20, "unidad"),
-                new Galeria(List.of(new ImagenDePresentacion("http://img/manilla.png", true))),
-                "semilla de café", "Manilla artesanal", RolVendedor.VENDEDOR_DERIVADOS);
-    }
+    @Mock
+    private PresentacionRepositorio presentacionRepositorio;
 
-    private void comprar(PresentacionRepositorioMemoria presentaciones, CompraRepositorioMemoria compras,
-                         String presentacionId) {
-        new RealizarCompra(presentaciones, compras).ejecutar("comprador-1",
-                List.of(new RealizarCompra.ItemSolicitado(presentacionId, new Cantidad(2, "unidad"))),
-                "Armenia", "Calle 1 # 2-3", "Juan Pérez");
-    }
+    @Mock
+    private ServicioDeBajaDePresentacion servicioDeBaja;
 
-    @Test
-    void daDeBajaUnaPresentacionSinCompras() {
-        PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
-        CompraRepositorioMemoria compras = new CompraRepositorioMemoria();
-        publicarMerchandising(presentaciones, "pres-1");
-        EliminarPresentacion eliminar = new EliminarPresentacion(presentaciones, compras);
+    @InjectMocks
+    private EliminarPresentacion eliminarPresentacion;
 
-        Presentacion eliminada = eliminar.ejecutar("pres-1");
-
-        assertTrue(eliminada.isEliminada());
-        assertTrue(presentaciones.buscarPorId("pres-1").get().isEliminada());
+    private Presentacion presentacion() {
+        return Presentacion.publicar("pres-1", "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
+                new Precio(15000, "COP"), new Cantidad(20, "unidad"),
+                new Galeria(List.of(new ImagenDePresentacion("http://img/manilla.png", true))), null,
+                RolVendedor.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
     }
 
     @Test
-    void noSePuedeEliminarUnaPresentacionConUnaCompraActiva() {
-        PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
-        CompraRepositorioMemoria compras = new CompraRepositorioMemoria();
-        publicarMerchandising(presentaciones, "pres-2");
-        comprar(presentaciones, compras, "pres-2");
-        EliminarPresentacion eliminar = new EliminarPresentacion(presentaciones, compras);
+    void delegaLaBajaEnElServicioYGuardaLaPresentacion() {
+        Presentacion presentacion = presentacion();
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
 
-        assertThrows(ReglaDominioException.class, () -> eliminar.ejecutar("pres-2"));
-        assertFalse(presentaciones.buscarPorId("pres-2").get().isEliminada());
+        Presentacion resultado = eliminarPresentacion.ejecutar("pres-1");
+
+        assertSame(presentacion, resultado);
+        verify(servicioDeBaja).darDeBaja(presentacion);
+        verify(presentacionRepositorio).guardar(presentacion);
     }
 
     @Test
-    void unaCompraDeOtraPresentacionNoBloqueaLaEliminacion() {
-        PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
-        CompraRepositorioMemoria compras = new CompraRepositorioMemoria();
-        publicarMerchandising(presentaciones, "pres-3");
-        publicarMerchandising(presentaciones, "pres-4");
-        comprar(presentaciones, compras, "pres-4");
-        EliminarPresentacion eliminar = new EliminarPresentacion(presentaciones, compras);
+    void noGuardaNadaSiElServicioRechazaLaBaja() {
+        Presentacion presentacion = presentacion();
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
+        doThrow(new ReglaDominioException("compras activas")).when(servicioDeBaja).darDeBaja(presentacion);
 
-        Presentacion eliminada = eliminar.ejecutar("pres-3");
+        assertThrows(ReglaDominioException.class, () -> eliminarPresentacion.ejecutar("pres-1"));
 
-        assertTrue(eliminada.isEliminada());
+        verify(presentacionRepositorio, never()).guardar(any());
     }
 
     @Test
-    void lanzaExcepcionSiLaPresentacionNoExiste() {
-        EliminarPresentacion eliminar = new EliminarPresentacion(new PresentacionRepositorioMemoria(),
-                new CompraRepositorioMemoria());
+    void lanzaExcepcionSiLaPresentacionNoExisteYNoLlamaAlServicio() {
+        when(presentacionRepositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
 
-        assertThrows(ReglaDominioException.class, () -> eliminar.ejecutar("no-existe"));
-    }
+        assertThrows(ReglaDominioException.class, () -> eliminarPresentacion.ejecutar("no-existe"));
 
-    @Test
-    void unaPresentacionEliminadaYaNoSePuedeComprar() {
-        PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
-        CompraRepositorioMemoria compras = new CompraRepositorioMemoria();
-        publicarMerchandising(presentaciones, "pres-5");
-        new EliminarPresentacion(presentaciones, compras).ejecutar("pres-5");
-
-        assertThrows(ReglaDominioException.class, () -> comprar(presentaciones, compras, "pres-5"));
+        verify(servicioDeBaja, never()).darDeBaja(any());
+        verify(presentacionRepositorio, never()).guardar(any());
     }
 }
