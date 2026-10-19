@@ -3,11 +3,13 @@ package com.uniquindio.ecommerce.infrastructure.persistence;
 import com.uniquindio.ecommerce.Domain.entity.Lote;
 import com.uniquindio.ecommerce.Domain.repository.LoteRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeLote;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Repository
 public class LoteRepositorioMemoria implements LoteRepositorio {
 
     private final Map<String, Lote> lotes = new HashMap<>();
