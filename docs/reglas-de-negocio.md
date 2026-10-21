@@ -10,7 +10,7 @@ coordinan. La columna "Dónde vive" indica quién la hace cumplir.
 | # | Regla | Dónde vive |
 | --- | --- | --- |
 | 1 | Una Presentación no puede tener cantidad disponible negativa. | `Cantidad.restar()` / `Presentacion.descontarCantidad()` |
-| 2 | Un Comprador no puede dejar una Reseña (calificación y comentario) de una Presentación sin haberla comprado (compra completada). La Nota de Cata no aplica aquí: la escribe el vendedor. | **Pendiente:** requiere el caso de uso de reseñas, que aún no está implementado |
+| 2 | Un Comprador no puede dejar una Reseña (calificación y comentario) de una Presentación sin haberla adquirido (Compra **entregada**), y solo puede reseñar cada Presentación una vez. Solo el vendedor dueño de la Presentación responde la Reseña, y una sola vez. La Nota de Cata no aplica aquí: la escribe el vendedor. | `VerificadorDeCompra` (compra entregada y reseña única) + `DejarResena` / `Resena.responder()` (dueño y respuesta única) |
 | 3 | Un vendedor no puede eliminar una Presentación con compras activas; solo eliminación lógica (se conserva para trazabilidad e historial). | `Presentacion.darDeBaja()` + `EliminarPresentacion` |
 | 4 | Un Vendedor no puede eliminar un Lote ya usado en una Transformación; solo eliminación lógica (borrarlo rompería la trazabilidad de las Presentaciones derivadas). | `Lote.eliminarLogicamente()` |
 | 5 | Un Comprador B2C no puede adquirir un Lote completo; solo Presentaciones. El Lote se transa en B2B entre Caficultor, Tostador y Vendedor de Derivados. | Modelo: el Lote no es comprable |
@@ -53,6 +53,6 @@ Implementadas en el código:
 - Un Lote solo puede estar en estado Verde o Pergamino (`Lote.registrar()`).
 - Un Comprador debe ser mayor de edad al registrarse (`Comprador`, 18 años).
 
-Pendientes (diseñadas, aún no implementadas): máximo una calificación por Compra entregada, reembolso
+Pendientes (diseñadas, aún no implementadas): reembolso
 de café físico dentro de 48 h tras la entrega, y la restricción de derivados alcohólicos a mayores de edad
 al comprar.

@@ -37,6 +37,8 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `ConfirmarCompra` | Sistema / Comprador | Confirma una Compra pendiente con la Dirección de Envío (evita doble confirmación) | `CompraRepositorio` |
 | `CancelarCompra` | Comprador | Cancela una Compra antes del envío y repone el stock (todo o nada) | `CompraRepositorio`, `PresentacionRepositorio` |
 | `CambiarEstadoCompra` | Vendedor / Sistema | Mueve una Compra a ENVIADA o ENTREGADA (registra la fecha y hora de entrega); confirmar y cancelar tienen su propio caso de uso | `CompraRepositorio` |
+| `DejarResena` | Comprador | Deja una Reseña (1 a 5 estrellas y texto) de una Presentación que adquirió; `VerificadorDeCompra` exige la Compra entregada y que no la haya reseñado antes | `PresentacionRepositorio`, `ResenaRepositorio`, `CompraRepositorio` |
+| `ResponderResena` | Vendedor | Responde una Reseña de una de sus Presentaciones (solo el dueño, una sola vez) | `ResenaRepositorio` |
 
 ## Cursos virtuales
 
@@ -71,15 +73,16 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `CursoRepositorio` | `buscarPorId`, `guardar` | `CursoRepositorioMemoria` |
 | `InscripcionRepositorio` | `buscarPorId`, `buscarActivaPorCompradorYCurso`, `guardar` | `InscripcionRepositorioMemoria` |
 | `SolicitudReembolsoRepositorio` | `buscarPorId`, `guardar` | `SolicitudReembolsoRepositorioMemoria` |
+| `ResenaRepositorio` | `buscarPorId`, `guardar`, `existeResenaDe` | `ResenaRepositorioMemoria` |
 
 ## Notas
 
 - `RegistrarFinca` existe en el código pero no usa ningún Repository: crea la Finca y no la guarda.
-- Diseñados en el modelado pero aún no implementados: `DejarResena`, `ResponderResena`,
+- Diseñados en el modelado pero aún no implementados:
   `SolicitarReembolso` (café físico), `GestionarReembolso`, `EnviarNotificacion`,
   `MarcarNotificacionLeida`.
 - Los casos de uso solo coordinan. Cuando una regla cruza agregados la resuelve un Domain Service
-  (`Domain/service`): `ServicioDePublicacion`, `ServicioDeReposicion` y `ServicioDeBajaDePresentacion`.
+  (`Domain/service`): `ServicioDePublicacion`, `ServicioDeReposicion`, `ServicioDeBajaDePresentacion` y `VerificadorDeCompra`.
   Hoy `RestablecerContrasena` (valida el código) todavía contiene una decisión que debería vivir
   en el dominio.
 - Un caso de uso por operación: no hay un "actualizar" genérico con campos opcionales.

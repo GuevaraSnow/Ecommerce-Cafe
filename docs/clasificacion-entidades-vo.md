@@ -24,7 +24,7 @@ que la separa es su id.
 | **Vendedor** | `id` propio, generado al registrarse | Se registra y puede darse de baja; lo que publicó sigue atribuido a él | Dos Vendedores con el mismo nombre y rol son dos cuentas distintas |
 | **Comprador** | `id` propio (su cuenta), no sus datos de contacto | Cambia contraseña, recibe códigos de recuperación, eliminación lógica | Dos Compradores con el mismo nombre y teléfono son dos personas distintas |
 | **Compra** (raíz) | `id` propio para trazabilidad y disputas | Mientras está pendiente es el carrito (se agregan, cambian y quitan Presentaciones); al confirmarse fija la dirección de envío y sigue el tramo logístico (enviada, entregada) con transiciones válidas | Dos Compras idénticas (mismo comprador, productos y fecha) son dos pedidos: cancelar uno no cancela el otro |
-| **Reseña** *(diseño; aún no implementada en el código)* | `id` propio, pertenece a una Compra | Se crea con la Compra entregada; puede eliminarse lógicamente | Dos Reseñas con el mismo texto y calificación son dos opiniones distintas |
+| **Reseña** | `id` propio; referencia por id al Comprador, la Presentación y su vendedor | Se deja solo con una Compra entregada (una por Comprador y Presentación); el vendedor dueño la responde una sola vez | Dos Reseñas con el mismo texto y calificación son dos opiniones distintas |
 | **Solicitud de Reembolso** | `id` propio, asociada a una Compra | Solicitada → Aprobada / Rechazada | Dos solicitudes idénticas son dos trámites: aprobar una no resuelve la otra |
 | **Notificación** | `id` propio y destinatario | No leída → leída | Dos avisos idénticos son dos: leer uno no marca el otro |
 | **Curso** | `id` propio; sigue siendo el mismo aunque cambie precio o contenido | Publicación, nuevas Lecciones, eliminación lógica | Dos Cursos idénticos (mismo Formador, título y precio) son dos cursos con inscritos distintos |
@@ -46,6 +46,9 @@ que la separa es su id.
 | **OrigenDePresentacion** | record | Referencia a un Lote **o** una Transformación (exactamente uno); fijo al publicar |
 | **FechaDeTueste** | record | Solo una fecha (nunca futura) |
 | **NotaDeCata** | record | Descriptores de sabor; dos notas iguales son intercambiables |
+| **Calificacion** | record | De 1 a 5 estrellas; dos calificaciones de 4 estrellas son intercambiables |
+| **TextoDeResena** | record | Texto de la Reseña o de su respuesta: no vacío, máximo 500 caracteres |
+| **RespuestaAResena** | record | Texto + fecha de la respuesta del vendedor; vive dentro de la Reseña, sin identidad propia |
 | **Galeria / ImagenDePresentacion** | record | Entre 1 y 10 imágenes, una principal; agregar una imagen produce otra Galería |
 | **Altitud / Ubicación / Email / Teléfono / Contraseña / FechaDeNacimiento** | record | Valores de atributo sin identidad; si cambian, se reemplazan |
 | **DireccionDeEnvio** | record | Ciudad + dirección + destinatario; se fija al confirmar la Compra y no cambia aunque el comprador cambie de dirección después |
