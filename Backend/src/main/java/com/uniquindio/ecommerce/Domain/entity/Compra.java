@@ -86,6 +86,39 @@ public class Compra {
         detalles.set(detalles.indexOf(actual), sumado);
     }
 
+    /**
+     * Cambia la cantidad de una Presentación que ya está en el carrito. El precio
+     * congelado no cambia y la unidad debe ser la misma; para sacarla se usa
+     * {@link #quitarPresentacion(String)}.
+     *
+     * @throws ReglaDominioException si la Compra ya no es un carrito, si la Presentación
+     *                               no está en él o si la cantidad no es válida
+     */
+    public void cambiarCantidad(String presentacionId, Cantidad nuevaCantidad) {
+        validarQueEsCarrito();
+        DetalleDeCompra actual = detalleEnCarrito(presentacionId);
+        if (nuevaCantidad != null && !nuevaCantidad.unidad().equals(actual.cantidad().unidad())) {
+            throw new ReglaDominioException("La cantidad debe expresarse en " + actual.cantidad().unidad());
+        }
+        DetalleDeCompra cambiado = new DetalleDeCompra(id, presentacionId, actual.precioCongelado(), nuevaCantidad);
+        detalles.set(detalles.indexOf(actual), cambiado);
+    }
+
+    /**
+     * Saca una Presentación del carrito.
+     *
+     * @throws ReglaDominioException si la Compra ya no es un carrito o si la Presentación no está en él
+     */
+    public void quitarPresentacion(String presentacionId) {
+        validarQueEsCarrito();
+        detalles.remove(detalleEnCarrito(presentacionId));
+    }
+
+    private DetalleDeCompra detalleEnCarrito(String presentacionId) {
+        return buscarDetalle(presentacionId).orElseThrow(
+                () -> new ReglaDominioException("La Presentacion " + presentacionId + " no esta en el carrito"));
+    }
+
     private Optional<DetalleDeCompra> buscarDetalle(String presentacionId) {
         return detalles.stream().filter(detalle -> detalle.presentacionId().equals(presentacionId)).findFirst();
     }
