@@ -27,7 +27,12 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `ReactivarPresentacion` | Vendedor | Reactiva una Presentación pausada que tenga stock | `PresentacionRepositorio` |
 | `ReemplazarGaleriaDePresentacion` | Vendedor | Reemplaza la Galería de imágenes | `PresentacionRepositorio` |
 | `RegistrarNotaDeCata` | Vendedor | Registra los descriptores de sabor de una Presentación Trazable | `PresentacionRepositorio` |
+| `ProgramarDescuentoDePresentacion` | Vendedor | Programa un Descuento por temporada (1–50 %, entre dos fechas); reemplaza al anterior | `PresentacionRepositorio` |
+| `QuitarDescuentoDePresentacion` | Vendedor | Quita el Descuento programado | `PresentacionRepositorio` |
 | `EliminarPresentacion` | Vendedor | Baja lógica; `ServicioDeBajaDePresentacion` la bloquea con compras activas | `PresentacionRepositorio`, `CompraRepositorio` |
+| `ConsultarPresentacion` | Cualquier visitante | Detalle de una Presentación con su galería, precio vigente y descuento (consulta, no modifica) | `PresentacionRepositorio` |
+| `BuscarPresentaciones` | Cualquier visitante | Lista por páginas las Presentaciones disponibles para la venta, con filtros por título, tipo, vendedor y rango de precio (consulta) | `PresentacionRepositorio` |
+| `SugerirPresentaciones` | Cualquier visitante | Búsqueda predictiva por nombre: sugiere Presentaciones disponibles cuyo título contiene el texto (consulta) | `PresentacionRepositorio` |
 | `RealizarCompra` | Comprador | Crea una Compra física: valida disponibilidad y stock, congela el precio y descuenta la cantidad (todo o nada) | `PresentacionRepositorio`, `CompraRepositorio` |
 | `ConfirmarCompra` | Sistema / Comprador | Confirma una Compra pendiente (evita doble confirmación) | `CompraRepositorio` |
 | `CancelarCompra` | Comprador | Cancela una Compra física antes del envío y repone el stock (todo o nada) | `CompraRepositorio`, `PresentacionRepositorio` |

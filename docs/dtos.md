@@ -43,12 +43,18 @@ endpoint con nombre propio. El id de la Presentación viaja en la ruta, no en el
 
 | Operación (caso de uso) | Cuerpo | Por qué |
 | --- | --- | --- |
-| `CambiarPrecioDePresentacion` → `cambiarPrecio()` | `PrecioRequest` (monto, moneda) | Reutiliza el mismo DTO de la publicación |
-| `ReponerStockDePresentacion` → `ServicioDeReposicion` | `CantidadRequest` (valor, unidad) | Es lo que se **suma**, no el total: así el endpoint no es ambiguo y el café sale del Origen por esa cantidad |
-| `RetirarStockDePresentacion` → `descontarCantidad()` | `CantidadRequest` | Lo que se **resta** del stock (merma, daño) |
-| `PausarPresentacion` → `desactivar()` / `ReactivarPresentacion` → `activar()` | sin cuerpo | La operación es el endpoint (`/pausar`, `/reactivar`) |
+| `CambiarPrecioDePresentacion` → `cambiarPrecio()` | `CambiarPrecioRequest` (`PrecioRequest`: monto, moneda) | Un request por operación; reutiliza el `PrecioRequest` de la publicación |
+| `ReponerStockDePresentacion` → `ServicioDeReposicion` | `ReponerStockRequest` (`CantidadRequest`: valor, unidad) | Es lo que se **suma**, no el total: así el endpoint no es ambiguo y el café sale del Origen por esa cantidad |
+| `RetirarStockDePresentacion` → `descontarCantidad()` | `RetirarStockRequest` (`CantidadRequest`) | Lo que se **resta** del stock (merma, daño) |
+| `PausarPresentacion` → `desactivar()` / `ReactivarPresentacion` → `activar()` | sin cuerpo | La operación es el endpoint (`/pausa`, `/reactivacion`) |
 | `ReemplazarGaleriaDePresentacion` → `reemplazarGaleria()` | `ReemplazarGaleriaRequest` (lista de `ImagenRequest`) | Valida la forma; 1 a 10 imágenes con una principal lo valida el dominio |
 | `RegistrarNotaDeCata` → `registrarNotaCata()` | `RegistrarNotaDeCataRequest` (descriptores) | Solo aplica a una Presentación Trazable |
+| `ProgramarDescuentoDePresentacion` → `programarDescuento()` | `ProgramarDescuentoRequest` (porcentaje, fechaInicio, fechaFin) | Valida la forma; porcentaje 1–50 y fechas no invertidas lo valida el dominio (`Descuento`) |
+| `QuitarDescuentoDePresentacion` → `quitarDescuento()` | sin cuerpo | La operación es el endpoint (`DELETE /descuento`) |
+| `EliminarPresentacion` → `ServicioDeBajaDePresentacion` | sin cuerpo | La operación es el endpoint (`DELETE /{id}`) |
+
+Validación de forma en los requests: `@NotBlank` en textos, `@NotNull` en campos obligatorios y
+`@Positive` en el monto del precio y el valor de la cantidad. Todo lo demás lo decide el dominio.
 
 ## Response
 
@@ -61,6 +67,7 @@ Refleja la herencia del dominio: cada variante trae **solo** los campos que le c
 | `id`, `vendedorId` | Identificar la Presentación y a quién pertenece |
 | `titulo`, `tipo` | Mostrarla y saber qué variante es |
 | `precio`, `cantidadDisponible` | Datos comerciales vigentes |
+| `precioVigente`, `descuento` | Precio al que se vende **hoy** (con el descuento si rige; si no, igual a `precio`) y el descuento programado, vigente o no (`null` si no hay) |
 | `galeria` | Imágenes para el catálogo |
 | `estado`, `eliminada` | Distinguir `ACTIVA/AGOTADA/VENCIDA/INACTIVA` de la baja definitiva |
 
@@ -68,6 +75,14 @@ Refleja la herencia del dominio: cada variante trae **solo** los campos que le c
   (los dos últimos solo si es café tostado / ya se registró).
 - `ArticuloDeMerchandisingResponse` agrega `material` y `descripcion`, y **no** lleva origen ni datos
   de tueste, ni siquiera como `null`.
+
+### Respuestas de las consultas
+
+| Respuesta | Qué trae |
+| --- | --- |
+| `PaginaResponse<T>` | `contenido`, `pagina` (la primera es la 0), `tamano`, `totalElementos`, `totalPaginas`; la usa la búsqueda con filtros |
+| `SugerenciaResponse` | Solo `id` y `titulo`: lo justo para mostrar la opción de la búsqueda predictiva y navegar a su detalle |
+| `DescuentoResponse` | `porcentaje`, `fechaInicio`, `fechaFin` |
 
 ### `LoteResponse` — respuesta de `RegistrarLote`
 

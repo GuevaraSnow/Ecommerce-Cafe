@@ -1,7 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
-import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class ReemplazarGaleriaDePresentacion {
     @Transactional
     public Presentacion ejecutar(String presentacionId, Galeria nuevaGaleria) {
         Presentacion presentacion = repositorio.buscarPorId(presentacionId)
-                .orElseThrow(() -> new ReglaDominioException("No existe una Presentación con id " + presentacionId));
+                .orElseThrow();
         presentacion.reemplazarGaleria(nuevaGaleria);
         repositorio.guardar(presentacion);
         return presentacion;

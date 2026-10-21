@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.uniquindio.ecommerce.application.usecase.PresentacionesDePrueba.*;
@@ -53,10 +54,10 @@ class ReemplazarGaleriaDePresentacionTest {
     }
 
     @Test
-    void lanzaExcepcionSiLaPresentacionNoExisteYNoGuardaNada() {
+    void lanzaNoEncontradoSiLaPresentacionNoExisteYNoGuardaNada() {
         when(repositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
 
-        assertThrows(ReglaDominioException.class, () -> reemplazarGaleria.ejecutar("no-existe", galeria()));
+        assertThrows(NoSuchElementException.class, () -> reemplazarGaleria.ejecutar("no-existe", galeria()));
 
         verify(repositorio, never()).guardar(any());
     }

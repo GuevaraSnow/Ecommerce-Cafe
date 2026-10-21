@@ -3,22 +3,30 @@ package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 import com.uniquindio.ecommerce.Domain.entity.ArticuloDeMerchandising;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
+import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
+import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
+import com.uniquindio.ecommerce.Domain.valueobject.Descuento;
 import com.uniquindio.ecommerce.Domain.valueobject.FechaDeTueste;
 import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
 import com.uniquindio.ecommerce.Domain.valueobject.ImagenDePresentacion;
 import com.uniquindio.ecommerce.Domain.valueobject.NotaDeCata;
 import com.uniquindio.ecommerce.Domain.valueobject.Precio;
+import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
 import com.uniquindio.ecommerce.application.dto.request.CantidadRequest;
 import com.uniquindio.ecommerce.application.dto.request.ImagenRequest;
 import com.uniquindio.ecommerce.application.dto.request.PrecioRequest;
+import com.uniquindio.ecommerce.application.dto.request.ProgramarDescuentoRequest;
 import com.uniquindio.ecommerce.application.dto.response.ArticuloDeMerchandisingResponse;
 import com.uniquindio.ecommerce.application.dto.response.CantidadResponse;
+import com.uniquindio.ecommerce.application.dto.response.DescuentoResponse;
 import com.uniquindio.ecommerce.application.dto.response.ImagenResponse;
 import com.uniquindio.ecommerce.application.dto.response.OrigenResponse;
+import com.uniquindio.ecommerce.application.dto.response.PaginaResponse;
 import com.uniquindio.ecommerce.application.dto.response.PrecioResponse;
 import com.uniquindio.ecommerce.application.dto.response.PresentacionResponse;
 import com.uniquindio.ecommerce.application.dto.response.PresentacionTrazableResponse;
+import com.uniquindio.ecommerce.application.dto.response.SugerenciaResponse;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -58,6 +66,25 @@ public class PresentacionMapper {
         return descriptores == null ? null : new NotaDeCata(descriptores);
     }
 
+    public Descuento toDescuento(ProgramarDescuentoRequest descuento) {
+        return descuento == null ? null
+                : new Descuento(descuento.porcentaje(), descuento.fechaInicio(), descuento.fechaFin());
+    }
+
+    public FiltroDePresentaciones toFiltro(String titulo, TipoDePresentacion tipo, String vendedorId,
+                                           Double precioMinimo, Double precioMaximo) {
+        return new FiltroDePresentaciones(titulo, tipo, vendedorId, precioMinimo, precioMaximo);
+    }
+
+    public PaginaResponse<PresentacionResponse> toPaginaResponse(Pagina<Presentacion> pagina) {
+        return new PaginaResponse<>(pagina.contenido().stream().map(this::toResponse).toList(),
+                pagina.pagina(), pagina.tamano(), pagina.totalElementos(), pagina.totalPaginas());
+    }
+
+    public SugerenciaResponse toSugerencia(Presentacion presentacion) {
+        return new SugerenciaResponse(presentacion.getId(), presentacion.getTitulo());
+    }
+
     public PresentacionResponse toResponse(Presentacion presentacion) {
         if (presentacion instanceof PresentacionTrazable trazable) {
             return toTrazableResponse(trazable);
@@ -75,6 +102,8 @@ public class PresentacionMapper {
                 p.getTitulo(),
                 p.getTipoPresentacion().name(),
                 toPrecioResponse(p.getPrecio()),
+                toPrecioResponse(p.precioVigente(LocalDate.now())),
+                toDescuentoResponse(p.getDescuento()),
                 toCantidadResponse(p.getCantidadDisponible()),
                 toImagenesResponse(p.getGaleria()),
                 p.getEstado().name(),
@@ -92,12 +121,19 @@ public class PresentacionMapper {
                 a.getTitulo(),
                 a.getTipoPresentacion().name(),
                 toPrecioResponse(a.getPrecio()),
+                toPrecioResponse(a.precioVigente(LocalDate.now())),
+                toDescuentoResponse(a.getDescuento()),
                 toCantidadResponse(a.getCantidadDisponible()),
                 toImagenesResponse(a.getGaleria()),
                 a.getEstado().name(),
                 a.isEliminada(),
                 a.getDescripcion(),
                 a.getMaterial());
+    }
+
+    private DescuentoResponse toDescuentoResponse(Descuento descuento) {
+        return descuento == null ? null
+                : new DescuentoResponse(descuento.porcentaje(), descuento.fechaInicio(), descuento.fechaFin());
     }
 
     private PrecioResponse toPrecioResponse(Precio precio) {

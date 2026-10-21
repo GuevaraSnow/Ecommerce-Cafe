@@ -96,4 +96,31 @@ class PresentacionRequestsTest {
         assertTrue(camposInvalidos(new RegistrarNotaDeCataRequest(List.of("Chocolate"))).isEmpty());
         assertEquals(Set.of("descriptores"), camposInvalidos(new RegistrarNotaDeCataRequest(null)));
     }
+
+    @Test
+    void cambiarPrecioReportaElPrecioFaltanteYElMontoNoPositivo() {
+        assertEquals(Set.of("precio"), camposInvalidos(new CambiarPrecioRequest(null)));
+        assertEquals(Set.of("precio.monto", "precio.moneda"),
+                camposInvalidos(new CambiarPrecioRequest(new PrecioRequest(0.0, " "))));
+        assertTrue(camposInvalidos(new CambiarPrecioRequest(new PrecioRequest(18000.0, "COP"))).isEmpty());
+    }
+
+    @Test
+    void reponerYRetirarStockReportanLaCantidadFaltanteYElValorNoPositivo() {
+        assertEquals(Set.of("cantidad"), camposInvalidos(new ReponerStockRequest(null)));
+        assertEquals(Set.of("cantidad"), camposInvalidos(new RetirarStockRequest(null)));
+        assertEquals(Set.of("cantidad.valor"),
+                camposInvalidos(new ReponerStockRequest(new CantidadRequest(-5.0, "kg"))));
+        assertEquals(Set.of("cantidad.valor"),
+                camposInvalidos(new RetirarStockRequest(new CantidadRequest(0.0, "kg"))));
+        assertTrue(camposInvalidos(new ReponerStockRequest(new CantidadRequest(5.0, "kg"))).isEmpty());
+    }
+
+    @Test
+    void programarDescuentoExigeLosTresCamposPeroNoValidaElRango() {
+        assertEquals(Set.of("porcentaje", "fechaInicio", "fechaFin"),
+                camposInvalidos(new ProgramarDescuentoRequest(null, null, null)));
+        // el rango 1-50 y las fechas invertidas los rechaza el dominio, no el request
+        assertTrue(camposInvalidos(new ProgramarDescuentoRequest(90, LocalDate.now(), LocalDate.now().minusDays(3))).isEmpty());
+    }
 }

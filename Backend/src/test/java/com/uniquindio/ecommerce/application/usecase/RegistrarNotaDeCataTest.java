@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.uniquindio.ecommerce.application.usecase.PresentacionesDePrueba.*;
@@ -51,10 +52,10 @@ class RegistrarNotaDeCataTest {
     }
 
     @Test
-    void lanzaExcepcionSiLaPresentacionNoExisteYNoGuardaNada() {
+    void lanzaNoEncontradoSiLaPresentacionNoExisteYNoGuardaNada() {
         when(repositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
 
-        assertThrows(ReglaDominioException.class, () -> registrarNota.ejecutar("no-existe", new NotaDeCata(List.of("Chocolate", "Panela"))));
+        assertThrows(NoSuchElementException.class, () -> registrarNota.ejecutar("no-existe", new NotaDeCata(List.of("Chocolate", "Panela"))));
 
         verify(repositorio, never()).guardar(any());
     }

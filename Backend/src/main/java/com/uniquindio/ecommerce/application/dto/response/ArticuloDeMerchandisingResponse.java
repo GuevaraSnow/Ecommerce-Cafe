@@ -8,6 +8,8 @@ public record ArticuloDeMerchandisingResponse(
         String titulo,
         String tipo,
         PrecioResponse precio,
+        PrecioResponse precioVigente,
+        DescuentoResponse descuento,
         CantidadResponse cantidadDisponible,
         List<ImagenResponse> galeria,
         String estado,
