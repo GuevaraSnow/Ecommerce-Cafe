@@ -157,6 +157,17 @@ No es una opinión del comprador (eso es una Reseña).
 presentacionTrazable.registrarNotaCata(new NotaDeCata(List.of("chocolate", "caramelo", "acidez cítrica")));
 ```
 
+### Reseña
+**Definición:** Opinión del **Comprador** sobre una Presentación que adquirió (Compra entregada):
+una Calificación de 1 a 5 y un texto de máximo 500 caracteres. Cada Comprador reseña una
+Presentación una sola vez, y solo el vendedor dueño de la Presentación la responde, también una vez.
+**Ejemplo:** Ana recibió su café y lo califica con 5: "Notas a panela y buen cuerpo"; el Tostador le responde.
+```java
+Resena resena = Resena.dejar(id, compradorId, presentacionId, presentacion.getVendedorId(),
+        new Calificacion(5), new TextoDeResena("Notas a panela y buen cuerpo"), LocalDateTime.now());
+resena.responder(vendedorId, new TextoDeResena("Gracias por tu compra"), LocalDateTime.now());
+```
+
 ### Ficha de Origen
 **Definición:** Reconstrucción de la historia de una Presentación recorriendo la cadena hacia atrás:
 Finca → Cosecha → Lote → Transformación. Es de solo lectura, no se persiste.
