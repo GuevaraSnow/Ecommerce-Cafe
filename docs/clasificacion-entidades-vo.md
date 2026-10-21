@@ -23,9 +23,7 @@ que la separa es su id.
 | **Finca** | `id` propio (el nombre puede repetirse); pertenece a un Caficultor | Se registra y puede eliminarse lógicamente sin perder la trazabilidad de sus Lotes | Dos Fincas "La Esperanza" del mismo dueño, municipio y altura siguen siendo dos terrenos |
 | **Vendedor** | `id` propio, generado al registrarse | Se registra y puede darse de baja; lo que publicó sigue atribuido a él | Dos Vendedores con el mismo nombre y rol son dos cuentas distintas |
 | **Comprador** | `id` propio (su cuenta), no sus datos de contacto | Cambia contraseña, recibe códigos de recuperación, eliminación lógica | Dos Compradores con el mismo nombre y teléfono son dos personas distintas |
-| **Compra** (raíz abstracta) | `id` propio para trazabilidad y disputas | Cambia de estado (pendiente → confirmada…) con transiciones válidas | Dos Compras idénticas (mismo comprador, productos y fecha) son dos pedidos: cancelar uno no cancela el otro |
-| **CompraFisica** (subclase) | Hereda el `id`; agrega dirección de envío y detalles | Además tiene tramo logístico (enviada, entregada) | Dos pedidos idénticos se envían y entregan por separado |
-| **CompraDigital** (subclase) | Hereda el `id`; agrega el Curso y el precio congelado | Se confirma al comprar el Curso y deja una Inscripción; sin envío | Dos compras idénticas del mismo Curso son dos transacciones distintas |
+| **Compra** (raíz) | `id` propio para trazabilidad y disputas | Mientras está pendiente es el carrito (se agregan, cambian y quitan Presentaciones); al confirmarse fija la dirección de envío y sigue el tramo logístico (enviada, entregada) con transiciones válidas | Dos Compras idénticas (mismo comprador, productos y fecha) son dos pedidos: cancelar uno no cancela el otro |
 | **Reseña** *(diseño; aún no implementada en el código)* | `id` propio, pertenece a una Compra | Se crea con la Compra entregada; puede eliminarse lógicamente | Dos Reseñas con el mismo texto y calificación son dos opiniones distintas |
 | **Solicitud de Reembolso** | `id` propio, asociada a una Compra | Solicitada → Aprobada / Rechazada | Dos solicitudes idénticas son dos trámites: aprobar una no resuelve la otra |
 | **Notificación** | `id` propio y destinatario | No leída → leída | Dos avisos idénticos son dos: leer uno no marca el otro |
@@ -40,7 +38,7 @@ que la separa es su id.
 | **Precio** | record | Par monto + moneda; si cambia es otro valor, no "el mismo precio editado" |
 | **Descuento** | record | Porcentaje (1–50 %) y rango de fechas; se identifica por sus valores, y programar otro reemplaza al anterior |
 | **Cantidad** | record | Valor + unidad (kg, g, ml, unidad); igual por valor y unidad (no convierte: `0,5 kg` y `500 g` son valores distintos); restar devuelve una nueva |
-| **DetalleDeCompra** | record | Línea de una Compra física (compraId, presentacionId, precio congelado, cantidad); sin identidad propia, se compara por valor |
+| **DetalleDeCompra** | record | Línea de una Compra (compraId, presentacionId, precio congelado, cantidad), una sola por Presentación; sin identidad propia, se compara por valor |
 | **PorcentajeDeMerma** | record | Porcentaje de peso perdido al tostar (12 %–22 %); dos Transformaciones con 18 % comparten el valor |
 | **CodigoDeLote** | record | Formato `LOT-AAAA-NNN`; el código en sí no tiene historia |
 | **VariedadDeCafe** | record | Un nombre (Castillo, Caturra, Geisha…) validado en el constructor; no es un conjunto cerrado, así que no es enum; dos Lotes "Caturra" comparten el valor |
@@ -50,7 +48,7 @@ que la separa es su id.
 | **NotaDeCata** | record | Descriptores de sabor; dos notas iguales son intercambiables |
 | **Galeria / ImagenDePresentacion** | record | Entre 1 y 10 imágenes, una principal; agregar una imagen produce otra Galería |
 | **Altitud / Ubicación / Email / Teléfono / Contraseña / FechaDeNacimiento** | record | Valores de atributo sin identidad; si cambian, se reemplazan |
-| **DireccionDeEnvio** | record | Ciudad + dirección + destinatario; queda fija en la Compra aunque el comprador cambie de dirección después |
+| **DireccionDeEnvio** | record | Ciudad + dirección + destinatario; se fija al confirmar la Compra y no cambia aunque el comprador cambie de dirección después |
 | **CodigoDeRecuperacion** | record | Código + fecha de expiración (15 min); si vence se genera otro, no se edita |
 | **FichaDeOrigen** | record de lectura | Reconstrucción de la cadena; no se persiste ni se edita |
 | **EstadoDeCompra, TipoDePresentacion, EstadoDePublicacion, PerfilTueste, ProcesoDeBeneficio, EstadoDelCafe, TemporadaDeCosecha, RolVendedor, TipoDeComprador, EstadoDeReembolso, TipoDeNotificacion** | enum | Conjunto cerrado de valores, sin identidad ni historia propia; quien cambia de estado es la entidad |

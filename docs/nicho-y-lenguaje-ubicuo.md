@@ -166,13 +166,23 @@ Finca → Cosecha → Lote → Transformación. Es de solo lectura, no se persis
 FichaDeOrigen ficha = consultarFichaOrigen.ejecutar(transformacionId);
 ```
 
-### Compra Física
-**Definición:** Compra de una o varias Presentaciones. Lleva Dirección de Envío y tramo logístico:
-Pendiente → Confirmada → Enviada → Entregada; se cancela sin costo solo antes del envío.
+### Compra
+**Definición:** Pedido de una o varias Presentaciones. Sigue el tramo Pendiente → Confirmada →
+Enviada → Entregada; se cancela sin costo solo antes del envío. La Dirección de Envío se fija al
+confirmarla y la fecha y hora de entrega se registran al entregarla.
 **Ejemplo:** un Comprador pide 2 kg de "Café del Valle, Tueste Medio" con envío a Armenia.
 ```java
-CompraFisica compra = CompraFisica.iniciar(compradorId, new DireccionDeEnvio("Armenia", "Cra 14 #10-20", "Ana"));
-compra.agregarDetalle(presentacionId, presentacion.getPrecio(), new Cantidad(2, "kg"));
+compra.confirmar(new DireccionDeEnvio("Armenia", "Cra 14 #10-20", "Ana"));
+```
+
+### Carrito
+**Definición:** La Compra mientras está Pendiente. Se le agregan, cambian o quitan Presentaciones;
+cada Presentación ocupa una sola línea (si se agrega otra vez se suma la cantidad) y su precio
+vigente queda congelado al agregarla.
+**Ejemplo:** Ana agrega 2 kg de café y luego 1 kg más del mismo: queda una línea de 3 kg al precio del primero.
+```java
+Compra carrito = Compra.abrirCarrito(compraId, compradorId);
+carrito.agregarPresentacion(presentacionId, presentacion.precioVigente(hoy), new Cantidad(2, "kg"));
 ```
 
 ### Compra Digital

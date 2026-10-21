@@ -33,10 +33,10 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `ConsultarPresentacion` | Cualquier visitante | Detalle de una Presentación con su galería, precio vigente y descuento (consulta, no modifica) | `PresentacionRepositorio` |
 | `BuscarPresentaciones` | Cualquier visitante | Lista por páginas las Presentaciones disponibles para la venta, con filtros por título, tipo, vendedor y rango de precio (consulta) | `PresentacionRepositorio` |
 | `SugerirPresentaciones` | Cualquier visitante | Búsqueda predictiva por nombre: sugiere Presentaciones disponibles cuyo título contiene el texto (consulta) | `PresentacionRepositorio` |
-| `RealizarCompra` | Comprador | Crea una Compra física: valida disponibilidad y stock, congela el precio y descuenta la cantidad (todo o nada) | `PresentacionRepositorio`, `CompraRepositorio` |
-| `ConfirmarCompra` | Sistema / Comprador | Confirma una Compra pendiente (evita doble confirmación) | `CompraRepositorio` |
-| `CancelarCompra` | Comprador | Cancela una Compra física antes del envío y repone el stock (todo o nada) | `CompraRepositorio`, `PresentacionRepositorio` |
-| `CambiarEstadoCompra` | Vendedor / Sistema | Mueve una Compra física a ENVIADA o ENTREGADA; confirmar y cancelar tienen su propio caso de uso | `CompraRepositorio` |
+| `RealizarCompra` | Comprador | Abre el carrito (Compra pendiente), congela el precio vigente de cada Presentación (con el Descuento por temporada si rige), junta en una sola línea las Presentaciones repetidas, valida disponibilidad y stock sobre la cantidad sumada y descuenta (todo o nada) | `PresentacionRepositorio`, `CompraRepositorio` |
+| `ConfirmarCompra` | Sistema / Comprador | Confirma una Compra pendiente con la Dirección de Envío (evita doble confirmación) | `CompraRepositorio` |
+| `CancelarCompra` | Comprador | Cancela una Compra antes del envío y repone el stock (todo o nada) | `CompraRepositorio`, `PresentacionRepositorio` |
+| `CambiarEstadoCompra` | Vendedor / Sistema | Mueve una Compra a ENVIADA o ENTREGADA (registra la fecha y hora de entrega); confirmar y cancelar tienen su propio caso de uso | `CompraRepositorio` |
 
 ## Cursos virtuales
 
@@ -66,7 +66,7 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `PresentacionRepositorio` | `buscarPorId`, `guardar` | `PresentacionRepositorioMemoria` |
 | `TransformacionRepositorio` | `buscarPorId`, `guardar` | `TransformacionRepositorioMemoria` |
 | `VendedorRepositorio` | `existePorEmail`, `guardar` | `VendedorRepositorioMemoria` |
-| `CompraRepositorio` | `buscarPorId`, `guardar`, `existeCompraActivaConPresentacion` | `CompraRepositorioMemoria` |
+| `CompraRepositorio` | `buscarPorId`, `guardar`, `existeCompraActivaConPresentacion`, `existeCompraEntregada` | `CompraRepositorioMemoria` |
 | `CompradorRepositorio` | `existePorEmail`, `buscarPorEmail`, `guardar` | `CompradorRepositorioMemoria` |
 | `CursoRepositorio` | `buscarPorId`, `guardar` | `CursoRepositorioMemoria` |
 | `InscripcionRepositorio` | `buscarPorId`, `buscarActivaPorCompradorYCurso`, `guardar` | `InscripcionRepositorioMemoria` |
