@@ -46,7 +46,7 @@ que la separa es su id.
 | **OrigenDePresentacion** | record | Referencia a un Lote **o** una Transformación (exactamente uno); fijo al publicar |
 | **FechaDeTueste** | record | Solo una fecha (nunca futura) |
 | **NotaDeCata** | record | Descriptores de sabor; dos notas iguales son intercambiables |
-| **Calificacion** | record | De 1 a 5 estrellas; dos calificaciones de 4 estrellas son intercambiables |
+| **Calificacion** | record | Valor de 1 a 5 (el front decide el ícono: tazas, granos de café…); dos calificaciones de 4 son intercambiables |
 | **TextoDeResena** | record | Texto de la Reseña o de su respuesta: no vacío, máximo 500 caracteres |
 | **RespuestaAResena** | record | Texto + fecha de la respuesta del vendedor; vive dentro de la Reseña, sin identidad propia |
 | **Galeria / ImagenDePresentacion** | record | Entre 1 y 10 imágenes, una principal; agregar una imagen produce otra Galería |

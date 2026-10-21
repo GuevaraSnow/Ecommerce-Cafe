@@ -11,7 +11,7 @@ import java.util.Optional;
 
 /**
  * Opinión de un Comprador sobre una Presentación que adquirió: una Calificación de 1 a 5
- * estrellas y un texto. Guarda el vendedor dueño de la Presentación porque solo él puede
+ * y un texto. Guarda el vendedor dueño de la Presentación porque solo él puede
  * responderla, y una sola vez. El Comprador, la Presentación y el vendedor se referencian por id.
  */
 public class Resena {

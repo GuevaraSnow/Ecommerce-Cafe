@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class CalificacionTest {
 
     @Test
-    void aceptaDeUnaACincoEstrellas() {
-        for (int estrellas = 1; estrellas <= 5; estrellas++) {
-            assertEquals(estrellas, new Calificacion(estrellas).estrellas());
+    void aceptaValoresDeUnoACinco() {
+        for (int valor = 1; valor <= 5; valor++) {
+            assertEquals(valor, new Calificacion(valor).valor());
         }
     }
 
@@ -21,12 +21,12 @@ class CalificacionTest {
     }
 
     @Test
-    void noAceptaMasDeCincoEstrellas() {
+    void noAceptaMasDeCinco() {
         assertThrows(ReglaDominioException.class, () -> new Calificacion(6));
     }
 
     @Test
-    void dosCalificacionesConLasMismasEstrellasSonIguales() {
+    void dosCalificacionesConElMismoValorSonIguales() {
         assertEquals(new Calificacion(4), new Calificacion(4));
     }
 }
