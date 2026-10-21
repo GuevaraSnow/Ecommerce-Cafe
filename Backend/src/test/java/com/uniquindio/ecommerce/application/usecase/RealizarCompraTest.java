@@ -109,6 +109,30 @@ class RealizarCompraTest {
     }
 
     @Test
+    void laMismaPresentacionPedidaDosVecesQuedaEnUnSoloDetalleConLaCantidadSumada() {
+        Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
+
+        Compra compra = comprar(List.of(item("pres-1", 3), item("pres-1", 2)));
+
+        assertEquals(1, compra.getDetalles().size());
+        assertEquals(new Cantidad(5, "kg"), compra.getDetalles().get(0).cantidad());
+        assertEquals(new Cantidad(5, "kg"), presentacion.getCantidadDisponible());
+    }
+
+    @Test
+    void siLaSumaDeUnaPresentacionRepetidaSuperaElStockNoSeDescuentaNada() {
+        Presentacion repetida = presentacionDisponible("pres-1", 10, 50000);
+        Presentacion otra = presentacionDisponible("pres-2", 5, 30000);
+
+        assertThrows(ReglaDominioException.class,
+                () -> comprar(List.of(item("pres-2", 1), item("pres-1", 6), item("pres-1", 6))));
+
+        assertEquals(new Cantidad(10, "kg"), repetida.getCantidadDisponible());
+        assertEquals(new Cantidad(5, "kg"), otra.getCantidadDisponible());
+        assertFalse(repositorioCompra.existeCompraActivaConPresentacion("pres-1"));
+    }
+
+    @Test
     void noSePuedeComprarMasDeLoDisponibleYElStockNoCambia() {
         Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
 

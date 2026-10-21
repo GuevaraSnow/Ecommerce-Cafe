@@ -6,10 +6,12 @@ import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
+import com.uniquindio.ecommerce.Domain.valueobject.DetalleDeCompra;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class RealizarCompra {
@@ -29,8 +31,10 @@ public class RealizarCompra {
      * Ejecuta la compra de una o varias Presentaciones: valida stock,
      * congela el precio vigente de cada una (con el Descuento por temporada
      * si rige hoy) en su DetalleDeCompra, y
-     * descuenta la cantidad disponible. Todo o nada: si algun item no se
-     * puede comprar, no se descuenta el stock de ninguno.
+     * descuenta la cantidad disponible. Si una Presentacion se pide varias
+     * veces queda en un solo detalle con la cantidad sumada, y es esa suma la
+     * que se verifica. Todo o nada: si algun item no se puede comprar, no se
+     * descuenta el stock de ninguno.
      */
     public Compra ejecutar(String compradorId, List<ItemSolicitado> items) {
         if (items == null || items.isEmpty()) {
@@ -40,21 +44,24 @@ public class RealizarCompra {
         Compra compra = Compra.abrirCarrito(UUID.randomUUID().toString(), compradorId);
         LocalDate hoy = LocalDate.now();
 
-        // Primera pasada: validar todo SIN modificar nada
-        List<Presentacion> presentaciones = new ArrayList<>();
+        // Primera pasada: armar el carrito; las Presentaciones repetidas quedan en un solo detalle
+        Map<String, Presentacion> presentaciones = new HashMap<>();
         for (ItemSolicitado item : items) {
             Presentacion presentacion = repositorioPresentacion.buscarPorId(item.presentacionId())
                     .orElseThrow(() -> new ReglaDominioException("Presentacion no encontrada: " + item.presentacionId()));
-            presentacion.verificarQueSePuedeVender(item.cantidad());
-            presentaciones.add(presentacion);
+            compra.agregarPresentacion(item.presentacionId(), presentacion.precioVigente(hoy), item.cantidad());
+            presentaciones.put(item.presentacionId(), presentacion);
         }
 
-        // Segunda pasada: ya es seguro modificar
-        for (int i = 0; i < items.size(); i++) {
-            ItemSolicitado item = items.get(i);
-            Presentacion presentacion = presentaciones.get(i);
-            presentacion.descontarCantidad(item.cantidad());
-            compra.agregarPresentacion(item.presentacionId(), presentacion.precioVigente(hoy), item.cantidad());
+        // Segunda pasada: verificar la cantidad ya sumada de cada detalle SIN modificar nada
+        for (DetalleDeCompra detalle : compra.getDetalles()) {
+            presentaciones.get(detalle.presentacionId()).verificarQueSePuedeVender(detalle.cantidad());
+        }
+
+        // Tercera pasada: ya es seguro descontar el stock
+        for (DetalleDeCompra detalle : compra.getDetalles()) {
+            Presentacion presentacion = presentaciones.get(detalle.presentacionId());
+            presentacion.descontarCantidad(detalle.cantidad());
             repositorioPresentacion.guardar(presentacion);
         }
 
