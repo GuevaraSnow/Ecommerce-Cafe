@@ -2,6 +2,7 @@ package com.uniquindio.ecommerce.infrastructure.persistence;
 
 import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
+import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -27,5 +28,13 @@ public class CompraRepositorioMemoria implements CompraRepositorio {
     public boolean existeCompraActivaConPresentacion(String presentacionId) {
         return compras.values().stream()
                 .anyMatch(compra -> compra.estaActiva() && compra.incluye(presentacionId));
+    }
+
+    @Override
+    public boolean existeCompraEntregada(String compradorId, String presentacionId) {
+        return compras.values().stream()
+                .anyMatch(compra -> compra.getCompradorId().equals(compradorId)
+                        && compra.getEstado() == EstadoDeCompra.ENTREGADA
+                        && compra.incluye(presentacionId));
     }
 }

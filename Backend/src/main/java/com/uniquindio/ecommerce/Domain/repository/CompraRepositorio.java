@@ -11,4 +11,7 @@ public interface CompraRepositorio {
 
     /** Indica si alguna Compra activa incluye esa Presentación (para bloquear su eliminación). */
     boolean existeCompraActivaConPresentacion(String presentacionId);
+
+    /** Indica si ese Comprador tiene una Compra ENTREGADA que incluye esa Presentación (para poder reseñarla). */
+    boolean existeCompraEntregada(String compradorId, String presentacionId);
 }
