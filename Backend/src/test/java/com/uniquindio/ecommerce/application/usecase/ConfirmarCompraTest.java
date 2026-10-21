@@ -1,9 +1,10 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
+import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
+import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
 import com.uniquindio.ecommerce.Domain.valueobject.ImagenDePresentacion;
@@ -37,30 +38,45 @@ class ConfirmarCompraTest {
                 null, RolVendedor.CAFICULTOR, null, null, null);
         repositorioPresentacion.guardar(presentacion);
 
-        CompraFisica compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
+        Compra compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
                 "comprador-1",
-                List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))),
-                "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+                List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))));
         compraId = compra.getId();
         confirmarCompra = new ConfirmarCompra(repositorioCompra);
     }
 
     @Test
     void confirmarUnaCompraPendienteLaDejaConfirmadaEnElRepositorio() {
-        confirmarCompra.ejecutar(compraId);
+        confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
 
         assertEquals(EstadoDeCompra.CONFIRMADA, repositorioCompra.buscarPorId(compraId).orElseThrow().getEstado());
     }
 
     @Test
-    void noSePuedeConfirmarDosVecesLaMismaCompra() {
-        confirmarCompra.ejecutar(compraId);
+    void confirmarGuardaLaDireccionDeEnvioEnLaCompra() {
+        confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
 
-        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar(compraId));
+        assertEquals(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"),
+                repositorioCompra.buscarPorId(compraId).orElseThrow().getDireccionEnvio().orElseThrow());
+    }
+
+    @Test
+    void unaDireccionInvalidaNoConfirmaLaCompra() {
+        assertThrows(ReglaDominioException.class,
+                () -> confirmarCompra.ejecutar(compraId, "   ", "Calle 10 # 5-20", "Carlos Perez"));
+
+        assertEquals(EstadoDeCompra.PENDIENTE, repositorioCompra.buscarPorId(compraId).orElseThrow().getEstado());
+    }
+
+    @Test
+    void noSePuedeConfirmarDosVecesLaMismaCompra() {
+        confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+
+        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
     }
 
     @Test
     void noSePuedeConfirmarUnaCompraInexistente() {
-        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar("no-existe"));
+        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar("no-existe", "Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
     }
 }

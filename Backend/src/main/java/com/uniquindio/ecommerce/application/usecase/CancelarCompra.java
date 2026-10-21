@@ -1,7 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Compra;
-import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
@@ -25,15 +24,11 @@ public class CancelarCompra {
      * Cancela una Compra que aun no fue enviada y devuelve el stock de cada
      * Presentacion (RealizarCompra lo descuenta al crear la compra). Todo o
      * nada: si algo falla, ni la compra ni el stock cambian. Las
-     * Presentaciones dadas de baja no reciben stock de vuelta. Solo aplica a
-     * compras fisicas: una compra digital no maneja stock.
+     * Presentaciones dadas de baja no reciben stock de vuelta.
      */
-    public CompraFisica ejecutar(String compraId) {
-        Compra encontrada = repositorioCompra.buscarPorId(compraId)
+    public Compra ejecutar(String compraId) {
+        Compra compra = repositorioCompra.buscarPorId(compraId)
                 .orElseThrow(() -> new ReglaDominioException("Compra no encontrada: " + compraId));
-        if (!(encontrada instanceof CompraFisica compra)) {
-            throw new ReglaDominioException("Solo se puede cancelar aqui una compra fisica: " + compraId);
-        }
 
         if (!compra.puedeCancelarse()) {
             throw new ReglaDominioException("No se puede cancelar una compra en estado " + compra.getEstado());

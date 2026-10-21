@@ -33,8 +33,18 @@ coordinan. La columna "Dónde vive" indica quién la hace cumplir.
 
 Implementadas en el código:
 
-- Una misma Compra no puede confirmarse dos veces (`Compra.confirmar()` solo desde pendiente);
-  recomprar la misma Presentación en otro pedido sí.
+- La Compra pendiente es el carrito: solo mientras está PENDIENTE se agregan, cambian o quitan
+  Presentaciones (`Compra.agregarPresentacion()`, `cambiarCantidad()`, `quitarPresentacion()`).
+- Cada Presentación ocupa una sola línea del carrito: si se agrega de nuevo, se suma la cantidad (en la
+  misma unidad) y se conserva el precio congelado la primera vez (`Compra.agregarPresentacion()`).
+- El precio que se congela es el vigente: con el Descuento por temporada si rige ese día
+  (`Presentacion.precioVigente(hoy)` en `RealizarCompra`).
+- El stock se verifica sobre la cantidad ya sumada de cada Presentación, y si algo no alcanza no se
+  descuenta nada (`RealizarCompra`, todo o nada).
+- Una misma Compra no puede confirmarse dos veces, y para confirmarla se necesitan al menos un
+  detalle y la Dirección de Envío (`Compra.confirmar(direccion)`); recomprar la misma Presentación en
+  otro pedido sí.
+- Al entregar una Compra se registra la fecha y hora de entrega (`Compra.entregar(fechaHora)`).
 - Una Compra se cancela sin costo mientras no se haya enviado (`Compra.cancelar()`); las transiciones
   de estado siguen un flujo válido (`EstadoDeCompra.puedeTransicionarA()`).
 - Un Comprador no puede comprar un Curso que ya tiene activo (`ComprarCurso`).

@@ -1,6 +1,6 @@
 package com.uniquindio.ecommerce.Domain.service;
 
-import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
+import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
@@ -23,10 +23,9 @@ class ServicioDeBajaDePresentacionTest {
                 RolVendedor.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
     }
 
-    private CompraFisica compraPendienteCon(String presentacionId) {
-        CompraFisica compra = CompraFisica.iniciar("comprador-1",
-                new DireccionDeEnvio("Armenia", "Calle 1 # 2-3", "Juan Pérez"));
-        compra.agregarDetalle(presentacionId, new Precio(15000, "COP"), new Cantidad(2, "unidad"));
+    private Compra compraPendienteCon(String presentacionId) {
+        Compra compra = Compra.abrirCarrito("compra-" + presentacionId, "comprador-1");
+        compra.agregarPresentacion(presentacionId, new Precio(15000, "COP"), new Cantidad(2, "unidad"));
         compras.guardar(compra);
         return compra;
     }
@@ -63,7 +62,7 @@ class ServicioDeBajaDePresentacionTest {
     @Test
     void unaCompraCanceladaYaNoBloqueaLaBaja() {
         Presentacion presentacion = publicarMerchandising("pres-5");
-        CompraFisica compra = compraPendienteCon("pres-5");
+        Compra compra = compraPendienteCon("pres-5");
         compra.cancelar();
         compras.guardar(compra);
 
