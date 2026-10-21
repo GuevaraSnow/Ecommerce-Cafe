@@ -1,6 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
+import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
@@ -30,14 +30,14 @@ public class RealizarCompra {
      * descuenta la cantidad disponible. Todo o nada: si algun item no se
      * puede comprar, no se descuenta el stock de ninguno.
      */
-    public CompraFisica ejecutar(String compradorId, List<ItemSolicitado> items,
+    public Compra ejecutar(String compradorId, List<ItemSolicitado> items,
                                  String ciudad, String direccion, String destinatario) {
         if (items == null || items.isEmpty()) {
             throw new ReglaDominioException("La compra debe tener al menos un item");
         }
 
         DireccionDeEnvio direccionEnvio = new DireccionDeEnvio(ciudad, direccion, destinatario);
-        CompraFisica compra = CompraFisica.iniciar(compradorId, direccionEnvio);
+        Compra compra = Compra.iniciar(compradorId, direccionEnvio);
 
         // Primera pasada: validar todo SIN modificar nada
         List<Presentacion> presentaciones = new ArrayList<>();

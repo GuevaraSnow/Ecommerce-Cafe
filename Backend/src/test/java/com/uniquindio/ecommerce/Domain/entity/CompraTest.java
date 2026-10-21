@@ -8,6 +8,10 @@ import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.Precio;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompraTest {
@@ -16,14 +20,14 @@ class CompraTest {
         return new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez");
     }
 
-    private CompraFisica compraValida() {
-        return CompraFisica.iniciar("comprador-1", direccionValida());
+    private Compra compraValida() {
+        return Compra.iniciar("comprador-1", direccionValida());
     }
 
     @Test
     void dosComprasConLosMismosDatosNoSonLaMismaPorqueElIdEsUnico() {
-        CompraFisica primera = compraValida();
-        CompraFisica segunda = compraValida();
+        Compra primera = compraValida();
+        Compra segunda = compraValida();
 
         assertNotEquals(primera, segunda);
         assertNotEquals(primera.getId(), segunda.getId());
@@ -31,17 +35,17 @@ class CompraTest {
 
     @Test
     void noSePuedeIniciarUnaCompraSinComprador() {
-        assertThrows(ReglaDominioException.class, () -> CompraFisica.iniciar("   ", direccionValida()));
+        assertThrows(ReglaDominioException.class, () -> Compra.iniciar("   ", direccionValida()));
     }
 
     @Test
     void noSePuedeIniciarUnaCompraSinDireccionDeEnvio() {
-        assertThrows(ReglaDominioException.class, () -> CompraFisica.iniciar("comprador-1", null));
+        assertThrows(ReglaDominioException.class, () -> Compra.iniciar("comprador-1", null));
     }
 
     @Test
     void unaCompraRecienIniciadaEstaPendienteYSinDetalles() {
-        CompraFisica compra = compraValida();
+        Compra compra = compraValida();
 
         assertEquals(EstadoDeCompra.PENDIENTE, compra.getEstado());
         assertTrue(compra.getDetalles().isEmpty());
@@ -50,7 +54,7 @@ class CompraTest {
 
     @Test
     void agregarDetalleLoAsociaALaCompraYCongelaElPrecio() {
-        CompraFisica compra = compraValida();
+        Compra compra = compraValida();
 
         compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
@@ -64,7 +68,7 @@ class CompraTest {
 
     @Test
     void laListaDeDetallesQueSeExponeNoPermiteModificarLaCompraDesdeAfuera() {
-        CompraFisica compra = compraValida();
+        Compra compra = compraValida();
         compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
         assertThrows(UnsupportedOperationException.class, () -> compra.getDetalles().clear());
@@ -73,10 +77,28 @@ class CompraTest {
 
     @Test
     void incluyeIndicaSiLaPresentacionEstaEnLosDetalles() {
-        CompraFisica compra = compraValida();
+        Compra compra = compraValida();
         compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
         assertTrue(compra.incluye("presentacion-1"));
         assertFalse(compra.incluye("presentacion-2"));
+    }
+
+    @Test
+    void reconstruirDevuelveLaCompraTalComoSeGuardo() {
+        DetalleDeCompra detalle = new DetalleDeCompra("compra-1", "presentacion-1",
+                new Precio(50000, "COP"), new Cantidad(2, "kg"));
+        LocalDateTime entregada = LocalDateTime.of(2026, 10, 18, 9, 0);
+
+        Compra compra = Compra.reconstruir("compra-1", "comprador-1", LocalDate.of(2026, 10, 15),
+                direccionValida(), List.of(detalle), EstadoDeCompra.ENTREGADA, entregada);
+
+        assertEquals("compra-1", compra.getId());
+        assertEquals("comprador-1", compra.getCompradorId());
+        assertEquals(LocalDate.of(2026, 10, 15), compra.getFechaCompra());
+        assertEquals(direccionValida(), compra.getDireccionEnvio());
+        assertEquals(List.of(detalle), compra.getDetalles());
+        assertEquals(EstadoDeCompra.ENTREGADA, compra.getEstado());
+        assertEquals(entregada, compra.getFechaEntrega().orElseThrow());
     }
 }

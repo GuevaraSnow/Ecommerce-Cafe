@@ -1,6 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.CompraFisica;
+import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
@@ -37,7 +37,7 @@ class CambiarEstadoCompraTest {
                 null, RolVendedor.CAFICULTOR, null, null, null);
         repositorioPresentacion.guardar(presentacion);
 
-        CompraFisica compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
+        Compra compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
                 "comprador-1",
                 List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))),
                 "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
@@ -57,7 +57,7 @@ class CambiarEstadoCompraTest {
     void unaCompraEnviadaPuedePasarAEntregadaYRegistraLaFecha() {
         cambiarEstadoCompra.ejecutar(compraId, EstadoDeCompra.ENVIADA);
 
-        CompraFisica compra = cambiarEstadoCompra.ejecutar(compraId, EstadoDeCompra.ENTREGADA);
+        Compra compra = cambiarEstadoCompra.ejecutar(compraId, EstadoDeCompra.ENTREGADA);
 
         assertEquals(EstadoDeCompra.ENTREGADA, compra.getEstado());
         assertTrue(compra.getFechaEntrega().isPresent());
