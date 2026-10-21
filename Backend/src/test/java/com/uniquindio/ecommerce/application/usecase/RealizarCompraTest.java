@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
+import com.uniquindio.ecommerce.Domain.valueobject.Descuento;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
 import com.uniquindio.ecommerce.Domain.valueobject.ImagenDePresentacion;
@@ -15,6 +16,7 @@ import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositor
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,6 +70,28 @@ class RealizarCompraTest {
 
         Compra compra = comprar(List.of(item("pres-1", 2)));
         presentacion.cambiarPrecio(new Precio(80000, "COP"));
+
+        assertEquals(new Precio(50000, "COP"), compra.getDetalles().get(0).precioCongelado());
+    }
+
+    @Test
+    void elDetalleCongelaElPrecioConElDescuentoPorTemporadaQueRigeHoy() {
+        Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
+        LocalDate hoy = LocalDate.now();
+        presentacion.programarDescuento(new Descuento(20, hoy.minusDays(1), hoy.plusDays(1)));
+
+        Compra compra = comprar(List.of(item("pres-1", 2)));
+
+        assertEquals(new Precio(40000, "COP"), compra.getDetalles().get(0).precioCongelado());
+    }
+
+    @Test
+    void unDescuentoQueYaNoRigeNoCambiaElPrecioCongelado() {
+        Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
+        LocalDate hoy = LocalDate.now();
+        presentacion.programarDescuento(new Descuento(20, hoy.minusDays(10), hoy.minusDays(1)));
+
+        Compra compra = comprar(List.of(item("pres-1", 2)));
 
         assertEquals(new Precio(50000, "COP"), compra.getDetalles().get(0).precioCongelado());
     }
