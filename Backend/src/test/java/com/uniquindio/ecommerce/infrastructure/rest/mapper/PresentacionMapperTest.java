@@ -228,4 +228,78 @@ class PresentacionMapperTest {
                 assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(actualizada));
         assertEquals(List.of("Cítrico", "Panela"), response.notaCata());
     }
+
+    @Test
+    void elResponseTraeElPrecioNormalElPrecioVigenteYElDescuentoProgramado() {
+        PresentacionTrazable presentacion =
+                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        presentacion.programarDescuento(mapper.toDescuento(
+                new ProgramarDescuentoRequest(25, LocalDate.now().minusDays(1), LocalDate.now().plusDays(5))));
+
+        PresentacionTrazableResponse response =
+                assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(presentacion));
+
+        assertEquals(new PrecioResponse(28000, "COP"), response.precio());
+        assertEquals(new PrecioResponse(21000, "COP"), response.precioVigente());
+        assertEquals(new DescuentoResponse(25, LocalDate.now().minusDays(1), LocalDate.now().plusDays(5)),
+                response.descuento());
+    }
+
+    @Test
+    void conUnDescuentoQueNoRigeElPrecioVigenteEsElNormal() {
+        PresentacionTrazable presentacion =
+                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        presentacion.programarDescuento(mapper.toDescuento(
+                new ProgramarDescuentoRequest(25, LocalDate.now().plusDays(10), LocalDate.now().plusDays(20))));
+
+        PresentacionTrazableResponse response =
+                assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(presentacion));
+
+        assertEquals(new PrecioResponse(28000, "COP"), response.precioVigente());
+        assertNotNull(response.descuento());
+    }
+
+    @Test
+    void sinDescuentoElResponseNoTraeDescuentoYElPrecioVigenteEsElNormal() {
+        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+
+        PresentacionResponse response = mapper.toResponse(presentacion);
+
+        assertNull(response.descuento());
+        assertEquals(response.precio(), response.precioVigente());
+    }
+
+    @Test
+    void unDescuentoFueraDeRangoPropagaReglaDominioException() {
+        assertThrows(ReglaDominioException.class, () -> mapper.toDescuento(
+                new ProgramarDescuentoRequest(90, LocalDate.now(), LocalDate.now().plusDays(1))));
+        assertNull(mapper.toDescuento(null));
+    }
+
+    @Test
+    void laPaginaDeResultadosSeMapeaConSusTotalesYSuContenido() {
+        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+
+        PaginaResponse<PresentacionResponse> pagina = mapper.toPaginaResponse(
+                new com.uniquindio.ecommerce.Domain.repository.Pagina<>(List.of(presentacion), 0, 10, 11));
+
+        assertEquals(1, pagina.contenido().size());
+        assertEquals("pres-1", pagina.contenido().get(0).id());
+        assertEquals(0, pagina.pagina());
+        assertEquals(10, pagina.tamano());
+        assertEquals(11, pagina.totalElementos());
+        assertEquals(2, pagina.totalPaginas());
+    }
+
+    @Test
+    void laSugerenciaSoloTraeIdYTitulo() {
+        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+
+        assertEquals(new SugerenciaResponse("pres-1", "Café Verde"), mapper.toSugerencia(presentacion));
+    }
+
+    @Test
+    void elFiltroConElPrecioMinimoMayorQueElMaximoPropagaReglaDominioException() {
+        assertThrows(ReglaDominioException.class, () -> mapper.toFiltro(null, null, null, 9000.0, 100.0));
+    }
 }

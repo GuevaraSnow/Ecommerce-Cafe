@@ -2,6 +2,7 @@ package com.uniquindio.ecommerce.infrastructure.rest.exception;
 
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -10,6 +11,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -64,6 +67,34 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.mensaje").value("El cuerpo de la petición no es válido"));
     }
 
+    @Test
+    void unParametroConUnTipoInvalidoResponde400ConElNombreDelParametro() throws Exception {
+        mockMvc.perform(get("/prueba/numero").param("cantidad", "mucho"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("El parámetro 'cantidad' tiene un valor no válido"));
+    }
+
+    @Test
+    void unParametroObligatorioFaltanteResponde400() throws Exception {
+        mockMvc.perform(get("/prueba/numero"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("Falta el parámetro 'cantidad'"));
+    }
+
+    @Test
+    void unEncabezadoObligatorioFaltanteResponde400() throws Exception {
+        mockMvc.perform(get("/prueba/encabezado"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("Falta el encabezado 'X-Prueba'"));
+    }
+
+    @Test
+    void unParametroQueNoPasaLaValidacionResponde400ConSuMensaje() throws Exception {
+        mockMvc.perform(get("/prueba/limitado").param("tamano", "500"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("El tamaño máximo es 50"));
+    }
+
     @RestController
     @RequestMapping("/prueba")
     static class ControladorDePrueba {
@@ -76,6 +107,18 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/no-existe")
         void noExiste() {
             throw new NoSuchElementException("No value present");
+        }
+
+        @GetMapping("/numero")
+        void numero(@RequestParam int cantidad) {
+        }
+
+        @GetMapping("/encabezado")
+        void encabezado(@RequestHeader("X-Prueba") String valor) {
+        }
+
+        @GetMapping("/limitado")
+        void limitado(@RequestParam @Max(value = 50, message = "El tamaño máximo es 50") int tamano) {
         }
 
         @PostMapping("/validar")

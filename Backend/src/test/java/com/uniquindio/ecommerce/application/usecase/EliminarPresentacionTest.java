@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,10 +62,10 @@ class EliminarPresentacionTest {
     }
 
     @Test
-    void lanzaExcepcionSiLaPresentacionNoExisteYNoLlamaAlServicio() {
+    void lanzaNoEncontradoSiLaPresentacionNoExisteYNoLlamaAlServicio() {
         when(presentacionRepositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
 
-        assertThrows(ReglaDominioException.class, () -> eliminarPresentacion.ejecutar("no-existe"));
+        assertThrows(NoSuchElementException.class, () -> eliminarPresentacion.ejecutar("no-existe"));
 
         verify(servicioDeBaja, never()).darDeBaja(any());
         verify(presentacionRepositorio, never()).guardar(any());

@@ -1,7 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
-import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ public class PausarPresentacion {
     @Transactional
     public Presentacion ejecutar(String presentacionId) {
         Presentacion presentacion = repositorio.buscarPorId(presentacionId)
-                .orElseThrow(() -> new ReglaDominioException("No existe una Presentación con id " + presentacionId));
+                .orElseThrow();
         presentacion.desactivar();
         repositorio.guardar(presentacion);
         return presentacion;

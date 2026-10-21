@@ -1,7 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
-import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
@@ -24,7 +23,7 @@ public class ReponerStockDePresentacion {
     @Transactional
     public Presentacion ejecutar(String presentacionId, Cantidad cantidad) {
         Presentacion presentacion = repositorio.buscarPorId(presentacionId)
-                .orElseThrow(() -> new ReglaDominioException("No existe una Presentación con id " + presentacionId));
+                .orElseThrow();
         servicioDeReposicion.reponer(presentacion, cantidad);
         repositorio.guardar(presentacion);
         return presentacion;

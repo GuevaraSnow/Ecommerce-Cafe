@@ -18,6 +18,12 @@ public sealed interface PresentacionResponse
 
     PrecioResponse precio();
 
+    // Precio al que se vende hoy: el precio con el descuento aplicado si rige, y si no, el precio normal.
+    PrecioResponse precioVigente();
+
+    // Descuento programado (vigente o no); null si no hay ninguno.
+    DescuentoResponse descuento();
+
     CantidadResponse cantidadDisponible();
 
     List<ImagenResponse> galeria();

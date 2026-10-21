@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.uniquindio.ecommerce.application.usecase.PresentacionesDePrueba.*;
@@ -51,10 +52,10 @@ class PausarPresentacionTest {
     }
 
     @Test
-    void lanzaExcepcionSiLaPresentacionNoExisteYNoGuardaNada() {
+    void lanzaNoEncontradoSiLaPresentacionNoExisteYNoGuardaNada() {
         when(repositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
 
-        assertThrows(ReglaDominioException.class, () -> pausar.ejecutar("no-existe"));
+        assertThrows(NoSuchElementException.class, () -> pausar.ejecutar("no-existe"));
 
         verify(repositorio, never()).guardar(any());
     }
