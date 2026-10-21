@@ -124,8 +124,8 @@ class CancelarCompraTest {
     @Test
     void siUnaPresentacionDelDetalleNoExisteNoSeCancelaNadaNiSeTocaElStock() {
         Compra manual = Compra.abrirCarrito("compra-manual", "comprador-1");
-        manual.agregarDetalle("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
-        manual.agregarDetalle("fantasma", new Precio(1000, "COP"), new Cantidad(1, "kg"));
+        manual.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+        manual.agregarPresentacion("fantasma", new Precio(1000, "COP"), new Cantidad(1, "kg"));
         repositorioCompra.guardar(manual);
 
         assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(manual.getId()));

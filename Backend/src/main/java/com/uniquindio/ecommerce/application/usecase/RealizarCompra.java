@@ -51,7 +51,7 @@ public class RealizarCompra {
             ItemSolicitado item = items.get(i);
             Presentacion presentacion = presentaciones.get(i);
             presentacion.descontarCantidad(item.cantidad());
-            compra.agregarDetalle(item.presentacionId(), presentacion.getPrecio(), item.cantidad());
+            compra.agregarPresentacion(item.presentacionId(), presentacion.getPrecio(), item.cantidad());
             repositorioPresentacion.guardar(presentacion);
         }
 

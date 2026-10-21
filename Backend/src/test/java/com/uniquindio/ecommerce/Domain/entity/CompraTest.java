@@ -54,10 +54,10 @@ class CompraTest {
     }
 
     @Test
-    void agregarDetalleLoAsociaALaCompraYCongelaElPrecio() {
+    void agregarPresentacionLaAsociaALaCompraYCongelaElPrecio() {
         Compra compra = compraValida();
 
-        compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
+        compra.agregarPresentacion("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
         assertEquals(1, compra.getDetalles().size());
         DetalleDeCompra detalle = compra.getDetalles().get(0);
@@ -70,7 +70,7 @@ class CompraTest {
     @Test
     void laListaDeDetallesQueSeExponeNoPermiteModificarLaCompraDesdeAfuera() {
         Compra compra = compraValida();
-        compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
+        compra.agregarPresentacion("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
         assertThrows(UnsupportedOperationException.class, () -> compra.getDetalles().clear());
         assertEquals(1, compra.getDetalles().size());
@@ -79,7 +79,7 @@ class CompraTest {
     @Test
     void incluyeIndicaSiLaPresentacionEstaEnLosDetalles() {
         Compra compra = compraValida();
-        compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
+        compra.agregarPresentacion("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
 
         assertTrue(compra.incluye("presentacion-1"));
         assertFalse(compra.incluye("presentacion-2"));

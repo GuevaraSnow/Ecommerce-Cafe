@@ -65,11 +65,36 @@ public class Compra {
         return new Compra(id, compradorId, fechaCompra, direccionEnvio, detalles, estado, fechaEntrega);
     }
 
-    public void agregarDetalle(String presentacionId, Precio precioCongelado, Cantidad cantidad) {
-        if (estado != EstadoDeCompra.PENDIENTE) {
-            throw new ReglaDominioException("Solo se pueden agregar detalles a una compra pendiente");
+    /**
+     * Agrega una Presentación al carrito congelando su precio. Si ya estaba en el
+     * carrito, suma la cantidad y conserva el precio que se congeló la primera vez.
+     *
+     * @throws ReglaDominioException si la Compra ya no es un carrito, si el detalle es
+     *                               inválido o si la unidad no coincide con la que ya tenía
+     */
+    public void agregarPresentacion(String presentacionId, Precio precioCongelado, Cantidad cantidad) {
+        validarQueEsCarrito();
+        DetalleDeCompra nuevo = new DetalleDeCompra(id, presentacionId, precioCongelado, cantidad);
+        Optional<DetalleDeCompra> existente = buscarDetalle(presentacionId);
+        if (existente.isEmpty()) {
+            detalles.add(nuevo);
+            return;
         }
-        detalles.add(new DetalleDeCompra(id, presentacionId, precioCongelado, cantidad));
+        DetalleDeCompra actual = existente.get();
+        DetalleDeCompra sumado = new DetalleDeCompra(id, presentacionId, actual.precioCongelado(),
+                actual.cantidad().sumar(cantidad));
+        detalles.set(detalles.indexOf(actual), sumado);
+    }
+
+    private Optional<DetalleDeCompra> buscarDetalle(String presentacionId) {
+        return detalles.stream().filter(detalle -> detalle.presentacionId().equals(presentacionId)).findFirst();
+    }
+
+    private void validarQueEsCarrito() {
+        if (estado != EstadoDeCompra.PENDIENTE) {
+            throw new ReglaDominioException("Solo se puede modificar el carrito de una compra pendiente (estado actual: "
+                    + estado + ")");
+        }
     }
 
     /**

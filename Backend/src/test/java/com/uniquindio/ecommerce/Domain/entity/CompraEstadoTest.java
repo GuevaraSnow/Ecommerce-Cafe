@@ -18,7 +18,7 @@ class CompraEstadoTest {
 
     private Compra compraConDetalle() {
         Compra compra = Compra.abrirCarrito("compra-1", "comprador-1");
-        compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
+        compra.agregarPresentacion("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
         return compra;
     }
 
@@ -56,12 +56,12 @@ class CompraEstadoTest {
     }
 
     @Test
-    void despuesDeConfirmadaYaNoSePuedenAgregarDetalles() {
+    void despuesDeConfirmadaYaNoSePuedenAgregarPresentaciones() {
         Compra compra = compraConDetalle();
         compra.confirmar(DIRECCION);
 
         assertThrows(ReglaDominioException.class,
-                () -> compra.agregarDetalle("presentacion-2", new Precio(30000, "COP"), new Cantidad(1, "kg")));
+                () -> compra.agregarPresentacion("presentacion-2", new Precio(30000, "COP"), new Cantidad(1, "kg")));
         assertEquals(1, compra.getDetalles().size());
     }
 

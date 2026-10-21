@@ -25,7 +25,7 @@ class ServicioDeBajaDePresentacionTest {
 
     private Compra compraPendienteCon(String presentacionId) {
         Compra compra = Compra.abrirCarrito("compra-" + presentacionId, "comprador-1");
-        compra.agregarDetalle(presentacionId, new Precio(15000, "COP"), new Cantidad(2, "unidad"));
+        compra.agregarPresentacion(presentacionId, new Precio(15000, "COP"), new Cantidad(2, "unidad"));
         compras.guardar(compra);
         return compra;
     }
