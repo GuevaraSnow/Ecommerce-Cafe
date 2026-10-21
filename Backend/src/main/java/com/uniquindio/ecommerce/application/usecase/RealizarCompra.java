@@ -6,10 +6,10 @@ import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
-import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class RealizarCompra {
 
@@ -30,14 +30,12 @@ public class RealizarCompra {
      * descuenta la cantidad disponible. Todo o nada: si algun item no se
      * puede comprar, no se descuenta el stock de ninguno.
      */
-    public Compra ejecutar(String compradorId, List<ItemSolicitado> items,
-                                 String ciudad, String direccion, String destinatario) {
+    public Compra ejecutar(String compradorId, List<ItemSolicitado> items) {
         if (items == null || items.isEmpty()) {
             throw new ReglaDominioException("La compra debe tener al menos un item");
         }
 
-        DireccionDeEnvio direccionEnvio = new DireccionDeEnvio(ciudad, direccion, destinatario);
-        Compra compra = Compra.iniciar(compradorId, direccionEnvio);
+        Compra compra = Compra.abrirCarrito(UUID.randomUUID().toString(), compradorId);
 
         // Primera pasada: validar todo SIN modificar nada
         List<Presentacion> presentaciones = new ArrayList<>();

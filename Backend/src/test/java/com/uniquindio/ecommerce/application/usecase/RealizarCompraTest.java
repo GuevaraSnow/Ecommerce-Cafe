@@ -48,7 +48,7 @@ class RealizarCompraTest {
     }
 
     private Compra comprar(List<RealizarCompra.ItemSolicitado> items) {
-        return realizarCompra.ejecutar("comprador-1", items, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+        return realizarCompra.ejecutar("comprador-1", items);
     }
 
     @Test
@@ -125,16 +125,6 @@ class RealizarCompraTest {
     void noSePuedeRealizarUnaCompraSinItems() {
         assertThrows(ReglaDominioException.class, () -> comprar(List.of()));
         assertThrows(ReglaDominioException.class, () -> comprar(null));
-    }
-
-    @Test
-    void unaDireccionInvalidaImpideLaCompraYNoTocaElStock() {
-        Presentacion presentacion = presentacionDisponible("pres-1", 10, 50000);
-
-        assertThrows(ReglaDominioException.class, () -> realizarCompra.ejecutar(
-                "comprador-1", List.of(item("pres-1", 3)), "   ", "Calle 10 # 5-20", "Carlos Perez"));
-
-        assertEquals(new Cantidad(10, "kg"), presentacion.getCantidadDisponible());
     }
 
     @Test

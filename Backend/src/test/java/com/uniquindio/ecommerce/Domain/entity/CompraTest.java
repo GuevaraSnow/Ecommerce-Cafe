@@ -21,34 +21,35 @@ class CompraTest {
     }
 
     private Compra compraValida() {
-        return Compra.iniciar("comprador-1", direccionValida());
+        return Compra.abrirCarrito(java.util.UUID.randomUUID().toString(), "comprador-1");
     }
 
     @Test
-    void dosComprasConLosMismosDatosNoSonLaMismaPorqueElIdEsUnico() {
-        Compra primera = compraValida();
-        Compra segunda = compraValida();
+    void dosCarritosDelMismoCompradorConDistintoIdNoSonLaMismaCompra() {
+        Compra primera = Compra.abrirCarrito("compra-1", "comprador-1");
+        Compra segunda = Compra.abrirCarrito("compra-2", "comprador-1");
 
         assertNotEquals(primera, segunda);
-        assertNotEquals(primera.getId(), segunda.getId());
     }
 
     @Test
-    void noSePuedeIniciarUnaCompraSinComprador() {
-        assertThrows(ReglaDominioException.class, () -> Compra.iniciar("   ", direccionValida()));
+    void noSePuedeAbrirUnCarritoSinComprador() {
+        assertThrows(ReglaDominioException.class, () -> Compra.abrirCarrito("compra-1", "   "));
     }
 
     @Test
-    void noSePuedeIniciarUnaCompraSinDireccionDeEnvio() {
-        assertThrows(ReglaDominioException.class, () -> Compra.iniciar("comprador-1", null));
+    void noSePuedeAbrirUnCarritoSinIdentificador() {
+        assertThrows(ReglaDominioException.class, () -> Compra.abrirCarrito(null, "comprador-1"));
+        assertThrows(ReglaDominioException.class, () -> Compra.abrirCarrito(" ", "comprador-1"));
     }
 
     @Test
-    void unaCompraRecienIniciadaEstaPendienteYSinDetalles() {
+    void unCarritoRecienAbiertoEstaPendienteSinDetallesNiDireccion() {
         Compra compra = compraValida();
 
         assertEquals(EstadoDeCompra.PENDIENTE, compra.getEstado());
         assertTrue(compra.getDetalles().isEmpty());
+        assertTrue(compra.getDireccionEnvio().isEmpty());
         assertTrue(compra.getFechaEntrega().isEmpty());
     }
 
@@ -96,7 +97,7 @@ class CompraTest {
         assertEquals("compra-1", compra.getId());
         assertEquals("comprador-1", compra.getCompradorId());
         assertEquals(LocalDate.of(2026, 10, 15), compra.getFechaCompra());
-        assertEquals(direccionValida(), compra.getDireccionEnvio());
+        assertEquals(direccionValida(), compra.getDireccionEnvio().orElseThrow());
         assertEquals(List.of(detalle), compra.getDetalles());
         assertEquals(EstadoDeCompra.ENTREGADA, compra.getEstado());
         assertEquals(entregada, compra.getFechaEntrega().orElseThrow());

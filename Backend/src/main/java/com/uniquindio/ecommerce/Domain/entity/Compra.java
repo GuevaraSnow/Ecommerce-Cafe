@@ -13,21 +13,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Raíz del agregado Compra: un pedido de Presentaciones con su Dirección de
- * Envío, sus Detalles (cada uno con el precio congelado) y su tramo logístico
- * (Confirmada, Enviada, Entregada). Las Presentaciones se referencian por id.
+ * Raíz del agregado Compra: un pedido de Presentaciones con sus Detalles (cada
+ * uno con el precio congelado), su Dirección de Envío y su tramo logístico.
+ * Mientras está PENDIENTE la Compra es el carrito del Comprador; la Dirección
+ * de Envío se fija al confirmarla. Las Presentaciones se referencian por id.
  */
 public class Compra {
 
     private final String id;
     private final String compradorId;
     private final LocalDate fechaCompra;
-    private final DireccionDeEnvio direccionEnvio;
     private final List<DetalleDeCompra> detalles;
     private EstadoDeCompra estado;
+    private DireccionDeEnvio direccionEnvio;
     private LocalDateTime fechaEntrega;
 
     private Compra(String id, String compradorId, LocalDate fechaCompra, DireccionDeEnvio direccionEnvio,
@@ -42,19 +42,18 @@ public class Compra {
     }
 
     /**
-     * Inicia una Compra pendiente, sin detalles, para un Comprador y una Dirección de Envío.
+     * Abre el carrito de un Comprador: una Compra PENDIENTE, vacía y aún sin Dirección de Envío.
      *
-     * @throws ReglaDominioException si falta el comprador o la dirección de envío
+     * @throws ReglaDominioException si falta el identificador o el comprador
      */
-    public static Compra iniciar(String compradorId, DireccionDeEnvio direccionEnvio) {
+    public static Compra abrirCarrito(String id, String compradorId) {
+        if (id == null || id.isBlank()) {
+            throw new ReglaDominioException("La compra debe tener un identificador");
+        }
         if (compradorId == null || compradorId.isBlank()) {
             throw new ReglaDominioException("La compra debe estar asociada a un comprador");
         }
-        if (direccionEnvio == null) {
-            throw new ReglaDominioException("La compra debe tener una direccion de envio");
-        }
-        return new Compra(UUID.randomUUID().toString(), compradorId, LocalDate.now(), direccionEnvio,
-                List.of(), EstadoDeCompra.PENDIENTE, null);
+        return new Compra(id, compradorId, LocalDate.now(), null, List.of(), EstadoDeCompra.PENDIENTE, null);
     }
 
     /**
@@ -73,15 +72,22 @@ public class Compra {
         detalles.add(new DetalleDeCompra(id, presentacionId, precioCongelado, cantidad));
     }
 
-    /** Confirma una Compra pendiente con al menos un detalle; no puede confirmarse dos veces. */
-    public void confirmar() {
+    /**
+     * Confirma el carrito: exige al menos un detalle y fija la Dirección de Envío.
+     * Una Compra no puede confirmarse dos veces.
+     */
+    public void confirmar(DireccionDeEnvio direccionEnvio) {
         if (estado != EstadoDeCompra.PENDIENTE) {
             throw new ReglaDominioException("Solo se puede confirmar una compra pendiente (estado actual: " + estado + ")");
         }
         if (detalles.isEmpty()) {
             throw new ReglaDominioException("No se puede confirmar una compra sin detalles");
         }
+        if (direccionEnvio == null) {
+            throw new ReglaDominioException("Para confirmar la compra se necesita una direccion de envio");
+        }
         cambiarEstado(EstadoDeCompra.CONFIRMADA);
+        this.direccionEnvio = direccionEnvio;
     }
 
     public boolean puedeCancelarse() {
@@ -150,8 +156,9 @@ public class Compra {
         return fechaCompra;
     }
 
-    public DireccionDeEnvio getDireccionEnvio() {
-        return direccionEnvio;
+    /** Vacía mientras la Compra sea un carrito sin confirmar. */
+    public Optional<DireccionDeEnvio> getDireccionEnvio() {
+        return Optional.ofNullable(direccionEnvio);
     }
 
     public List<DetalleDeCompra> getDetalles() {

@@ -50,7 +50,7 @@ class CancelarCompraTest {
 
     private Compra comprar(List<RealizarCompra.ItemSolicitado> items) {
         return new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
-                "comprador-1", items, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+                "comprador-1", items);
     }
 
     private RealizarCompra.ItemSolicitado item(String presentacionId, double kg) {
@@ -81,7 +81,7 @@ class CancelarCompraTest {
     @Test
     void noSePuedeCancelarUnaCompraYaEnviadaYElStockNoCambia() {
         Compra compra = comprar(List.of(item("pres-1", 3)));
-        compra.confirmar();
+        compra.confirmar(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
         compra.enviar();
 
         assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(compra.getId()));
@@ -103,7 +103,7 @@ class CancelarCompraTest {
     @Test
     void cancelarUnaCompraConfirmadaTambienDevuelveElStock() {
         Compra compra = comprar(List.of(item("pres-1", 3)));
-        compra.confirmar();
+        compra.confirmar(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
 
         cancelarCompra.ejecutar(compra.getId());
 
@@ -123,8 +123,7 @@ class CancelarCompraTest {
 
     @Test
     void siUnaPresentacionDelDetalleNoExisteNoSeCancelaNadaNiSeTocaElStock() {
-        Compra manual = Compra.iniciar("comprador-1",
-                new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
+        Compra manual = Compra.abrirCarrito("compra-manual", "comprador-1");
         manual.agregarDetalle("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
         manual.agregarDetalle("fantasma", new Precio(1000, "COP"), new Cantidad(1, "kg"));
         repositorioCompra.guardar(manual);

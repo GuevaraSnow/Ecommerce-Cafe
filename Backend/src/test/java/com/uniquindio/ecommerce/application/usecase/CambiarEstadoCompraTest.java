@@ -39,10 +39,9 @@ class CambiarEstadoCompraTest {
 
         Compra compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
                 "comprador-1",
-                List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))),
-                "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+                List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))));
         compraId = compra.getId();
-        new ConfirmarCompra(repositorioCompra).ejecutar(compraId);
+        new ConfirmarCompra(repositorioCompra).ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
         cambiarEstadoCompra = new CambiarEstadoCompra(repositorioCompra);
     }
 

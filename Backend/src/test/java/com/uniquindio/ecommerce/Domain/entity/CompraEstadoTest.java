@@ -13,18 +13,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CompraEstadoTest {
 
+    private static final DireccionDeEnvio DIRECCION = new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez");
     private static final LocalDateTime FECHA_DE_ENTREGA = LocalDateTime.of(2026, 10, 20, 15, 30);
 
     private Compra compraConDetalle() {
-        Compra compra = Compra.iniciar("comprador-1",
-                new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
+        Compra compra = Compra.abrirCarrito("compra-1", "comprador-1");
         compra.agregarDetalle("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
         return compra;
     }
 
     private Compra compraEnviada() {
         Compra compra = compraConDetalle();
-        compra.confirmar();
+        compra.confirmar(DIRECCION);
         compra.enviar();
         return compra;
     }
@@ -33,7 +33,7 @@ class CompraEstadoTest {
     void confirmarPasaLaCompraDePendienteAConfirmada() {
         Compra compra = compraConDetalle();
 
-        compra.confirmar();
+        compra.confirmar(DIRECCION);
 
         assertEquals(EstadoDeCompra.CONFIRMADA, compra.getEstado());
     }
@@ -41,25 +41,24 @@ class CompraEstadoTest {
     @Test
     void unaMismaCompraNoPuedeConfirmarseDosVeces() {
         Compra compra = compraConDetalle();
-        compra.confirmar();
+        compra.confirmar(DIRECCION);
 
-        assertThrows(ReglaDominioException.class, compra::confirmar);
+        assertThrows(ReglaDominioException.class, () -> compra.confirmar(DIRECCION));
         assertEquals(EstadoDeCompra.CONFIRMADA, compra.getEstado());
     }
 
     @Test
     void noSePuedeConfirmarUnaCompraSinDetalles() {
-        Compra vacia = Compra.iniciar("comprador-1",
-                new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
+        Compra vacia = Compra.abrirCarrito("compra-vacia", "comprador-1");
 
-        assertThrows(ReglaDominioException.class, vacia::confirmar);
+        assertThrows(ReglaDominioException.class, () -> vacia.confirmar(DIRECCION));
         assertEquals(EstadoDeCompra.PENDIENTE, vacia.getEstado());
     }
 
     @Test
     void despuesDeConfirmadaYaNoSePuedenAgregarDetalles() {
         Compra compra = compraConDetalle();
-        compra.confirmar();
+        compra.confirmar(DIRECCION);
 
         assertThrows(ReglaDominioException.class,
                 () -> compra.agregarDetalle("presentacion-2", new Precio(30000, "COP"), new Cantidad(1, "kg")));
@@ -78,7 +77,7 @@ class CompraEstadoTest {
     @Test
     void sePuedeCancelarUnaCompraConfirmadaMientrasNoSeHayaEnviado() {
         Compra compra = compraConDetalle();
-        compra.confirmar();
+        compra.confirmar(DIRECCION);
 
         assertTrue(compra.puedeCancelarse());
         compra.cancelar();
@@ -124,7 +123,7 @@ class CompraEstadoTest {
     @Test
     void noSePuedeEntregarUnaCompraQueNoFueEnviada() {
         Compra compra = compraConDetalle();
-        compra.confirmar();
+        compra.confirmar(DIRECCION);
 
         assertThrows(ReglaDominioException.class, () -> compra.entregar(FECHA_DE_ENTREGA));
         assertTrue(compra.getFechaEntrega().isEmpty());
@@ -154,5 +153,23 @@ class CompraEstadoTest {
         assertThrows(ReglaDominioException.class, () -> compra.entregar(null));
         assertEquals(EstadoDeCompra.ENVIADA, compra.getEstado());
         assertTrue(compra.getFechaEntrega().isEmpty());
+    }
+
+    @Test
+    void confirmarFijaLaDireccionDeEnvio() {
+        Compra compra = compraConDetalle();
+
+        compra.confirmar(DIRECCION);
+
+        assertEquals(DIRECCION, compra.getDireccionEnvio().orElseThrow());
+    }
+
+    @Test
+    void noSePuedeConfirmarSinDireccionDeEnvioYSigueSiendoUnCarrito() {
+        Compra compra = compraConDetalle();
+
+        assertThrows(ReglaDominioException.class, () -> compra.confirmar(null));
+        assertEquals(EstadoDeCompra.PENDIENTE, compra.getEstado());
+        assertTrue(compra.getDireccionEnvio().isEmpty());
     }
 }
