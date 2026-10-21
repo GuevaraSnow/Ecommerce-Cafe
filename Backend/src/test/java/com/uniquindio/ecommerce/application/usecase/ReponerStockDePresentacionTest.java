@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.NoSuchElementException;
 
 import static com.uniquindio.ecommerce.application.usecase.PresentacionesDePrueba.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,10 +58,10 @@ class ReponerStockDePresentacionTest {
     }
 
     @Test
-    void lanzaExcepcionSiLaPresentacionNoExisteYNoLlamaAlServicio() {
+    void lanzaNoEncontradoSiLaPresentacionNoExisteYNoLlamaAlServicio() {
         when(repositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
 
-        assertThrows(ReglaDominioException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> reponerStock.ejecutar("no-existe", new Cantidad(30, "kg")));
 
         verify(servicioDeReposicion, never()).reponer(any(), any());
