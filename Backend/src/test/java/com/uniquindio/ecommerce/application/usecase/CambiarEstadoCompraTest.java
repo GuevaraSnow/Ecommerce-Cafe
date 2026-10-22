@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
+import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
 import com.uniquindio.ecommerce.Domain.valueobject.ImagenDePresentacion;
@@ -27,21 +28,12 @@ class CambiarEstadoCompraTest {
 
     @BeforeEach
     void preparar() {
-        PresentacionRepositorioMemoria repositorioPresentacion = new PresentacionRepositorioMemoria();
         repositorioCompra = new CompraRepositorioMemoria();
-        Presentacion presentacion = Presentacion.publicar(
-                "pres-1", "vendedor-1", "LOT-2026-001", null,
-                "Cafe verde", TipoDePresentacion.CAFE_VERDE,
-                new Precio(50000, "COP"), new Cantidad(10, "kg"),
-                new Galeria(List.of(new ImagenDePresentacion("https://img.cafe/1.jpg", true))),
-                null, RolVendedor.CAFICULTOR, null, null, null);
-        repositorioPresentacion.guardar(presentacion);
-
-        Compra compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
-                "comprador-1",
-                List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))));
+        Compra compra = Compra.abrirCarrito("compra-1", "comprador-1");
+        compra.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+        compra.confirmar(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
+        repositorioCompra.guardar(compra);
         compraId = compra.getId();
-        new ConfirmarCompra(repositorioCompra).ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
         cambiarEstadoCompra = new CambiarEstadoCompra(repositorioCompra);
     }
 
