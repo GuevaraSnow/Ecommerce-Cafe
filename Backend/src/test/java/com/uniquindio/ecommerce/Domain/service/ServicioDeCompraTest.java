@@ -8,6 +8,7 @@ import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositor
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -168,5 +169,64 @@ class ServicioDeCompraTest {
         assertThrows(ReglaDominioException.class, () -> servicio.cancelar(carrito));
 
         assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
+    }
+
+    private static final LocalDate HOY = LocalDate.of(2026, 10, 22);
+
+    @Test
+    void agregarAlCarritoCongelaElPrecioVigenteSinDescontarStock() {
+        primera.programarDescuento(new Descuento(20, HOY.minusDays(1), HOY.plusDays(1)));
+
+        servicio.agregarAlCarrito(carrito, primera, new Cantidad(3, "kg"), HOY);
+
+        assertEquals(new Precio(40000, "COP"), carrito.getDetalles().get(0).precioCongelado());
+        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
+    }
+
+    @Test
+    void noSePuedeAgregarMasDeLoQueHayEnStockYElCarritoNoCambia() {
+        assertThrows(ReglaDominioException.class,
+                () -> servicio.agregarAlCarrito(carrito, primera, new Cantidad(11, "kg"), HOY));
+
+        assertTrue(carrito.getDetalles().isEmpty());
+    }
+
+    @Test
+    void elStockSeVerificaContraElTotalQueQuedariaEnElCarrito() {
+        servicio.agregarAlCarrito(carrito, primera, new Cantidad(6, "kg"), HOY);
+
+        assertThrows(ReglaDominioException.class,
+                () -> servicio.agregarAlCarrito(carrito, primera, new Cantidad(6, "kg"), HOY));
+
+        assertEquals(new Cantidad(6, "kg"), carrito.cantidadDe("pres-1").orElseThrow());
+    }
+
+    @Test
+    void agregarExactamenteElStockDisponibleSiSePuede() {
+        servicio.agregarAlCarrito(carrito, primera, new Cantidad(4, "kg"), HOY);
+        servicio.agregarAlCarrito(carrito, primera, new Cantidad(6, "kg"), HOY);
+
+        assertEquals(new Cantidad(10, "kg"), carrito.cantidadDe("pres-1").orElseThrow());
+    }
+
+    @Test
+    void noSePuedeAgregarUnaPresentacionQueNoEstaALaVenta() {
+        primera.desactivar();
+
+        assertThrows(ReglaDominioException.class,
+                () -> servicio.agregarAlCarrito(carrito, primera, new Cantidad(1, "kg"), HOY));
+
+        assertTrue(carrito.getDetalles().isEmpty());
+    }
+
+    @Test
+    void unaCompraConfirmadaYaNoAceptaPresentacionesNuevas() {
+        servicio.agregarAlCarrito(carrito, primera, new Cantidad(1, "kg"), HOY);
+        servicio.confirmar(carrito, DIRECCION);
+
+        assertThrows(ReglaDominioException.class,
+                () -> servicio.agregarAlCarrito(carrito, segunda, new Cantidad(1, "kg"), HOY));
+
+        assertEquals(1, carrito.getDetalles().size());
     }
 }

@@ -4,10 +4,12 @@ import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
 import com.uniquindio.ecommerce.Domain.valueobject.DetalleDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -22,6 +24,24 @@ public class ServicioDeCompra {
 
     public ServicioDeCompra(PresentacionRepositorio presentacionRepositorio) {
         this.presentacionRepositorio = presentacionRepositorio;
+    }
+
+    /**
+     * Agrega una Presentación al carrito congelando su precio vigente (con el Descuento
+     * por temporada si rige ese día). Verifica, sin descontar nada, que la Presentación
+     * esté a la venta y que su stock alcance para el total que quedaría en el carrito:
+     * si ya hay 6 kg y se agregan 6 más con 11 en stock, se rechaza. Al confirmar se
+     * vuelve a verificar, por si alguien compró antes.
+     *
+     * @throws ReglaDominioException si la Presentación no está a la venta, el stock no alcanza
+     *                               o la Compra ya no es un carrito; en ese caso el carrito no cambia
+     */
+    public void agregarAlCarrito(Compra carrito, Presentacion presentacion, Cantidad cantidad, LocalDate hoy) {
+        Cantidad totalEnCarrito = carrito.cantidadDe(presentacion.getId())
+                .map(enCarrito -> enCarrito.sumar(cantidad))
+                .orElse(cantidad);
+        presentacion.verificarQueSePuedeVender(totalEnCarrito);
+        carrito.agregarPresentacion(presentacion.getId(), presentacion.precioVigente(hoy), cantidad);
     }
 
     /**
