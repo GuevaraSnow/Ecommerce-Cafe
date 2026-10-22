@@ -3,11 +3,13 @@ package com.uniquindio.ecommerce.infrastructure.persistence;
 import com.uniquindio.ecommerce.Domain.entity.SolicitudReembolso;
 import com.uniquindio.ecommerce.Domain.repository.SolicitudReembolsoRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeReembolso;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Repository
 public class SolicitudReembolsoRepositorioMemoria implements SolicitudReembolsoRepositorio {
 
     private final Map<String, SolicitudReembolso> solicitudes = new HashMap<>();
