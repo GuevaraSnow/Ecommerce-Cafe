@@ -63,6 +63,18 @@ class ServicioDeCompraTest {
     }
 
     @Test
+    void conStockInsuficienteEnElSegundoItemNoSeDescuentaNadaDelPrimero() {
+        carrito.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+        carrito.agregarPresentacion("pres-2", new Precio(50000, "COP"), new Cantidad(8, "kg"));
+
+        assertThrows(ReglaDominioException.class, () -> servicio.confirmar(carrito, DIRECCION));
+
+        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
+        assertEquals(new Cantidad(5, "kg"), segunda.getCantidadDisponible());
+        assertEquals(EstadoDeCompra.PENDIENTE, carrito.getEstado());
+    }
+
+    @Test
     void siUnaPresentacionYaNoEstaALaVentaNoSeConfirmaNiSeDescuentaNada() {
         carrito.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
         primera.desactivar();
