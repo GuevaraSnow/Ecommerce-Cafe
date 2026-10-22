@@ -53,12 +53,22 @@ Implementadas en el código:
 - Al entregar una Compra se registra la fecha y hora de entrega (`Compra.entregar(fechaHora)`).
 - Una Compra se cancela sin costo mientras no se haya enviado (`Compra.cancelar()`); las transiciones
   de estado siguen un flujo válido (`EstadoDeCompra.puedeTransicionarA()`).
+- El reembolso de café físico es **por Presentación**: pedir el de todo el carrito crea una solicitud
+  por cada una. Solo lo pide quien hizo la Compra, sobre una Compra ENTREGADA, dentro de las 48 horas
+  siguientes a la entrega (las 48 h exactas todavía cuentan) y para una Presentación que está en la
+  Compra (`Compra.verificarQueSePuedeReembolsar()` + `ServicioDeReembolso.solicitar()`).
+- No puede haber otra solicitud pendiente o aprobada de la misma Presentación en la misma Compra; si se
+  la rechazaron, se puede volver a pedir dentro de las 48 h (`SolicitudReembolsoRepositorio.existeSolicitudVigente()`).
+- Solo el vendedor dueño de la Presentación aprueba o rechaza la solicitud, y una sola vez
+  (`SolicitudReembolso.aprobar()` / `rechazar()`).
+- La Compra pasa a REEMBOLSADA solo cuando todas sus Presentaciones tienen el reembolso aprobado; con un
+  reembolso parcial (por ejemplo 3 de 4) sigue ENTREGADA. El stock no se devuelve: el café ya se
+  entregó (`ServicioDeReembolso.aprobar()` + `Compra.reembolsar()`).
 - Un Comprador no puede comprar un Curso que ya tiene activo (`ComprarCurso`).
 - Un Curso solo se reembolsa dentro de 48 h y antes de acceder al contenido (`Inscripcion`); el
   contenido solo es accesible con una Inscripción vigente (`AccederLeccion`).
 - Un Lote solo puede estar en estado Verde o Pergamino (`Lote.registrar()`).
 - Un Comprador debe ser mayor de edad al registrarse (`Comprador`, 18 años).
 
-Pendientes (diseñadas, aún no implementadas): reembolso
-de café físico dentro de 48 h tras la entrega, y la restricción de derivados alcohólicos a mayores de edad
+Pendientes (diseñadas, aún no implementadas): la restricción de derivados alcohólicos a mayores de edad
 al comprar.

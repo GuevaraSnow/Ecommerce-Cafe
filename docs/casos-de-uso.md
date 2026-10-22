@@ -39,6 +39,9 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `CancelarCompra` | Comprador | Cancela una Compra antes del envío; `ServicioDeCompra` repone el stock si ya estaba confirmada | `CompraRepositorio`, `PresentacionRepositorio` |
 | `MarcarEnviada` | Vendedor | Marca como enviada una Compra confirmada | `CompraRepositorio` |
 | `MarcarEntregada` | Vendedor | Marca como entregada una Compra enviada y registra la fecha y hora de entrega | `CompraRepositorio` |
+| `SolicitarReembolso` | Comprador | Pide el reembolso de una Presentación de una Compra entregada; `ServicioDeReembolso` exige que sea quien compró, dentro de las 48 h, que la Presentación esté en la Compra y que no haya otra solicitud vigente de ella | `CompraRepositorio`, `PresentacionRepositorio`, `SolicitudReembolsoRepositorio` |
+| `AprobarReembolso` | Vendedor | Aprueba el reembolso de una de sus Presentaciones; `ServicioDeReembolso` pasa la Compra a REEMBOLSADA solo cuando todas sus Presentaciones quedan aprobadas | `SolicitudReembolsoRepositorio`, `CompraRepositorio` |
+| `RechazarReembolso` | Vendedor | Rechaza el reembolso de una de sus Presentaciones (solo el dueño, una sola vez); la Compra no cambia | `SolicitudReembolsoRepositorio` |
 | `DejarResena` | Comprador | Deja una Reseña (Calificación de 1 a 5 y texto) de una Presentación que adquirió; `VerificadorDeCompra` exige la Compra entregada y que no la haya reseñado antes | `PresentacionRepositorio`, `ResenaRepositorio`, `CompraRepositorio` |
 | `ResponderResena` | Vendedor | Responde una Reseña de una de sus Presentaciones (solo el dueño, una sola vez) | `ResenaRepositorio` |
 
@@ -74,17 +77,16 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `CompradorRepositorio` | `existePorEmail`, `buscarPorEmail`, `guardar` | `CompradorRepositorioMemoria` |
 | `CursoRepositorio` | `buscarPorId`, `guardar` | `CursoRepositorioMemoria` |
 | `InscripcionRepositorio` | `buscarPorId`, `buscarActivaPorCompradorYCurso`, `guardar` | `InscripcionRepositorioMemoria` |
-| `SolicitudReembolsoRepositorio` | `buscarPorId`, `guardar` | `SolicitudReembolsoRepositorioMemoria` |
+| `SolicitudReembolsoRepositorio` | `buscarPorId`, `guardar`, `existeSolicitudVigente`, `existeSolicitudAprobada` | `SolicitudReembolsoRepositorioMemoria` |
 | `ResenaRepositorio` | `buscarPorId`, `guardar`, `existeResenaDe` | `ResenaRepositorioMemoria` |
 
 ## Notas
 
 - `RegistrarFinca` existe en el código pero no usa ningún Repository: crea la Finca y no la guarda.
 - Diseñados en el modelado pero aún no implementados:
-  `SolicitarReembolso` (café físico), `GestionarReembolso`, `EnviarNotificacion`,
-  `MarcarNotificacionLeida`.
+  `EnviarNotificacion`, `MarcarNotificacionLeida`.
 - Los casos de uso solo coordinan. Cuando una regla cruza agregados la resuelve un Domain Service
-  (`Domain/service`): `ServicioDePublicacion`, `ServicioDeReposicion`, `ServicioDeBajaDePresentacion`, `ServicioDeCompra` y `VerificadorDeCompra`.
+  (`Domain/service`): `ServicioDePublicacion`, `ServicioDeReposicion`, `ServicioDeBajaDePresentacion`, `ServicioDeCompra`, `ServicioDeReembolso` y `VerificadorDeCompra`.
   Hoy `RestablecerContrasena` (valida el código) todavía contiene una decisión que debería vivir
   en el dominio.
 - Un caso de uso por operación: no hay un "actualizar" genérico con campos opcionales.

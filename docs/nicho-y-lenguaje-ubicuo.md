@@ -168,6 +168,20 @@ Resena resena = Resena.dejar(id, compradorId, presentacionId, presentacion.getVe
 resena.responder(vendedorId, new TextoDeResena("Gracias por tu compra"), LocalDateTime.now());
 ```
 
+### Reembolso de café físico
+**Definición:** Devolución del dinero de **una Presentación** de una Compra entregada, pedida por quien
+compró dentro de las 48 horas siguientes a la entrega. Pedir el de todo el carrito crea una Solicitud de
+Reembolso por cada Presentación, y cada vendedor aprueba o rechaza solo las suyas. La Compra queda
+**Reembolsada** solo cuando se aprueban todas sus Presentaciones; con un reembolso parcial sigue
+**Entregada**. El stock no se devuelve.
+**Ejemplo:** Ana recibe 4 cafés y uno llega húmedo: pide el reembolso de ese, el Tostador lo aprueba y la
+Compra sigue Entregada.
+```java
+SolicitudReembolso solicitud = servicioDeReembolso.solicitar(id, compra, compradorId, presentacion,
+        "Llegó húmedo", LocalDateTime.now());
+servicioDeReembolso.aprobar(solicitud, compra, vendedorId, LocalDateTime.now());
+```
+
 ### Ficha de Origen
 **Definición:** Reconstrucción de la historia de una Presentación recorriendo la cadena hacia atrás:
 Finca → Cosecha → Lote → Transformación. Es de solo lectura, no se persiste.

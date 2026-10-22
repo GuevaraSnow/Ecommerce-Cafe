@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.infrastructure.config;
 
 import com.uniquindio.ecommerce.Domain.service.ServicioDeCompra;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeReembolso;
 import com.uniquindio.ecommerce.Domain.service.VerificadorDeCompra;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,13 @@ class ConfigCompraTest {
     @Autowired
     private ServicioDeCompra servicioDeCompra;
 
+    @Autowired
+    private ServicioDeReembolso servicioDeReembolso;
+
     @Test
     void springRegistraLosDomainServicesDeCompraComoBeans() {
         assertNotNull(verificadorDeCompra);
         assertNotNull(servicioDeCompra);
+        assertNotNull(servicioDeReembolso);
     }
 }
