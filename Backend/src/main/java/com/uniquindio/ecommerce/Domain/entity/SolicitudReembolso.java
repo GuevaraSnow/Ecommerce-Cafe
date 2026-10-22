@@ -67,17 +67,28 @@ public class SolicitudReembolso {
                 estado, fechaResolucion);
     }
 
-    /** Aprueba la solicitud; solo es posible si sigue SOLICITADA. */
-    public void aprobar(LocalDateTime fechaResolucion) {
-        resolver(EstadoDeReembolso.APROBADO, fechaResolucion);
+    /**
+     * El vendedor dueño de la Presentación aprueba la solicitud; solo es posible si sigue SOLICITADA.
+     *
+     * @throws ReglaDominioException si no es el dueño de la Presentación o la solicitud ya se resolvió
+     */
+    public void aprobar(String vendedorId, LocalDateTime fechaResolucion) {
+        resolver(vendedorId, EstadoDeReembolso.APROBADO, fechaResolucion);
     }
 
-    /** Rechaza la solicitud; solo es posible si sigue SOLICITADA. */
-    public void rechazar(LocalDateTime fechaResolucion) {
-        resolver(EstadoDeReembolso.RECHAZADO, fechaResolucion);
+    /**
+     * El vendedor dueño de la Presentación rechaza la solicitud; solo es posible si sigue SOLICITADA.
+     *
+     * @throws ReglaDominioException si no es el dueño de la Presentación o la solicitud ya se resolvió
+     */
+    public void rechazar(String vendedorId, LocalDateTime fechaResolucion) {
+        resolver(vendedorId, EstadoDeReembolso.RECHAZADO, fechaResolucion);
     }
 
-    private void resolver(EstadoDeReembolso nuevoEstado, LocalDateTime fechaResolucion) {
+    private void resolver(String vendedorId, EstadoDeReembolso nuevoEstado, LocalDateTime fechaResolucion) {
+        if (!this.vendedorId.equals(vendedorId)) {
+            throw new ReglaDominioException("Solo el vendedor dueno de la presentacion puede resolver su reembolso");
+        }
         if (estado != EstadoDeReembolso.SOLICITADO) {
             throw new ReglaDominioException("Solo se puede resolver una Solicitud de Reembolso que este SOLICITADA");
         }

@@ -52,7 +52,7 @@ class SolicitudReembolsoTest {
     void aprobarRegistraLaFechaYHoraDeLaResolucion() {
         SolicitudReembolso solicitud = solicitud();
 
-        solicitud.aprobar(RESUELTA);
+        solicitud.aprobar("vendedor-1", RESUELTA);
 
         assertEquals(EstadoDeReembolso.APROBADO, solicitud.getEstado());
         assertEquals(RESUELTA, solicitud.getFechaResolucion().orElseThrow());
@@ -61,9 +61,9 @@ class SolicitudReembolsoTest {
     @Test
     void unaSolicitudSoloSeResuelveUnaVezYConservaLaPrimeraResolucion() {
         SolicitudReembolso solicitud = solicitud();
-        solicitud.rechazar(RESUELTA);
+        solicitud.rechazar("vendedor-1", RESUELTA);
 
-        assertThrows(ReglaDominioException.class, () -> solicitud.aprobar(RESUELTA.plusHours(1)));
+        assertThrows(ReglaDominioException.class, () -> solicitud.aprobar("vendedor-1", RESUELTA.plusHours(1)));
 
         assertEquals(EstadoDeReembolso.RECHAZADO, solicitud.getEstado());
         assertEquals(RESUELTA, solicitud.getFechaResolucion().orElseThrow());
@@ -73,9 +73,30 @@ class SolicitudReembolsoTest {
     void resolverSinFechaFallaYLaSolicitudSigueSolicitada() {
         SolicitudReembolso solicitud = solicitud();
 
-        assertThrows(ReglaDominioException.class, () -> solicitud.rechazar(null));
+        assertThrows(ReglaDominioException.class, () -> solicitud.rechazar("vendedor-1", null));
 
         assertEquals(EstadoDeReembolso.SOLICITADO, solicitud.getEstado());
+    }
+
+    @Test
+    void otroVendedorNoPuedeAprobarNiRechazarYLaSolicitudSigueSolicitada() {
+        SolicitudReembolso solicitud = solicitud();
+
+        assertThrows(ReglaDominioException.class, () -> solicitud.aprobar("vendedor-2", RESUELTA));
+        assertThrows(ReglaDominioException.class, () -> solicitud.rechazar("vendedor-2", RESUELTA));
+        assertThrows(ReglaDominioException.class, () -> solicitud.aprobar(null, RESUELTA));
+
+        assertEquals(EstadoDeReembolso.SOLICITADO, solicitud.getEstado());
+        assertTrue(solicitud.getFechaResolucion().isEmpty());
+    }
+
+    @Test
+    void elVendedorDuenoPuedeRechazar() {
+        SolicitudReembolso solicitud = solicitud();
+
+        solicitud.rechazar("vendedor-1", RESUELTA);
+
+        assertEquals(EstadoDeReembolso.RECHAZADO, solicitud.getEstado());
     }
 
     @Test
