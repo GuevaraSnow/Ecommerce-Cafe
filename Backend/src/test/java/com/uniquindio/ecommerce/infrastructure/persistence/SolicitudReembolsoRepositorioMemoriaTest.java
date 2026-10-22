@@ -43,6 +43,17 @@ class SolicitudReembolsoRepositorioMemoriaTest {
     }
 
     @Test
+    void existeSolicitudAprobadaSoloCuentaLasAprobadas() {
+        solicitud("reembolso-1", "compra-1", "pres-1");
+        assertFalse(repositorio.existeSolicitudAprobada("compra-1", "pres-1"));
+
+        repositorio.buscarPorId("reembolso-1").orElseThrow().aprobar("vendedor-1", AHORA.plusHours(1));
+
+        assertTrue(repositorio.existeSolicitudAprobada("compra-1", "pres-1"));
+        assertFalse(repositorio.existeSolicitudAprobada("compra-1", "pres-2"));
+    }
+
+    @Test
     void noCuentaLasSolicitudesDeOtraCompraNiDeOtraPresentacion() {
         solicitud("reembolso-1", "compra-2", "pres-1");
         solicitud("reembolso-2", "compra-1", "pres-2");

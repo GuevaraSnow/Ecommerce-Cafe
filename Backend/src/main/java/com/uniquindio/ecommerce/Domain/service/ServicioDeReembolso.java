@@ -39,4 +39,25 @@ public class ServicioDeReembolso {
         return SolicitudReembolso.solicitar(id, compra.getId(), presentacion.getId(), presentacion.getVendedorId(),
                 motivo, momento);
     }
+
+    /**
+     * El vendedor dueño de la Presentación aprueba la solicitud. Si con esta aprobación todas las
+     * Presentaciones de la Compra quedan reembolsadas, la Compra pasa a REEMBOLSADA; con un
+     * reembolso parcial (por ejemplo 3 de 4) la Compra sigue ENTREGADA. El stock no se devuelve.
+     *
+     * @throws ReglaDominioException si no es el dueño, la solicitud ya se resolvió o no es de esa Compra;
+     *                               en ese caso nada cambia
+     */
+    public void aprobar(SolicitudReembolso solicitud, Compra compra, String vendedorId, LocalDateTime momento) {
+        if (!solicitud.getCompraId().equals(compra.getId())) {
+            throw new ReglaDominioException("La solicitud de reembolso no pertenece a esta compra");
+        }
+        solicitud.aprobar(vendedorId, momento);
+        boolean todasReembolsadas = compra.getDetalles().stream()
+                .allMatch(detalle -> detalle.presentacionId().equals(solicitud.getPresentacionId())
+                        || solicitudReembolsoRepositorio.existeSolicitudAprobada(compra.getId(), detalle.presentacionId()));
+        if (todasReembolsadas) {
+            compra.reembolsar();
+        }
+    }
 }

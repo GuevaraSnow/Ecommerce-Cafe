@@ -29,4 +29,12 @@ public class SolicitudReembolsoRepositorioMemoria implements SolicitudReembolsoR
                         && solicitud.getPresentacionId().equals(presentacionId)
                         && solicitud.getEstado() != EstadoDeReembolso.RECHAZADO);
     }
+
+    @Override
+    public boolean existeSolicitudAprobada(String compraId, String presentacionId) {
+        return solicitudes.values().stream()
+                .anyMatch(solicitud -> solicitud.getCompraId().equals(compraId)
+                        && solicitud.getPresentacionId().equals(presentacionId)
+                        && solicitud.getEstado() == EstadoDeReembolso.APROBADO);
+    }
 }

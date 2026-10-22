@@ -15,4 +15,7 @@ public interface SolicitudReembolsoRepositorio {
      * (una rechazada no cuenta: se puede volver a pedir).
      */
     boolean existeSolicitudVigente(String compraId, String presentacionId);
+
+    /** Indica si esa Presentación de esa Compra ya tiene su reembolso APROBADO. */
+    boolean existeSolicitudAprobada(String compraId, String presentacionId);
 }

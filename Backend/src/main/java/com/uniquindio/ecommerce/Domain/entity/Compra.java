@@ -192,6 +192,19 @@ public class Compra {
     }
 
     /**
+     * Marca la Compra como REEMBOLSADA. Lo decide ServicioDeReembolso cuando todas sus
+     * Presentaciones tienen reembolso aprobado; con un reembolso parcial la Compra sigue ENTREGADA.
+     *
+     * @throws ReglaDominioException si la Compra no está ENTREGADA
+     */
+    public void reembolsar() {
+        if (estado != EstadoDeCompra.ENTREGADA) {
+            throw new ReglaDominioException("Solo se puede reembolsar una compra entregada (estado actual: " + estado + ")");
+        }
+        cambiarEstado(EstadoDeCompra.REEMBOLSADA);
+    }
+
+    /**
      * Verifica, sin modificar nada, que se puede pedir el reembolso de esa Presentación:
      * lo pide quien hizo la Compra, la Compra está ENTREGADA, el momento cae dentro de las
      * 48 horas siguientes a la entrega (las 48 h exactas todavía cuentan) y la Presentación

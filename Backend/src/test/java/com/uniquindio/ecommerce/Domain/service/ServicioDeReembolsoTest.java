@@ -104,4 +104,89 @@ class ServicioDeReembolsoTest {
 
         assertEquals(EstadoDeReembolso.SOLICITADO, otraVez.getEstado());
     }
+
+    /** Compra entregada con 4 Presentaciones; cada una con su solicitud de reembolso guardada. */
+    private Compra compraDeCuatro() {
+        Compra cuatro = Compra.abrirCarrito("compra-4", "comprador-1");
+        for (int i = 1; i <= 4; i++) {
+            cuatro.agregarPresentacion("pres-" + i, new Precio(28000, "COP"), new Cantidad(1, "kg"));
+        }
+        cuatro.confirmar(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
+        cuatro.enviar();
+        cuatro.entregar(ENTREGA);
+        for (int i = 1; i <= 4; i++) {
+            solicitudes.guardar(SolicitudReembolso.solicitar("reembolso-" + i, "compra-4", "pres-" + i,
+                    "vendedor-" + i, "Llego humedo", ENTREGA.plusHours(2)));
+        }
+        return cuatro;
+    }
+
+    private void aprobarDe(Compra cuatro, int i) {
+        servicio.aprobar(solicitudes.buscarPorId("reembolso-" + i).orElseThrow(), cuatro, "vendedor-" + i,
+                ENTREGA.plusHours(10));
+    }
+
+    @Test
+    void siLaCompraTieneUnaSolaPresentacionAprobarlaPasaLaCompraAReembolsada() {
+        SolicitudReembolso solicitud = solicitarYGuardar();
+
+        servicio.aprobar(solicitud, compra, "vendedor-7", ENTREGA.plusHours(5));
+
+        assertEquals(EstadoDeReembolso.APROBADO, solicitud.getEstado());
+        assertEquals(EstadoDeCompra.REEMBOLSADA, compra.getEstado());
+    }
+
+    @Test
+    void conTresDeCuatroAprobadasLaCompraSigueEntregada() {
+        Compra cuatro = compraDeCuatro();
+        for (int i = 1; i <= 3; i++) {
+            aprobarDe(cuatro, i);
+        }
+
+        assertEquals(EstadoDeCompra.ENTREGADA, cuatro.getEstado());
+    }
+
+    @Test
+    void alAprobarLaCuartaLaCompraPasaAReembolsada() {
+        Compra cuatro = compraDeCuatro();
+        for (int i = 1; i <= 4; i++) {
+            aprobarDe(cuatro, i);
+        }
+
+        assertEquals(EstadoDeCompra.REEMBOLSADA, cuatro.getEstado());
+    }
+
+    @Test
+    void unaSolicitudRechazadaNoCuentaParaReembolsarLaCompra() {
+        Compra cuatro = compraDeCuatro();
+        for (int i = 1; i <= 3; i++) {
+            aprobarDe(cuatro, i);
+        }
+        solicitudes.buscarPorId("reembolso-4").orElseThrow().rechazar("vendedor-4", ENTREGA.plusHours(10));
+
+        assertEquals(EstadoDeCompra.ENTREGADA, cuatro.getEstado());
+    }
+
+    @Test
+    void otroVendedorNoPuedeAprobarYNadaCambia() {
+        SolicitudReembolso solicitud = solicitarYGuardar();
+
+        assertThrows(ReglaDominioException.class,
+                () -> servicio.aprobar(solicitud, compra, "vendedor-2", ENTREGA.plusHours(5)));
+
+        assertEquals(EstadoDeReembolso.SOLICITADO, solicitud.getEstado());
+        assertEquals(EstadoDeCompra.ENTREGADA, compra.getEstado());
+    }
+
+    @Test
+    void unaSolicitudDeOtraCompraNoSeApruebaContraEstaCompra() {
+        SolicitudReembolso ajena = SolicitudReembolso.solicitar("reembolso-9", "compra-9", "pres-1", "vendedor-7",
+                "Llego humedo", ENTREGA.plusHours(2));
+
+        assertThrows(ReglaDominioException.class,
+                () -> servicio.aprobar(ajena, compra, "vendedor-7", ENTREGA.plusHours(5)));
+
+        assertEquals(EstadoDeReembolso.SOLICITADO, ajena.getEstado());
+        assertEquals(EstadoDeCompra.ENTREGADA, compra.getEstado());
+    }
 }

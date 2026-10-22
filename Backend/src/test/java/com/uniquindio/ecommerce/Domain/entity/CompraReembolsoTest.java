@@ -79,4 +79,20 @@ class CompraReembolsoTest {
 
         assertEquals(EstadoDeCompra.ENTREGADA, compra.getEstado());
     }
+
+    @Test
+    void unaCompraEntregadaSePuedeMarcarComoReembolsada() {
+        compra.entregar(ENTREGA);
+
+        compra.reembolsar();
+
+        assertEquals(EstadoDeCompra.REEMBOLSADA, compra.getEstado());
+    }
+
+    @Test
+    void unaCompraQueNoEstaEntregadaNoSePuedeMarcarComoReembolsadaYNoCambia() {
+        assertThrows(ReglaDominioException.class, compra::reembolsar);
+
+        assertEquals(EstadoDeCompra.ENVIADA, compra.getEstado());
+    }
 }
