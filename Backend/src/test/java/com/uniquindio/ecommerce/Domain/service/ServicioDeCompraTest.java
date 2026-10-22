@@ -99,4 +99,62 @@ class ServicioDeCompraTest {
 
         assertEquals(EstadoDeCompra.PENDIENTE, conFantasma.getEstado());
     }
+
+    @Test
+    void cancelarUnaCompraConfirmadaReponeElStockDeCadaPresentacion() {
+        carrito.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+        carrito.agregarPresentacion("pres-2", new Precio(50000, "COP"), new Cantidad(2, "kg"));
+        servicio.confirmar(carrito, DIRECCION);
+
+        servicio.cancelar(carrito);
+
+        assertEquals(EstadoDeCompra.CANCELADA, carrito.getEstado());
+        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
+        assertEquals(new Cantidad(5, "kg"), segunda.getCantidadDisponible());
+    }
+
+    @Test
+    void cancelarUnCarritoPendienteNoTocaElStockPorqueNuncaSeDesconto() {
+        carrito.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+
+        servicio.cancelar(carrito);
+
+        assertEquals(EstadoDeCompra.CANCELADA, carrito.getEstado());
+        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
+    }
+
+    @Test
+    void unaPresentacionDadaDeBajaNoRecibeStockDeVueltaYLaCompraSeCancelaIgual() {
+        carrito.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+        servicio.confirmar(carrito, DIRECCION);
+        primera.darDeBaja();
+
+        servicio.cancelar(carrito);
+
+        assertEquals(EstadoDeCompra.CANCELADA, carrito.getEstado());
+        assertEquals(new Cantidad(7, "kg"), primera.getCantidadDisponible());
+    }
+
+    @Test
+    void noSePuedeCancelarUnaCompraEnviadaYElStockNoCambia() {
+        carrito.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+        servicio.confirmar(carrito, DIRECCION);
+        carrito.enviar();
+
+        assertThrows(ReglaDominioException.class, () -> servicio.cancelar(carrito));
+
+        assertEquals(EstadoDeCompra.ENVIADA, carrito.getEstado());
+        assertEquals(new Cantidad(7, "kg"), primera.getCantidadDisponible());
+    }
+
+    @Test
+    void cancelarDosVecesNoReponeElStockDosVeces() {
+        carrito.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
+        servicio.confirmar(carrito, DIRECCION);
+        servicio.cancelar(carrito);
+
+        assertThrows(ReglaDominioException.class, () -> servicio.cancelar(carrito));
+
+        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
+    }
 }

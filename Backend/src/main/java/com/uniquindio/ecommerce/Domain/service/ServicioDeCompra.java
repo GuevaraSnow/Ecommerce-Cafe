@@ -6,6 +6,7 @@ import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.DetalleDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
+import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 
 import java.util.List;
 
@@ -46,6 +47,31 @@ public class ServicioDeCompra {
         for (int i = 0; i < detalles.size(); i++) {
             presentaciones.get(i).descontarCantidad(detalles.get(i).cantidad());
             presentacionRepositorio.guardar(presentaciones.get(i));
+        }
+    }
+
+    /**
+     * Cancela la Compra y, si ya estaba confirmada (el stock se había descontado),
+     * repone el stock de cada Presentación. Un carrito pendiente nunca descontó stock,
+     * así que solo se cancela. Una Presentación dada de baja no recibe stock de vuelta.
+     *
+     * @throws ReglaDominioException si la Compra ya no se puede cancelar; en ese caso nada cambia
+     */
+    public void cancelar(Compra compra) {
+        boolean habiaDescontadoStock = compra.getEstado() == EstadoDeCompra.CONFIRMADA;
+        List<DetalleDeCompra> detalles = compra.getDetalles();
+        List<Presentacion> presentaciones = detalles.stream()
+                .map(detalle -> presentacionRepositorio.buscarPorId(detalle.presentacionId()).orElseThrow())
+                .toList();
+
+        compra.cancelar();
+
+        for (int i = 0; i < detalles.size(); i++) {
+            Presentacion presentacion = presentaciones.get(i);
+            if (habiaDescontadoStock && !presentacion.isEliminada()) {
+                presentacion.reponerCantidad(detalles.get(i).cantidad());
+                presentacionRepositorio.guardar(presentacion);
+            }
         }
     }
 }
