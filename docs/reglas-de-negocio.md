@@ -38,9 +38,15 @@ Implementadas en el código:
 - Cada Presentación ocupa una sola línea del carrito: si se agrega de nuevo, se suma la cantidad (en la
   misma unidad) y se conserva el precio congelado la primera vez (`Compra.agregarPresentacion()`).
 - El precio que se congela es el vigente: con el Descuento por temporada si rige ese día
-  (`Presentacion.precioVigente(hoy)` en `RealizarCompra`).
-- El stock se verifica sobre la cantidad ya sumada de cada Presentación, y si algo no alcanza no se
-  descuenta nada (`RealizarCompra`, todo o nada).
+  (`ServicioDeCompra.agregarAlCarrito()` usa `Presentacion.precioVigente(hoy)`).
+- Al agregar al carrito se verifica, sin descontar nada, que la Presentación esté a la venta y que su
+  stock alcance para el total que quedaría en el carrito (`ServicioDeCompra.agregarAlCarrito()`).
+  Agregar al carrito no aparta stock: gana quien confirma primero.
+- El stock se descuenta al confirmar, no al agregar al carrito. Al confirmar se vuelve a verificar el
+  stock de todos los ítems (por si alguien compró antes) y, si alguno no alcanza, no se descuenta nada
+  (`ServicioDeCompra.confirmar()`, todo o nada).
+- Al cancelar una Compra confirmada se le devuelve el stock a cada Presentación (salvo a las dadas de
+  baja); un carrito pendiente nunca descontó stock, así que solo se cancela (`ServicioDeCompra.cancelar()`).
 - Una misma Compra no puede confirmarse dos veces, y para confirmarla se necesitan al menos un
   detalle y la Dirección de Envío (`Compra.confirmar(direccion)`); recomprar la misma Presentación en
   otro pedido sí.

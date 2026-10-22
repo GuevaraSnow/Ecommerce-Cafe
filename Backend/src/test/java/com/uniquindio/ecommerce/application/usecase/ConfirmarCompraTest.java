@@ -3,80 +3,100 @@ package com.uniquindio.ecommerce.application.usecase;
 import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
 import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
-import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
-import com.uniquindio.ecommerce.Domain.valueobject.ImagenDePresentacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Precio;
-import com.uniquindio.ecommerce.Domain.valueobject.RolVendedor;
-import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
-import com.uniquindio.ecommerce.infrastructure.persistence.CompraRepositorioMemoria;
-import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
+import static com.uniquindio.ecommerce.application.usecase.PresentacionesDePrueba.cafeVerde;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+/** Usa el ServicioDeCompra real: así la prueba cubre el descuento de stock y no solo la delegación. */
+@ExtendWith(MockitoExtension.class)
 class ConfirmarCompraTest {
 
-    private CompraRepositorioMemoria repositorioCompra;
+    private static final DireccionDeEnvio DIRECCION = new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+
+    @Mock
+    private CompraRepositorio compraRepositorio;
+
+    @Mock
+    private PresentacionRepositorio presentacionRepositorio;
+
     private ConfirmarCompra confirmarCompra;
-    private String compraId;
+    private Presentacion presentacion;
+    private Compra carrito;
 
     @BeforeEach
     void preparar() {
-        PresentacionRepositorioMemoria repositorioPresentacion = new PresentacionRepositorioMemoria();
-        repositorioCompra = new CompraRepositorioMemoria();
-        Presentacion presentacion = Presentacion.publicar(
-                "pres-1", "vendedor-1", "LOT-2026-001", null,
-                "Cafe verde", TipoDePresentacion.CAFE_VERDE,
-                new Precio(50000, "COP"), new Cantidad(10, "kg"),
-                new Galeria(List.of(new ImagenDePresentacion("https://img.cafe/1.jpg", true))),
-                null, RolVendedor.CAFICULTOR, null, null, null);
-        repositorioPresentacion.guardar(presentacion);
-
-        Compra compra = new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
-                "comprador-1",
-                List.of(new RealizarCompra.ItemSolicitado("pres-1", new Cantidad(3, "kg"))));
-        compraId = compra.getId();
-        confirmarCompra = new ConfirmarCompra(repositorioCompra);
+        confirmarCompra = new ConfirmarCompra(compraRepositorio, new ServicioDeCompra(presentacionRepositorio));
+        presentacion = cafeVerde("pres-1");
+        carrito = Compra.abrirCarrito("compra-1", "comprador-1");
     }
 
     @Test
-    void confirmarUnaCompraPendienteLaDejaConfirmadaEnElRepositorio() {
-        confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+    void confirmaElCarritoDescuentaElStockYGuardaLaCompra() {
+        carrito.agregarPresentacion("pres-1", new Precio(28000, "COP"), new Cantidad(50, "kg"));
+        when(compraRepositorio.buscarPorId("compra-1")).thenReturn(Optional.of(carrito));
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
 
-        assertEquals(EstadoDeCompra.CONFIRMADA, repositorioCompra.buscarPorId(compraId).orElseThrow().getEstado());
+        confirmarCompra.ejecutar("compra-1", DIRECCION);
+
+        assertEquals(EstadoDeCompra.CONFIRMADA, carrito.getEstado());
+        assertEquals(DIRECCION, carrito.getDireccionEnvio().orElseThrow());
+        assertEquals(new Cantidad(150, "kg"), presentacion.getCantidadDisponible());
+        verify(compraRepositorio).guardar(carrito);
+        verify(presentacionRepositorio).guardar(presentacion);
     }
 
     @Test
-    void confirmarGuardaLaDireccionDeEnvioEnLaCompra() {
-        confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+    void siOtroCompradorDejoElStockCortoNoSeConfirmaNiSeGuardaNada() {
+        carrito.agregarPresentacion("pres-1", new Precio(28000, "COP"), new Cantidad(50, "kg"));
+        presentacion.descontarCantidad(new Cantidad(180, "kg"));
+        when(compraRepositorio.buscarPorId("compra-1")).thenReturn(Optional.of(carrito));
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
 
-        assertEquals(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"),
-                repositorioCompra.buscarPorId(compraId).orElseThrow().getDireccionEnvio().orElseThrow());
-    }
+        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar("compra-1", DIRECCION));
 
-    @Test
-    void unaDireccionInvalidaNoConfirmaLaCompra() {
-        assertThrows(ReglaDominioException.class,
-                () -> confirmarCompra.ejecutar(compraId, "   ", "Calle 10 # 5-20", "Carlos Perez"));
-
-        assertEquals(EstadoDeCompra.PENDIENTE, repositorioCompra.buscarPorId(compraId).orElseThrow().getEstado());
+        assertEquals(EstadoDeCompra.PENDIENTE, carrito.getEstado());
+        assertEquals(new Cantidad(20, "kg"), presentacion.getCantidadDisponible());
+        verify(compraRepositorio, never()).guardar(any());
+        verify(presentacionRepositorio, never()).guardar(any());
     }
 
     @Test
     void noSePuedeConfirmarDosVecesLaMismaCompra() {
-        confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez");
+        carrito.agregarPresentacion("pres-1", new Precio(28000, "COP"), new Cantidad(50, "kg"));
+        when(compraRepositorio.buscarPorId("compra-1")).thenReturn(Optional.of(carrito));
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
+        confirmarCompra.ejecutar("compra-1", DIRECCION);
+        clearInvocations(compraRepositorio, presentacionRepositorio);
 
-        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar(compraId, "Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
+        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar("compra-1", DIRECCION));
+
+        assertEquals(new Cantidad(150, "kg"), presentacion.getCantidadDisponible());
+        verify(compraRepositorio, never()).guardar(any());
     }
 
     @Test
-    void noSePuedeConfirmarUnaCompraInexistente() {
-        assertThrows(ReglaDominioException.class, () -> confirmarCompra.ejecutar("no-existe", "Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
+    void lanzaNoEncontradoSiLaCompraNoExisteYNoGuardaNada() {
+        when(compraRepositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> confirmarCompra.ejecutar("no-existe", DIRECCION));
+
+        verify(compraRepositorio, never()).guardar(any());
     }
 }

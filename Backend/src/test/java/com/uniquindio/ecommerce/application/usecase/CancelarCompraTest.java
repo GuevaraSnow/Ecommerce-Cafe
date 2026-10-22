@@ -3,139 +3,102 @@ package com.uniquindio.ecommerce.application.usecase;
 import com.uniquindio.ecommerce.Domain.entity.Compra;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
 import com.uniquindio.ecommerce.Domain.valueobject.DireccionDeEnvio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
-import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
-import com.uniquindio.ecommerce.Domain.valueobject.ImagenDePresentacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Precio;
-import com.uniquindio.ecommerce.Domain.valueobject.RolVendedor;
-import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
-import com.uniquindio.ecommerce.infrastructure.persistence.CompraRepositorioMemoria;
-import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
+import static com.uniquindio.ecommerce.application.usecase.PresentacionesDePrueba.cafeVerde;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+/** Usa el ServicioDeCompra real: así la prueba cubre la reposición de stock y no solo la delegación. */
+@ExtendWith(MockitoExtension.class)
 class CancelarCompraTest {
 
-    private PresentacionRepositorioMemoria repositorioPresentacion;
-    private CompraRepositorioMemoria repositorioCompra;
+    @Mock
+    private CompraRepositorio compraRepositorio;
+
+    @Mock
+    private PresentacionRepositorio presentacionRepositorio;
+
     private CancelarCompra cancelarCompra;
-    private Presentacion primera;
-    private Presentacion segunda;
+    private Presentacion presentacion;
+    private Compra compra;
 
     @BeforeEach
     void preparar() {
-        repositorioPresentacion = new PresentacionRepositorioMemoria();
-        repositorioCompra = new CompraRepositorioMemoria();
-        cancelarCompra = new CancelarCompra(repositorioCompra, repositorioPresentacion);
-        primera = presentacionDisponible("pres-1", 10);
-        segunda = presentacionDisponible("pres-2", 5);
+        cancelarCompra = new CancelarCompra(compraRepositorio, new ServicioDeCompra(presentacionRepositorio));
+        presentacion = cafeVerde("pres-1");
+        compra = Compra.abrirCarrito("compra-1", "comprador-1");
+        compra.agregarPresentacion("pres-1", new Precio(28000, "COP"), new Cantidad(50, "kg"));
     }
 
-    private Presentacion presentacionDisponible(String id, double kg) {
-        Presentacion presentacion = Presentacion.publicar(
-                id, "vendedor-1", "LOT-2026-001", null,
-                "Cafe verde " + id, TipoDePresentacion.CAFE_VERDE,
-                new Precio(50000, "COP"), new Cantidad(kg, "kg"),
-                new Galeria(List.of(new ImagenDePresentacion("https://img.cafe/" + id + ".jpg", true))),
-                null, RolVendedor.CAFICULTOR, null, null, null);
-        repositorioPresentacion.guardar(presentacion);
-        return presentacion;
-    }
-
-    private Compra comprar(List<RealizarCompra.ItemSolicitado> items) {
-        return new RealizarCompra(repositorioPresentacion, repositorioCompra).ejecutar(
-                "comprador-1", items);
-    }
-
-    private RealizarCompra.ItemSolicitado item(String presentacionId, double kg) {
-        return new RealizarCompra.ItemSolicitado(presentacionId, new Cantidad(kg, "kg"));
-    }
-
-    @Test
-    void cancelarUnaCompraDevuelveElStockYLaDejaCancelada() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
-        assertEquals(new Cantidad(7, "kg"), primera.getCantidadDisponible());
-
-        cancelarCompra.ejecutar(compra.getId());
-
-        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
-        assertEquals(EstadoDeCompra.CANCELADA, repositorioCompra.buscarPorId(compra.getId()).orElseThrow().getEstado());
-    }
-
-    @Test
-    void cancelarUnaCompraConVariosItemsDevuelveElStockDeCadaPresentacion() {
-        Compra compra = comprar(List.of(item("pres-1", 3), item("pres-2", 2)));
-
-        cancelarCompra.ejecutar(compra.getId());
-
-        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
-        assertEquals(new Cantidad(5, "kg"), segunda.getCantidadDisponible());
-    }
-
-    @Test
-    void noSePuedeCancelarUnaCompraYaEnviadaYElStockNoCambia() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
+    private void confirmarYDescontar() {
         compra.confirmar(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
-        compra.enviar();
-
-        assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(compra.getId()));
-
-        assertEquals(new Cantidad(7, "kg"), primera.getCantidadDisponible());
-        assertEquals(EstadoDeCompra.ENVIADA, compra.getEstado());
+        presentacion.descontarCantidad(new Cantidad(50, "kg"));
     }
 
     @Test
-    void noSePuedeCancelarDosVecesNiDevolverElStockDosVeces() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
-        cancelarCompra.ejecutar(compra.getId());
+    void cancelarUnaCompraConfirmadaReponeElStockYGuardaAmbas() {
+        confirmarYDescontar();
+        when(compraRepositorio.buscarPorId("compra-1")).thenReturn(Optional.of(compra));
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
 
-        assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(compra.getId()));
-
-        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
-    }
-
-    @Test
-    void cancelarUnaCompraConfirmadaTambienDevuelveElStock() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
-        compra.confirmar(new DireccionDeEnvio("Montenegro", "Calle 10 # 5-20", "Carlos Perez"));
-
-        cancelarCompra.ejecutar(compra.getId());
-
-        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
-    }
-
-    @Test
-    void cancelarSigueFuncionandoSiUnaPresentacionFueDadaDeBaja() {
-        Compra compra = comprar(List.of(item("pres-1", 3)));
-        primera.darDeBaja();
-
-        cancelarCompra.ejecutar(compra.getId());
+        cancelarCompra.ejecutar("compra-1");
 
         assertEquals(EstadoDeCompra.CANCELADA, compra.getEstado());
-        assertEquals(new Cantidad(7, "kg"), primera.getCantidadDisponible());
+        assertEquals(new Cantidad(200, "kg"), presentacion.getCantidadDisponible());
+        verify(compraRepositorio).guardar(compra);
+        verify(presentacionRepositorio).guardar(presentacion);
     }
 
     @Test
-    void siUnaPresentacionDelDetalleNoExisteNoSeCancelaNadaNiSeTocaElStock() {
-        Compra manual = Compra.abrirCarrito("compra-manual", "comprador-1");
-        manual.agregarPresentacion("pres-1", new Precio(50000, "COP"), new Cantidad(3, "kg"));
-        manual.agregarPresentacion("fantasma", new Precio(1000, "COP"), new Cantidad(1, "kg"));
-        repositorioCompra.guardar(manual);
+    void cancelarUnCarritoPendienteNoTocaElStock() {
+        when(compraRepositorio.buscarPorId("compra-1")).thenReturn(Optional.of(compra));
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
 
-        assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar(manual.getId()));
+        cancelarCompra.ejecutar("compra-1");
 
-        assertEquals(EstadoDeCompra.PENDIENTE, manual.getEstado());
-        assertEquals(new Cantidad(10, "kg"), primera.getCantidadDisponible());
+        assertEquals(EstadoDeCompra.CANCELADA, compra.getEstado());
+        assertEquals(new Cantidad(200, "kg"), presentacion.getCantidadDisponible());
+        verify(compraRepositorio).guardar(compra);
+        verify(presentacionRepositorio, never()).guardar(any());
     }
 
     @Test
-    void noSePuedeCancelarUnaCompraInexistente() {
-        assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar("no-existe"));
+    void noSePuedeCancelarUnaCompraEnviadaYNoSeGuardaNada() {
+        confirmarYDescontar();
+        compra.enviar();
+        when(compraRepositorio.buscarPorId("compra-1")).thenReturn(Optional.of(compra));
+        when(presentacionRepositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
+
+        assertThrows(ReglaDominioException.class, () -> cancelarCompra.ejecutar("compra-1"));
+
+        assertEquals(EstadoDeCompra.ENVIADA, compra.getEstado());
+        assertEquals(new Cantidad(150, "kg"), presentacion.getCantidadDisponible());
+        verify(compraRepositorio, never()).guardar(any());
+        verify(presentacionRepositorio, never()).guardar(any());
+    }
+
+    @Test
+    void lanzaNoEncontradoSiLaCompraNoExisteYNoGuardaNada() {
+        when(compraRepositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> cancelarCompra.ejecutar("no-existe"));
+
+        verify(compraRepositorio, never()).guardar(any());
     }
 }

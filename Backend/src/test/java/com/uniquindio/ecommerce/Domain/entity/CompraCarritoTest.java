@@ -128,4 +128,13 @@ class CompraCarritoTest {
         assertEquals(List.of(new DetalleDeCompra("compra-1", "presentacion-1",
                 new Precio(50000, "COP"), new Cantidad(2, "kg"))), carrito.getDetalles());
     }
+
+    @Test
+    void cantidadDeDevuelveLoQueYaHayEnElCarritoDeEsaPresentacion() {
+        carrito.agregarPresentacion("presentacion-1", new Precio(50000, "COP"), new Cantidad(2, "kg"));
+        carrito.agregarPresentacion("presentacion-1", new Precio(50000, "COP"), new Cantidad(1, "kg"));
+
+        assertEquals(new Cantidad(3, "kg"), carrito.cantidadDe("presentacion-1").orElseThrow());
+        assertTrue(carrito.cantidadDe("presentacion-9").isEmpty());
+    }
 }

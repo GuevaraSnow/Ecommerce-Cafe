@@ -114,6 +114,11 @@ public class Compra {
         detalles.remove(detalleEnCarrito(presentacionId));
     }
 
+    /** Cantidad de esa Presentación que ya hay en la Compra; vacía si no está. */
+    public Optional<Cantidad> cantidadDe(String presentacionId) {
+        return buscarDetalle(presentacionId).map(DetalleDeCompra::cantidad);
+    }
+
     private DetalleDeCompra detalleEnCarrito(String presentacionId) {
         return buscarDetalle(presentacionId).orElseThrow(
                 () -> new ReglaDominioException("La Presentacion " + presentacionId + " no esta en el carrito"));
