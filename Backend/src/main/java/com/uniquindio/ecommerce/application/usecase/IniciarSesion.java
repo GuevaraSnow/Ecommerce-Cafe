@@ -1,33 +1,31 @@
 package com.uniquindio.ecommerce.application.usecase;
 
+import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
-import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
+import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
+import com.uniquindio.ecommerce.application.dto.request.IniciarSesionRequest;
+import com.uniquindio.ecommerce.application.dto.response.UsuarioResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
+@Service
+@RequiredArgsConstructor
 public class IniciarSesion {
 
-    private final CompradorRepositorio compradorRepositorio;
-    private final VendedorRepositorio vendedorRepositorio;
+    private final UsuarioRepositorio usuarioRepositorio;
 
-    public IniciarSesion(CompradorRepositorio compradorRepositorio, VendedorRepositorio vendedorRepositorio) {
-        this.compradorRepositorio = compradorRepositorio;
-        this.vendedorRepositorio = vendedorRepositorio;
-    }
+    @Transactional(readOnly = true)
+    public UsuarioResponse ejecutar(IniciarSesionRequest request) {
+        Email email = new Email(request.email());
 
-    public Object ejecutar(Email email, Contrasena contrasena) {
-        Optional compradorOpt = compradorRepositorio.buscarPorEmail(email);
-
-        if (compradorOpt != null && compradorOpt.isPresent()) {
-            Comprador comprador = (Comprador) compradorOpt.get();
-
-            if (comprador.getContraseña().equals(contrasena)) {
-                return comprador;
-            }
-            throw new ReglaDominioException("Contraseña incorrecta.");
+        Usuario usuario = usuarioRepositorio.buscarPorEmail(email)
+                .orElseThrow();
+        if (!usuario.getContrasena().contrasena().equals(request.contrasena())) {
+            throw new ReglaDominioException("Credenciales inválidas.");
         }
 
-        throw new ReglaDominioException("No existe un usuario registrado con el email especificado.");
+        return UsuarioResponse.desdeDominio(usuario);
     }
 }
