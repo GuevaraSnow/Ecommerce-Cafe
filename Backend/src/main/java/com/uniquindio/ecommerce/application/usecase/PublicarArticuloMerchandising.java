@@ -6,7 +6,6 @@ import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
 import com.uniquindio.ecommerce.Domain.valueobject.Galeria;
 import com.uniquindio.ecommerce.Domain.valueobject.Precio;
-import com.uniquindio.ecommerce.Domain.valueobject.RolVendedor;
 import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

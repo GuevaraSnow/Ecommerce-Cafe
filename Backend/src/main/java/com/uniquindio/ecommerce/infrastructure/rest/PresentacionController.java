@@ -1,7 +1,6 @@
 package com.uniquindio.ecommerce.infrastructure.rest;
 
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
-import com.uniquindio.ecommerce.Domain.valueobject.RolVendedor;
 import com.uniquindio.ecommerce.application.dto.request.CambiarPrecioRequest;
 import com.uniquindio.ecommerce.application.dto.request.ProgramarDescuentoRequest;
 import com.uniquindio.ecommerce.application.dto.request.PublicarArticuloMerchandisingRequest;

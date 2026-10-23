@@ -1,8 +1,6 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.Comprador;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
-import com.uniquindio.ecommerce.Domain.repository.CompradorRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 
 public class RegistrarComprador {
