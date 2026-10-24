@@ -2,6 +2,7 @@ package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.repository.EncriptadorContrasenaRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
 import com.uniquindio.ecommerce.application.dto.request.IniciarSesionRequest;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class IniciarSesion {
 
     private final UsuarioRepositorio usuarioRepositorio;
+    private final EncriptadorContrasenaRepositorio encriptadorContrasenaRepositorio;
 
     @Transactional(readOnly = true)
     public UsuarioResponse ejecutar(IniciarSesionRequest request) {
@@ -22,9 +24,10 @@ public class IniciarSesion {
 
         Usuario usuario = usuarioRepositorio.buscarPorEmail(email)
                 .orElseThrow();
-        if (!usuario.getContrasena().contrasena().equals(request.contrasena())) {
+        if (!encriptadorContrasenaRepositorio.coinciden(request.contrasena(), usuario.getContrasena().contrasena())) {
             throw new ReglaDominioException("Credenciales inválidas.");
         }
+
 
         return UsuarioResponse.desdeDominio(usuario);
     }

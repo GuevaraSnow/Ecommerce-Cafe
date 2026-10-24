@@ -2,6 +2,7 @@ package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.repository.EncriptadorContrasenaRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class RegistrarUsuario {
 
     private final UsuarioRepositorio usuarioRepositorio;
+    private final EncriptadorContrasenaRepositorio encriptadorContrasenaRepositorio;
 
     @Transactional
     public UsuarioResponse ejecutar(RegistrarUsuarioRequest request) {
@@ -30,7 +32,8 @@ public class RegistrarUsuario {
         }
 
         String id = UUID.randomUUID().toString();
-        Contrasena contrasena = new Contrasena(request.contrasena());
+        String contrasenaEncriptada = encriptadorContrasenaRepositorio.encriptar(request.contrasena());
+        Contrasena contrasena = new Contrasena(contrasenaEncriptada);
         Telefono telefono = request.telefono() != null && !request.telefono().isBlank()
                 ? new Telefono(request.telefono()) : null;
         FechaDeNacimiento fechaNacimiento = request.fechaDeNacimiento() != null
