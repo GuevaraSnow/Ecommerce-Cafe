@@ -89,7 +89,7 @@ class PresentacionControllerTest {
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol-Vendedor", "VENDEDOR_DERIVADOS")
+                        .header("X-Rol", "VENDEDOR_DERIVADOS")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isCreated())
@@ -106,7 +106,7 @@ class PresentacionControllerTest {
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol-Vendedor", "VENDEDOR_DERIVADOS")
+                        .header("X-Rol", "VENDEDOR_DERIVADOS")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isCreated());
@@ -124,7 +124,7 @@ class PresentacionControllerTest {
 
         mockMvc.perform(post("/api/presentaciones")
                         .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol-Vendedor", "CAFICULTOR")
+                        .header("X-Rol", "CAFICULTOR")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"titulo": "Café Verde", "tipo": "CAFE_VERDE", "loteId": "LOT-2026-001",
@@ -138,7 +138,7 @@ class PresentacionControllerTest {
     void publicarConElCuerpoIncompletoResponde400ConLosCamposYNoLlamaAlCasoDeUso() throws Exception {
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol-Vendedor", "VENDEDOR_DERIVADOS")
+                        .header("X-Rol", "VENDEDOR_DERIVADOS")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"titulo": " ", "precio": {"monto": -5, "moneda": "COP"}}"""))
@@ -153,7 +153,7 @@ class PresentacionControllerTest {
     @Test
     void publicarSinElEncabezadoDelVendedorResponde400() throws Exception {
         mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Rol-Vendedor", "VENDEDOR_DERIVADOS")
+                        .header("X-Rol", "VENDEDOR_DERIVADOS")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isBadRequest())
@@ -164,7 +164,7 @@ class PresentacionControllerTest {
     void publicarConUnRolDesconocidoResponde400() throws Exception {
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol-Vendedor", "REY")
+                        .header("X-Rol", "REY")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isBadRequest());
@@ -177,7 +177,7 @@ class PresentacionControllerTest {
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol-Vendedor", "TOSTADOR")
+                        .header("X-Rol", "TOSTADOR")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isBadRequest())

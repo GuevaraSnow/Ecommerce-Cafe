@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.entity.Lote;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
+import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
@@ -44,8 +45,16 @@ class PresentacionMapperTest {
         return List.of(new ImagenRequest("http://img/1.png", true), new ImagenRequest("http://img/2.png", false));
     }
 
+    private void registrarUsuario(String id, Rol rol) {
+        usuarios.guardar(Usuario.registrar(
+                id, "Usuario Vendedor", new Email("vendedor@uniquindio.edu.co"),
+                new Contrasena("Password123!"), new Telefono("3001234567"),
+                new FechaDeNacimiento(LocalDate.of(1990, 1, 1)), rol));
+    }
+
     /** Publica con PublicarPresentacion usando el mapper para armar los parámetros desde el Request. */
     private Presentacion publicar(PublicarPresentacionRequest r, Rol rol) {
+        registrarUsuario("vendedor-1", rol);
         return new PublicarPresentacion(presentaciones, new ServicioDePublicacion(lotes, transformaciones, usuarios)).ejecutar(
                 "pres-1", "vendedor-1", r.loteId(), r.transformacionId(), r.titulo(), r.tipo(),
                 mapper.toPrecio(r.precio()), mapper.toCantidad(r.cantidad()), mapper.toGaleria(r.galeria()),
