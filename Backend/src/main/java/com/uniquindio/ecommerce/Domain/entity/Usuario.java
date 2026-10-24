@@ -21,6 +21,8 @@ public class Usuario {
     private final FechaDeNacimiento fechaDeNacimiento;
     private final Rol rol;
     private CodigoDeRecuperacion codigoRecuperacion;
+    private boolean eliminado;
+
     private Usuario(String id, String nombre, Email email, Contrasena contrasena,
                     Telefono telefono, FechaDeNacimiento fechaDeNacimiento,
                     Rol rol, CodigoDeRecuperacion codigoRecuperacion) {
@@ -32,6 +34,7 @@ public class Usuario {
         this.fechaDeNacimiento = fechaDeNacimiento;
         this.rol = rol;
         this.codigoRecuperacion = codigoRecuperacion;
+        this.eliminado = false;
     }
 
     public static Usuario registrar(String id, String nombre, Email email, Contrasena contrasena,
@@ -139,5 +142,16 @@ public class Usuario {
 
         String nuevaEncriptada = encriptador.encriptar(nuevaContrasena.contrasena());
         this.contrasena = new Contrasena(nuevaEncriptada);
+    }
+
+    public void eliminarLogicamente() {
+        if (this.eliminado) {
+            throw new ReglaDominioException("El usuario ya se encuentra eliminado.");
+        }
+        this.eliminado = true;
+    }
+
+    public boolean isEliminado() {
+        return eliminado;
     }
 }
