@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.entity.Lote;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
+import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
@@ -42,6 +43,13 @@ class PublicarPresentacionTest {
         return lotes.buscarPorCodigo(new CodigoDeLote(codigo)).get().getCantidadDisponible();
     }
 
+    private void registrarUsuario(String id, Rol rol) {
+        usuarios.guardar(Usuario.registrar(
+                id, "Usuario Vendedor", new Email("vendedor@uniquindio.edu.co"),
+                new Contrasena("Password123!"), new Telefono("3001234567"),
+                new FechaDeNacimiento(LocalDate.of(1990, 1, 1)), rol));
+    }
+
     private void registrarTransformacion(String id, double cantidadEntradaKg) {
         transformaciones.guardar(Transformacion.registrar(id, List.of("LOT-2026-001"),
                 new Cantidad(cantidadEntradaKg, "kg"), new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(),
@@ -49,13 +57,15 @@ class PublicarPresentacionTest {
     }
 
     private Presentacion publicarCafeVerde(String id, String loteId, double cantidadKg) {
+        registrarUsuario("vendedor-1", Rol.CAFICULTOR);
         return publicar.ejecutar(id, "vendedor-1", loteId, null, "Café Verde", TipoDePresentacion.CAFE_VERDE,
                 new Precio(28000, "COP"), new Cantidad(cantidadKg, "kg"), galeriaValida(), null,
                 Rol.CAFICULTOR, null);
     }
 
     @Test
-    void publicaCafeTostadoYDescuentaLaCantidadResultanteDisponible() {
+    void publicaCafeTostadoYDescuentaLaCantidadResultanteDisponible(){
+        registrarUsuario("vendedor-1", Rol.TOSTADOR);
         registrarTransformacion("transformacion-1", 50); // resultante = 41 kg (18% merma)
 
         Presentacion presentacion = publicar.ejecutar("pres-1", "vendedor-1", null, "transformacion-1",
@@ -71,6 +81,7 @@ class PublicarPresentacionTest {
 
     @Test
     void noSePuedePublicarMasCantidadDeLaResultanteDisponible() {
+        registrarUsuario("vendedor-1", Rol.TOSTADOR);
         registrarTransformacion("transformacion-2", 50); // resultante = 41 kg
 
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-2", "vendedor-1", null,
@@ -83,6 +94,7 @@ class PublicarPresentacionTest {
 
     @Test
     void publicarDosVecesDeLaMismaTransformacionAcumulaElDescuento() {
+        registrarUsuario("vendedor-1", Rol.TOSTADOR);
         registrarTransformacion("transformacion-3", 50); // resultante = 41 kg
 
         publicar.ejecutar("pres-3a", "vendedor-1", null, "transformacion-3", "Café Tostado Medio",
@@ -145,6 +157,7 @@ class PublicarPresentacionTest {
 
     @Test
     void noSePuedePublicarSiLaTransformacionNoExiste() {
+        registrarUsuario("vendedor-1", Rol.TOSTADOR);
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-9", "vendedor-1", null,
                 "no-existe", "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
                 new Cantidad(10, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
@@ -155,6 +168,7 @@ class PublicarPresentacionTest {
 
     @Test
     void noSePuedeUsarEsteCasoDeUsoParaMerchandising() {
+        registrarUsuario("vendedor-1", Rol.TOSTADOR);
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-10", "vendedor-1", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null));
