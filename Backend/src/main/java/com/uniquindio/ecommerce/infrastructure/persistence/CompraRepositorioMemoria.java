@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Repository
+// Reemplazado por CompraRepositorioJpa; con los dos activos Spring lanza NoUniqueBeanDefinitionException
+//@Repository
 public class CompraRepositorioMemoria implements CompraRepositorio {
 
     private final Map<String, Compra> compras = new HashMap<>();
