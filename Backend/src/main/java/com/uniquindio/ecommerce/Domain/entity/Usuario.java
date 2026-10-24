@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.Domain.entity;
 
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.repository.EncriptadorContrasenaRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeRecuperacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
@@ -13,10 +14,10 @@ import java.util.Objects;
 public class Usuario {
 
     private final String id;
-    private final String nombre;
+    private String nombre;
     private final Email email;
     private Contrasena contrasena;
-    private final Telefono telefono;
+    private Telefono telefono;
     private final FechaDeNacimiento fechaDeNacimiento;
     private final Rol rol;
     private CodigoDeRecuperacion codigoRecuperacion;
@@ -110,5 +111,33 @@ public class Usuario {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+
+    public void editarPerfil(String nuevoNombre, Telefono nuevoTelefono) {
+        if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+            throw new ReglaDominioException("El nombre no puede ser nulo ni estar vacío.");
+        }
+        this.nombre = nuevoNombre.trim();
+        this.telefono = nuevoTelefono;
+    }
+
+
+    public void cambiarContrasenaConVerificacion(Contrasena contrasenaActualFormulario,
+                                                 Contrasena nuevaContrasena,
+                                                 EncriptadorContrasenaRepositorio encriptador) {
+        if (contrasenaActualFormulario == null || nuevaContrasena == null) {
+            throw new ReglaDominioException("La contraseña actual y la nueva contraseña son obligatorias.");
+        }
+        if (encriptador == null) {
+            throw new ReglaDominioException("El encriptador no puede ser nulo.");
+        }
+
+        if (!encriptador.coinciden(contrasenaActualFormulario.contrasena(), this.contrasena.contrasena())) {
+            throw new ReglaDominioException("La contraseña actual ingresada no es correcta.");
+        }
+
+        String nuevaEncriptada = encriptador.encriptar(nuevaContrasena.contrasena());
+        this.contrasena = new Contrasena(nuevaEncriptada);
     }
 }
