@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
+import com.uniquindio.ecommerce.Domain.repository.NotificadorCorreoRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeRecuperacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecuperarContrasena {
 
     private final UsuarioRepositorio usuarioRepositorio;
+    private final NotificadorCorreoRepositorio notificadorCorreoRepositorio;
 
     @Transactional
     public String ejecutar(RecuperarContrasenaRequest request) {
@@ -25,6 +27,8 @@ public class RecuperarContrasena {
         usuario.asignarCodigoRecuperacion(codigo);
 
         usuarioRepositorio.guardar(usuario);
+
+        notificadorCorreoRepositorio.enviarCodigoDeRecuperacion(email, codigo.codigo());
 
         return codigo.codigo();
     }
