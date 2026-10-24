@@ -25,56 +25,56 @@ class PresentacionTest {
     private Presentacion publicarMerchandisingValido() {
         return Presentacion.publicar("pres-1", "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
                 new Precio(15000, "COP"), new Cantidad(20, "unidad"), galeriaValida(), null,
-                RolVendedor.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
+                Rol.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
     }
 
     @Test
     void noSePuedePublicarSinId() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar(" ", "vendedor-1", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
     void noSePuedePublicarSinVendedor() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", " ", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
     void noSePuedePublicarSinTitulo() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null, null,
                 " ", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
     void noSePuedePublicarSinTipoDePresentacion() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null, null,
                 "Manilla", null, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
     void noSePuedePublicarSinPrecio() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, null, new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
     void noSePuedePublicarSinCantidadDisponible() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), null,
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
     void noSePuedePublicarSinGaleria() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                null, null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                null, null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
@@ -88,14 +88,14 @@ class PresentacionTest {
     void unArticuloDeMerchandisingNoPuedeProvenirDeUnLote() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", "LOT-2026-045",
                 null, "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material", "descripcion"));
     }
 
     @Test
     void unArticuloDeMerchandisingNoPuedeProvenirDeUnaTransformacion() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null,
                 "transformacion-1", "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"),
-                new Cantidad(20, "unidad"), galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "material",
+                new Cantidad(20, "unidad"), galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "material",
                 "descripcion"));
     }
 
@@ -210,7 +210,7 @@ class PresentacionTest {
         Presentacion p1 = publicarMerchandisingValido();
         Presentacion p2 = Presentacion.publicar("pres-1", "vendedor-2", null, null, "Otro título",
                 TipoDePresentacion.MERCHANDISING, new Precio(1000, "COP"), new Cantidad(1, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null, "otro material", "otra descripcion");
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null, "otro material", "otra descripcion");
 
         assertEquals(p1, p2);
         assertEquals(p1.hashCode(), p2.hashCode());

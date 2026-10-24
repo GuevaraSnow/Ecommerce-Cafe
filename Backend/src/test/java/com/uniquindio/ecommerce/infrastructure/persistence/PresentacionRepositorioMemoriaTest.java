@@ -22,14 +22,14 @@ class PresentacionRepositorioMemoriaTest {
         return Presentacion.publicar(id, vendedorId, null, null, titulo, TipoDePresentacion.MERCHANDISING,
                 new Precio(precio, "COP"), new Cantidad(20, "unidad"),
                 new Galeria(List.of(new ImagenDePresentacion("http://img/1.png", true))), null,
-                RolVendedor.VENDEDOR_DERIVADOS, null, "semilla", "descripcion");
+                Rol.VENDEDOR_DERIVADOS, null, "semilla", "descripcion");
     }
 
     private Presentacion cafeVerde(String id, String titulo, double precio) {
         return Presentacion.publicar(id, "vendedor-2", "LOT-2026-001", null, titulo, TipoDePresentacion.CAFE_VERDE,
                 new Precio(precio, "COP"), new Cantidad(10, "kg"),
                 new Galeria(List.of(new ImagenDePresentacion("http://img/1.png", true))), null,
-                RolVendedor.CAFICULTOR, null, null, null);
+                Rol.CAFICULTOR, null, null, null);
     }
 
     private List<String> ids(Pagina<Presentacion> pagina) {

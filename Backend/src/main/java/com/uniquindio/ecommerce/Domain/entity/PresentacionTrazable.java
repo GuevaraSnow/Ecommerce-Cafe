@@ -21,10 +21,10 @@ public class PresentacionTrazable extends Presentacion {
     private final FechaDeTueste fechaTueste;
     private NotaDeCata notaDeCata;
 
-    private PresentacionTrazable(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
+    private PresentacionTrazable(String id, String vendedorId, Rol rolVendedor, String titulo, TipoDePresentacion tipoPresentacion,
                           Precio precio, Cantidad cantidadDisponible, Galeria galeria,
                           OrigenDePresentacion origen, PerfilTueste perfilDeTueste, FechaDeTueste fechaTueste) {
-        super(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
+        super(id, vendedorId, rolVendedor, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
         this.origen = origen;
         this.perfilDeTueste = perfilDeTueste;
         this.fechaTueste = fechaTueste;
@@ -43,7 +43,7 @@ public class PresentacionTrazable extends Presentacion {
                                           TipoDePresentacion tipoPresentacion, Precio precio,
                                           Cantidad cantidadDisponible, Galeria galeria, String loteId,
                                           String transformacionId, PerfilTueste perfilDeTueste,
-                                          FechaDeTueste fechaTueste, RolVendedor rolVendedor) {
+                                          FechaDeTueste fechaTueste, Rol rolVendedor) {
         if (rolVendedor == null) {
             throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
         }
@@ -80,12 +80,12 @@ public class PresentacionTrazable extends Presentacion {
         }
 
         if (perfilDeTueste != null && perfilDeTueste != PerfilTueste.TRADICIONAL
-                && rolVendedor != RolVendedor.TOSTADOR) {
+                && rolVendedor != Rol.TOSTADOR) {
             throw new ReglaDominioException("Los perfiles de tueste CLARO, MEDIO y OSCURO son exclusivos del "
                     + "Tostador; un " + rolVendedor + " solo puede publicar café tostado con Perfil TRADICIONAL");
         }
 
-        return new PresentacionTrazable(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
+        return new PresentacionTrazable(id, vendedorId, rolVendedor, titulo, tipoPresentacion, precio, cantidadDisponible,
                 galeria, origen, perfilDeTueste, fechaTueste);
     }
 

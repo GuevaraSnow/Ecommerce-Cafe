@@ -70,7 +70,7 @@ class PresentacionControllerTest {
         return (ArticuloDeMerchandising) Presentacion.publicar("pres-1", "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
                 new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 new Galeria(List.of(new ImagenDePresentacion("http://img/1.png", true))), null,
-                RolVendedor.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
+                Rol.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
     }
 
     private String publicarMerchandisingBody() {
@@ -85,7 +85,7 @@ class PresentacionControllerTest {
     @Test
     void publicarUnArticuloResponde201ConLocationYElCuerpo() throws Exception {
         given(publicarArticulo.ejecutar(any(), eq("vendedor-1"), eq("Manilla"), any(), any(), any(), any(), any(),
-                eq(RolVendedor.VENDEDOR_DERIVADOS))).willReturn(manilla());
+                eq(Rol.VENDEDOR_DERIVADOS))).willReturn(manilla());
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .header("X-Vendedor-Id", "vendedor-1")
@@ -119,7 +119,7 @@ class PresentacionControllerTest {
     @Test
     void publicarUnaPresentacionTrazableResponde201() throws Exception {
         given(publicarPresentacion.ejecutar(any(), eq("vendedor-1"), eq("LOT-2026-001"), any(), eq("Café Verde"),
-                eq(TipoDePresentacion.CAFE_VERDE), any(), any(), any(), any(), eq(RolVendedor.CAFICULTOR), any()))
+                eq(TipoDePresentacion.CAFE_VERDE), any(), any(), any(), any(), eq(Rol.CAFICULTOR), any()))
                 .willReturn(manilla());
 
         mockMvc.perform(post("/api/presentaciones")
