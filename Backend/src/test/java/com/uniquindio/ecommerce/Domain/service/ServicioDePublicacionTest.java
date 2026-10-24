@@ -5,6 +5,7 @@ import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
+import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.TransformacionRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.UsuarioRepositorioMemoria;
@@ -26,6 +27,13 @@ class ServicioDePublicacionTest {
         return new Galeria(List.of(new ImagenDePresentacion("http://img/cafe.png", true)));
     }
 
+    private void registrarUsuario(String id, Rol rol) {
+        usuarios.guardar(Usuario.registrar(
+                id, "Usuario Vendedor", new Email("vendedor@uniquindio.edu.co"),
+                new Contrasena("Password123!"), new Telefono("3001234567"),
+                new FechaDeNacimiento(LocalDate.of(1990, 1, 1)), rol));
+    }
+
     private void registrarTransformacion(String id, PerfilTueste perfil) {
         transformaciones.guardar(Transformacion.registrar(id, List.of("LOT-2026-001"), new Cantidad(50, "kg"),
                 new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(), perfil));
@@ -37,6 +45,7 @@ class ServicioDePublicacionTest {
 
     @Test
     void publicarCafeTostadoConElPerfilDeLaTransformacionDescuentaDeElla() {
+        registrarUsuario("vendedor-1", Rol.TOSTADOR);
         registrarTransformacion("t-1", PerfilTueste.MEDIO); // resultante = 41 kg
 
         Presentacion presentacion = servicio.publicar("pres-1", "vendedor-1", null, "t-1", "Café Medio",
@@ -49,6 +58,7 @@ class ServicioDePublicacionTest {
 
     @Test
     void noSePuedePublicarConUnPerfilDistintoAlDeLaTransformacionYNadaCambia() {
+        registrarUsuario("vendedor-1", Rol.TOSTADOR);
         registrarTransformacion("t-2", PerfilTueste.MEDIO);
         Cantidad antes = disponibleEn("t-2");
 
@@ -61,6 +71,7 @@ class ServicioDePublicacionTest {
 
     @Test
     void unDerivadoConsumibleSinPerfilSePublicaDesdeCualquierTransformacion() {
+        registrarUsuario("vendedor-1", Rol.VENDEDOR_DERIVADOS);
         registrarTransformacion("t-3", PerfilTueste.OSCURO);
 
         Presentacion presentacion = servicio.publicar("pres-3", "vendedor-1", null, "t-3", "Licor de café",
