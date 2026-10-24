@@ -19,6 +19,7 @@ import com.uniquindio.ecommerce.application.usecase.ReponerStockDePresentacion;
 import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.TransformacionRepositorioMemoria;
+import com.uniquindio.ecommerce.infrastructure.persistence.UsuarioRepositorioMemoria;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.RecordComponent;
@@ -37,14 +38,15 @@ class PresentacionMapperTest {
     private final PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
     private final LoteRepositorioMemoria lotes = new LoteRepositorioMemoria();
     private final TransformacionRepositorioMemoria transformaciones = new TransformacionRepositorioMemoria();
+    private final UsuarioRepositorioMemoria usuarios = new UsuarioRepositorioMemoria();
 
     private List<ImagenRequest> galeria() {
         return List.of(new ImagenRequest("http://img/1.png", true), new ImagenRequest("http://img/2.png", false));
     }
 
     /** Publica con PublicarPresentacion usando el mapper para armar los parámetros desde el Request. */
-    private Presentacion publicar(PublicarPresentacionRequest r, RolVendedor rol) {
-        return new PublicarPresentacion(presentaciones, new ServicioDePublicacion(lotes, transformaciones)).ejecutar(
+    private Presentacion publicar(PublicarPresentacionRequest r, Rol rol) {
+        return new PublicarPresentacion(presentaciones, new ServicioDePublicacion(lotes, transformaciones, usuarios)).ejecutar(
                 "pres-1", "vendedor-1", r.loteId(), r.transformacionId(), r.titulo(), r.tipo(),
                 mapper.toPrecio(r.precio()), mapper.toCantidad(r.cantidad()), mapper.toGaleria(r.galeria()),
                 r.perfilTueste(), rol, mapper.toFechaDeTueste(r.fechaTueste()));
@@ -70,7 +72,7 @@ class PresentacionMapperTest {
 
     @Test
     void unaPresentacionTrazableProduceUnResponseConOrigenPerfilYFechaDeTueste() {
-        Presentacion presentacion = publicar(cafeTostadoDesdeTransformacion(), RolVendedor.TOSTADOR);
+        Presentacion presentacion = publicar(cafeTostadoDesdeTransformacion(), Rol.TOSTADOR);
 
         PresentacionResponse response = mapper.toResponse(presentacion);
 
@@ -93,7 +95,7 @@ class PresentacionMapperTest {
 
     @Test
     void elCafeVerdeDesdeUnLoteNoTraePerfilNiFechaDeTueste() {
-        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
 
         PresentacionTrazableResponse trazable =
                 assertInstanceOf(PresentacionTrazableResponse.class, mapper.toResponse(presentacion));
@@ -106,7 +108,7 @@ class PresentacionMapperTest {
     @Test
     void laNotaDeCataRegistradaApareceEnElResponse() {
         PresentacionTrazable presentacion =
-                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
         presentacion.registrarNotaCata(mapper.toNotaDeCata(List.of("Chocolate", "Panela")));
 
         PresentacionTrazableResponse trazable =
@@ -122,7 +124,7 @@ class PresentacionMapperTest {
                 new CantidadRequest(20.0, "unidad"), galeria());
         Presentacion articulo = new PublicarArticuloMerchandising(presentaciones).ejecutar(
                 "pres-2", "vendedor-1", r.titulo(), mapper.toPrecio(r.precio()), mapper.toCantidad(r.cantidad()),
-                mapper.toGaleria(r.galeria()), r.material(), r.descripcion(), RolVendedor.VENDEDOR_DERIVADOS);
+                mapper.toGaleria(r.galeria()), r.material(), r.descripcion(), Rol.VENDEDOR_DERIVADOS);
 
         PresentacionResponse response = mapper.toResponse(articulo);
 
@@ -177,7 +179,7 @@ class PresentacionMapperTest {
 
     @Test
     void elRequestDePausarSoloCambiaElEstado() {
-        publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
 
         Presentacion pausada = new PausarPresentacion(presentaciones).ejecutar("pres-1");
 
@@ -190,7 +192,7 @@ class PresentacionMapperTest {
 
     @Test
     void elRequestDeCambiarPrecioUsaElPrecioRequestDirectamente() {
-        publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
         PrecioRequest nuevoPrecio = new PrecioRequest(30000.0, "COP");
 
         Presentacion actualizada = new CambiarPrecioDePresentacion(presentaciones)
@@ -203,7 +205,7 @@ class PresentacionMapperTest {
 
     @Test
     void elRequestDeReponerStockDescuentaDelLoteYSumaALaPresentacion() {
-        publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR); // 500 kg en el Lote, publica 200 -> quedan 300
+        publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR); // 500 kg en el Lote, publica 200 -> quedan 300
         CantidadRequest reposicion = new CantidadRequest(50.0, "kg");
 
         Presentacion repuesta = new ReponerStockDePresentacion(presentaciones,
@@ -218,7 +220,7 @@ class PresentacionMapperTest {
 
     @Test
     void elRequestDeNotaDeCataApareceEnElResponse() {
-        publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
         RegistrarNotaDeCataRequest r = new RegistrarNotaDeCataRequest(List.of("Cítrico", "Panela"));
 
         Presentacion actualizada = new RegistrarNotaDeCata(presentaciones)
@@ -232,7 +234,7 @@ class PresentacionMapperTest {
     @Test
     void elResponseTraeElPrecioNormalElPrecioVigenteYElDescuentoProgramado() {
         PresentacionTrazable presentacion =
-                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
         presentacion.programarDescuento(mapper.toDescuento(
                 new ProgramarDescuentoRequest(25, LocalDate.now().minusDays(1), LocalDate.now().plusDays(5))));
 
@@ -248,7 +250,7 @@ class PresentacionMapperTest {
     @Test
     void conUnDescuentoQueNoRigeElPrecioVigenteEsElNormal() {
         PresentacionTrazable presentacion =
-                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+                (PresentacionTrazable) publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
         presentacion.programarDescuento(mapper.toDescuento(
                 new ProgramarDescuentoRequest(25, LocalDate.now().plusDays(10), LocalDate.now().plusDays(20))));
 
@@ -261,7 +263,7 @@ class PresentacionMapperTest {
 
     @Test
     void sinDescuentoElResponseNoTraeDescuentoYElPrecioVigenteEsElNormal() {
-        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
 
         PresentacionResponse response = mapper.toResponse(presentacion);
 
@@ -278,7 +280,7 @@ class PresentacionMapperTest {
 
     @Test
     void laPaginaDeResultadosSeMapeaConSusTotalesYSuContenido() {
-        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
 
         PaginaResponse<PresentacionResponse> pagina = mapper.toPaginaResponse(
                 new com.uniquindio.ecommerce.Domain.repository.Pagina<>(List.of(presentacion), 0, 10, 11));
@@ -293,7 +295,7 @@ class PresentacionMapperTest {
 
     @Test
     void laSugerenciaSoloTraeIdYTitulo() {
-        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), RolVendedor.CAFICULTOR);
+        Presentacion presentacion = publicar(cafeVerdeDesdeLote(), Rol.CAFICULTOR);
 
         assertEquals(new SugerenciaResponse("pres-1", "Café Verde"), mapper.toSugerencia(presentacion));
     }

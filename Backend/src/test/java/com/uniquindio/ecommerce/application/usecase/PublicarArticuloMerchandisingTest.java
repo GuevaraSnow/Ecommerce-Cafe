@@ -30,7 +30,7 @@ class PublicarArticuloMerchandisingTest {
                 galeriaValida(),
                 "semilla de café e hilo encerado",
                 "Manilla artesanal hecha con semillas de café",
-                RolVendedor.VENDEDOR_DERIVADOS);
+                Rol.VENDEDOR_DERIVADOS);
 
         assertEquals("Manilla artesanal hecha con semillas de café", articulo.getDescripcion());
         assertEquals("semilla de café e hilo encerado", articulo.getMaterial());
@@ -51,7 +51,7 @@ class PublicarArticuloMerchandisingTest {
                 galeriaValida(),
                 "semilla de café e hilo encerado",
                 "Manilla artesanal hecha con semillas de café",
-                RolVendedor.CAFICULTOR));
+                Rol.CAFICULTOR));
     }
 
     @Test
@@ -68,6 +68,6 @@ class PublicarArticuloMerchandisingTest {
                 galeriaValida(),
                 "  ",
                 "Manilla artesanal hecha con semillas de café",
-                RolVendedor.VENDEDOR_DERIVADOS));
+                Rol.VENDEDOR_DERIVADOS));
     }
 }

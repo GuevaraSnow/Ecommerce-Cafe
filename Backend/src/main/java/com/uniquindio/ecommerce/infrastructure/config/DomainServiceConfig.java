@@ -3,6 +3,7 @@ package com.uniquindio.ecommerce.infrastructure.config;
 import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.LoteRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.TransformacionRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeBajaDePresentacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
@@ -20,8 +21,8 @@ public class DomainServiceConfig {
 
     @Bean
     public ServicioDePublicacion servicioDePublicacion(LoteRepositorio loteRepositorio,
-                                                       TransformacionRepositorio transformacionRepositorio) {
-        return new ServicioDePublicacion(loteRepositorio, transformacionRepositorio);
+                                                       TransformacionRepositorio transformacionRepositorio, UsuarioRepositorio usuarioRepositorio) {
+        return new ServicioDePublicacion(loteRepositorio, transformacionRepositorio, usuarioRepositorio);
     }
 
     @Bean

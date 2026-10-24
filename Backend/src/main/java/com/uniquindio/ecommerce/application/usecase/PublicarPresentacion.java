@@ -26,7 +26,7 @@ public class PublicarPresentacion {
     public Presentacion ejecutar(String id, String vendedorId, String loteId, String transformacionId,
                                   String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
                                   Cantidad cantidadDisponible, Galeria galeria, PerfilTueste perfilDeTueste,
-                                  RolVendedor rolVendedor, FechaDeTueste fechaTueste) {
+                                  Rol rolVendedor, FechaDeTueste fechaTueste) {
         Presentacion presentacion = servicioDePublicacion.publicar(id, vendedorId, loteId, transformacionId,
                 titulo, tipoPresentacion, precio, cantidadDisponible, galeria, perfilDeTueste, rolVendedor,
                 fechaTueste);

@@ -17,6 +17,7 @@ import java.util.Objects;
 public abstract class Presentacion {
     private final String id;
     private final String vendedorId;
+    private final Rol rolVendedor;
     private final String titulo;
     private final TipoDePresentacion tipoPresentacion;
     private Precio precio;
@@ -26,10 +27,11 @@ public abstract class Presentacion {
     private EstadoDePublicacion estado;
     private boolean eliminada;
 
-    protected Presentacion(String id, String vendedorId, String titulo,
+    protected Presentacion(String id, String vendedorId, Rol rolVendedor, String titulo,
                           TipoDePresentacion tipoPresentacion, Precio precio, Cantidad cantidadDisponible, Galeria galeria) {
         this.id = id;
         this.vendedorId = vendedorId;
+        this.rolVendedor = rolVendedor;
         this.titulo = titulo;
         this.tipoPresentacion = tipoPresentacion;
         this.precio = precio;
@@ -51,7 +53,7 @@ public abstract class Presentacion {
     public static Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
                                          String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
                                          Cantidad cantidadDisponible, Galeria galeria,
-                                         PerfilTueste perfilDeTueste, RolVendedor rolVendedor,
+                                         PerfilTueste perfilDeTueste, Rol rolVendedor,
                                          FechaDeTueste fechaTueste, String material, String descripcion) {
         if (id == null || id.isBlank()) {
             throw new ReglaDominioException("La Presentación debe tener un identificador");
@@ -81,7 +83,7 @@ public abstract class Presentacion {
             throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
         }
         if (tipoPresentacion == TipoDePresentacion.MERCHANDISING) {
-            if (rolVendedor != RolVendedor.VENDEDOR_DERIVADOS) {
+            if (rolVendedor != Rol.VENDEDOR_DERIVADOS) {
                 throw new ReglaDominioException("Solo un Vendedor de Derivados puede publicar un Artículo de Merchandising");
             }
             if (fechaTueste != null || perfilDeTueste != null) {
@@ -91,7 +93,7 @@ public abstract class Presentacion {
                 throw new ReglaDominioException(
                         "Un Artículo de Merchandising no tiene Origen: no puede provenir de un Lote ni de una Transformación");
             }
-            return ArticuloDeMerchandising.publicar(id, vendedorId, titulo, tipoPresentacion, precio,
+            return ArticuloDeMerchandising.publicar(id, vendedorId, rolVendedor, titulo, tipoPresentacion, precio,
                     cantidadDisponible, galeria, material, descripcion);
         }
         return PresentacionTrazable.publicar(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
@@ -254,6 +256,8 @@ public abstract class Presentacion {
     public String getId() {return id;}
 
     public String getVendedorId() {return vendedorId;}
+
+    public Rol getRolVendedor() { return rolVendedor; }
 
     public String getTitulo() {return titulo;}
 

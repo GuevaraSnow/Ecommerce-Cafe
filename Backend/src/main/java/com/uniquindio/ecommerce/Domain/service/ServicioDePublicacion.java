@@ -5,6 +5,7 @@ import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.LoteRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.TransformacionRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 
 /**
@@ -18,10 +19,13 @@ import com.uniquindio.ecommerce.Domain.valueobject.*;
 public class ServicioDePublicacion {
 
     private final DescuentoDeOrigen descuentoDeOrigen;
+    private final UsuarioRepositorio usuarioRepositorio;
 
     public ServicioDePublicacion(LoteRepositorio loteRepositorio,
-                                 TransformacionRepositorio transformacionRepositorio) {
+                                 TransformacionRepositorio transformacionRepositorio, UsuarioRepositorio usuarioRepositorio) {
         this.descuentoDeOrigen = new DescuentoDeOrigen(loteRepositorio, transformacionRepositorio);
+        this.usuarioRepositorio = usuarioRepositorio;  {
+        }
     }
 
     /**
@@ -31,10 +35,20 @@ public class ServicioDePublicacion {
      *
      * @throws ReglaDominioException si se incumple alguna regla de negocio
      */
+
+
     public Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
                                  String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
                                  Cantidad cantidadDisponible, Galeria galeria, PerfilTueste perfilDeTueste,
-                                 RolVendedor rolVendedor, FechaDeTueste fechaTueste) {
+                                 Rol rolVendedor, FechaDeTueste fechaTueste) {
+
+        var usuario = usuarioRepositorio.buscarPorId(vendedorId)
+                .orElseThrow();
+
+        if (usuario.getRol() == Rol.COMPRADOR) {
+            throw new ReglaDominioException("Un usuario con rol COMPRADOR no está autorizado para publicar presentaciones.");
+        }
+
         Presentacion presentacion = Presentacion.publicar(id, vendedorId, loteId, transformacionId, titulo,
                 tipoPresentacion, precio, cantidadDisponible, galeria, perfilDeTueste, rolVendedor, fechaTueste,
                 null, null);

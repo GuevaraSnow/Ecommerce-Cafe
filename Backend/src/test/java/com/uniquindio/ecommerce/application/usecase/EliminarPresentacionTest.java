@@ -35,7 +35,7 @@ class EliminarPresentacionTest {
         return Presentacion.publicar("pres-1", "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
                 new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 new Galeria(List.of(new ImagenDePresentacion("http://img/manilla.png", true))), null,
-                RolVendedor.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
+                Rol.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
     }
 
     @Test

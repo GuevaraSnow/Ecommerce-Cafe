@@ -28,7 +28,7 @@ class ServicioDeReembolsoTest {
         return Presentacion.publicar(id, vendedorId, "LOT-2026-001", null, "Cafe verde " + id,
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(10, "kg"),
                 new Galeria(List.of(new ImagenDePresentacion("https://img.cafe/" + id + ".jpg", true))),
-                null, RolVendedor.CAFICULTOR, null, null, null);
+                null, Rol.CAFICULTOR, null, null, null);
     }
 
     @BeforeEach

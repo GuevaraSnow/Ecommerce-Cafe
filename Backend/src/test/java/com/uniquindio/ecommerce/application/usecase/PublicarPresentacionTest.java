@@ -10,6 +10,7 @@ import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.PresentacionRepositorioMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.TransformacionRepositorioMemoria;
+import com.uniquindio.ecommerce.infrastructure.persistence.UsuarioRepositorioMemoria;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -23,8 +24,9 @@ class PublicarPresentacionTest {
     private final PresentacionRepositorioMemoria presentaciones = new PresentacionRepositorioMemoria();
     private final LoteRepositorioMemoria lotes = new LoteRepositorioMemoria();
     private final TransformacionRepositorioMemoria transformaciones = new TransformacionRepositorioMemoria();
+    private final UsuarioRepositorioMemoria usuarios = new UsuarioRepositorioMemoria();
     private final PublicarPresentacion publicar = new PublicarPresentacion(presentaciones,
-            new ServicioDePublicacion(lotes, transformaciones));
+            new ServicioDePublicacion(lotes, transformaciones, usuarios));
 
     private Galeria galeriaValida() {
         return new Galeria(List.of(new ImagenDePresentacion("http://img/cafe.png", true)));
@@ -49,7 +51,7 @@ class PublicarPresentacionTest {
     private Presentacion publicarCafeVerde(String id, String loteId, double cantidadKg) {
         return publicar.ejecutar(id, "vendedor-1", loteId, null, "Café Verde", TipoDePresentacion.CAFE_VERDE,
                 new Precio(28000, "COP"), new Cantidad(cantidadKg, "kg"), galeriaValida(), null,
-                RolVendedor.CAFICULTOR, null);
+                Rol.CAFICULTOR, null);
     }
 
     @Test
@@ -58,7 +60,7 @@ class PublicarPresentacionTest {
 
         Presentacion presentacion = publicar.ejecutar("pres-1", "vendedor-1", null, "transformacion-1",
                 "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(20, "kg"), galeriaValida(), PerfilTueste.MEDIO, RolVendedor.TOSTADOR,
+                new Cantidad(20, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
                 new FechaDeTueste(LocalDate.now()));
 
         assertTrue(presentacion instanceof PresentacionTrazable);
@@ -73,7 +75,7 @@ class PublicarPresentacionTest {
 
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-2", "vendedor-1", null,
                 "transformacion-2", "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(50, "kg"), galeriaValida(), PerfilTueste.MEDIO, RolVendedor.TOSTADOR,
+                new Cantidad(50, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
                 new FechaDeTueste(LocalDate.now())));
 
         assertTrue(presentaciones.buscarPorId("pres-2").isEmpty());
@@ -85,11 +87,11 @@ class PublicarPresentacionTest {
 
         publicar.ejecutar("pres-3a", "vendedor-1", null, "transformacion-3", "Café Tostado Medio",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(30, "kg"), galeriaValida(),
-                PerfilTueste.MEDIO, RolVendedor.TOSTADOR, new FechaDeTueste(LocalDate.now()));
+                PerfilTueste.MEDIO, Rol.TOSTADOR, new FechaDeTueste(LocalDate.now()));
 
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-3b", "vendedor-1", null,
                 "transformacion-3", "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(15, "kg"), galeriaValida(), PerfilTueste.MEDIO, RolVendedor.TOSTADOR,
+                new Cantidad(15, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
                 new FechaDeTueste(LocalDate.now())));
     }
 
@@ -145,7 +147,7 @@ class PublicarPresentacionTest {
     void noSePuedePublicarSiLaTransformacionNoExiste() {
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-9", "vendedor-1", null,
                 "no-existe", "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(10, "kg"), galeriaValida(), PerfilTueste.MEDIO, RolVendedor.TOSTADOR,
+                new Cantidad(10, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
                 new FechaDeTueste(LocalDate.now())));
 
         assertTrue(presentaciones.buscarPorId("pres-9").isEmpty());
@@ -155,6 +157,6 @@ class PublicarPresentacionTest {
     void noSePuedeUsarEsteCasoDeUsoParaMerchandising() {
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-10", "vendedor-1", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, RolVendedor.VENDEDOR_DERIVADOS, null));
+                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null));
     }
 }

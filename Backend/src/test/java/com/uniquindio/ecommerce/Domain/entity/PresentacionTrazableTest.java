@@ -25,7 +25,7 @@ class PresentacionTrazableTest {
     void cafeVerdeDesdeUnLoteEsValido() {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-1", "vendedor-1", "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),
-                "lote-1", null, null, null, RolVendedor.CAFICULTOR);
+                "lote-1", null, null, null, Rol.CAFICULTOR);
 
         assertEquals("lote-1", presentacion.getOrigen().loteId());
         assertNull(presentacion.getOrigen().transformacionId());
@@ -35,21 +35,21 @@ class PresentacionTrazableTest {
     void cafeVerdeDesdeUnaTransformacionFalla() {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-2", "vendedor-1",
                 "Café Verde", TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"),
-                galeriaValida(), null, "transformacion-1", null, null, RolVendedor.CAFICULTOR));
+                galeriaValida(), null, "transformacion-1", null, null, Rol.CAFICULTOR));
     }
 
     @Test
     void sinLoteNiTransformacionFalla() {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-3", "vendedor-1",
                 "Café Verde", TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"),
-                galeriaValida(), null, null, null, null, RolVendedor.CAFICULTOR));
+                galeriaValida(), null, null, null, null, Rol.CAFICULTOR));
     }
 
     @Test
     void conLoteYTransformacionALaVezFalla() {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-4", "vendedor-1",
                 "Café Verde", TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"),
-                galeriaValida(), "lote-1", "transformacion-1", null, null, RolVendedor.CAFICULTOR));
+                galeriaValida(), "lote-1", "transformacion-1", null, null, Rol.CAFICULTOR));
     }
 
     @Test
@@ -57,7 +57,7 @@ class PresentacionTrazableTest {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-5", "vendedor-1", "Café Tostado",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"), galeriaValida(),
                 null, "transformacion-1", PerfilTueste.MEDIO, new FechaDeTueste(LocalDate.now()),
-                RolVendedor.TOSTADOR);
+                Rol.TOSTADOR);
 
         assertEquals("transformacion-1", presentacion.getOrigen().transformacionId());
         assertEquals(PerfilTueste.MEDIO, presentacion.getPerfilDeTueste());
@@ -68,14 +68,14 @@ class PresentacionTrazableTest {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-6", "vendedor-1",
                 "Café Tostado", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"),
                 galeriaValida(), "lote-1", null, PerfilTueste.MEDIO, new FechaDeTueste(LocalDate.now()),
-                RolVendedor.TOSTADOR));
+                Rol.TOSTADOR));
     }
 
     @Test
     void cafeTostadoSinFechaDeTuesteFalla() {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-7", "vendedor-1",
                 "Café Tostado", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"),
-                galeriaValida(), null, "transformacion-1", PerfilTueste.MEDIO, null, RolVendedor.TOSTADOR));
+                galeriaValida(), null, "transformacion-1", PerfilTueste.MEDIO, null, Rol.TOSTADOR));
     }
 
     @Test
@@ -83,7 +83,7 @@ class PresentacionTrazableTest {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-8", "vendedor-1",
                 "Café Tostado", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"),
                 galeriaValida(), null, "transformacion-1", null, new FechaDeTueste(LocalDate.now()),
-                RolVendedor.TOSTADOR));
+                Rol.TOSTADOR));
     }
 
     @Test
@@ -92,14 +92,14 @@ class PresentacionTrazableTest {
 
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-9", "vendedor-1",
                 "Café Tostado", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"),
-                galeriaValida(), null, "transformacion-1", PerfilTueste.MEDIO, fechaVencida, RolVendedor.TOSTADOR));
+                galeriaValida(), null, "transformacion-1", PerfilTueste.MEDIO, fechaVencida, Rol.TOSTADOR));
     }
 
     @Test
     void cafeVerdeConFechaDeTuesteFalla() {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-10", "vendedor-1",
                 "Café Verde", TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"),
-                galeriaValida(), "lote-1", null, null, new FechaDeTueste(LocalDate.now()), RolVendedor.CAFICULTOR));
+                galeriaValida(), "lote-1", null, null, new FechaDeTueste(LocalDate.now()), Rol.CAFICULTOR));
     }
 
     @Test
@@ -107,7 +107,7 @@ class PresentacionTrazableTest {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-11", "vendedor-1",
                 "Café Tostado", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"),
                 galeriaValida(), null, "transformacion-1", PerfilTueste.OSCURO, new FechaDeTueste(LocalDate.now()),
-                RolVendedor.CAFICULTOR));
+                Rol.CAFICULTOR));
     }
 
     @Test
@@ -115,7 +115,7 @@ class PresentacionTrazableTest {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-12", "vendedor-1", "Café Tostado",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"), galeriaValida(),
                 null, "transformacion-1", PerfilTueste.TRADICIONAL, new FechaDeTueste(LocalDate.now()),
-                RolVendedor.CAFICULTOR);
+                Rol.CAFICULTOR);
 
         assertEquals(PerfilTueste.TRADICIONAL, presentacion.getPerfilDeTueste());
     }
@@ -125,7 +125,7 @@ class PresentacionTrazableTest {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-26", "vendedor-1",
                 "Café Tostado", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"),
                 galeriaValida(), null, "transformacion-1", PerfilTueste.OSCURO, new FechaDeTueste(LocalDate.now()),
-                RolVendedor.VENDEDOR_DERIVADOS));
+                Rol.VENDEDOR_DERIVADOS));
     }
 
     @Test
@@ -133,7 +133,7 @@ class PresentacionTrazableTest {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-27", "vendedor-1", "Café Tostado",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"), galeriaValida(),
                 null, "transformacion-1", PerfilTueste.OSCURO, new FechaDeTueste(LocalDate.now()),
-                RolVendedor.TOSTADOR);
+                Rol.TOSTADOR);
 
         assertEquals(PerfilTueste.OSCURO, presentacion.getPerfilDeTueste());
     }
@@ -149,14 +149,14 @@ class PresentacionTrazableTest {
     void noSePuedeContarEnUnidadComoElMerchandising() {
         assertThrows(ReglaDominioException.class, () -> PresentacionTrazable.publicar("pres-14", "vendedor-1",
                 "Café Verde", TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "unidad"),
-                galeriaValida(), "lote-1", null, null, null, RolVendedor.CAFICULTOR));
+                galeriaValida(), "lote-1", null, null, null, Rol.CAFICULTOR));
     }
 
     @Test
     void estaFrescaEsVerdaderaCuandoNoHayFechaDeTueste() {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-15", "vendedor-1", "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),
-                "lote-1", null, null, null, RolVendedor.CAFICULTOR);
+                "lote-1", null, null, null, Rol.CAFICULTOR);
 
         assertTrue(presentacion.estaFresca());
     }
@@ -166,7 +166,7 @@ class PresentacionTrazableTest {
         FechaDeTueste fechaLimite = new FechaDeTueste(LocalDate.now().minusDays(30));
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-16", "vendedor-1", "Café Tostado",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(50, "kg"), galeriaValida(),
-                null, "transformacion-1", PerfilTueste.MEDIO, fechaLimite, RolVendedor.TOSTADOR);
+                null, "transformacion-1", PerfilTueste.MEDIO, fechaLimite, Rol.TOSTADOR);
 
         assertTrue(presentacion.estaFresca());
     }
@@ -199,7 +199,7 @@ class PresentacionTrazableTest {
     void elCafeSinTostarNuncaSeVence() {
         PresentacionTrazable verde = PresentacionTrazable.publicar("pres-33", "vendedor-1", "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),
-                "lote-1", null, null, null, RolVendedor.CAFICULTOR);
+                "lote-1", null, null, null, Rol.CAFICULTOR);
 
         assertEquals(EstadoDePublicacion.ACTIVA, verde.estadoAl(LocalDate.now().plusYears(5)));
     }
@@ -208,7 +208,7 @@ class PresentacionTrazableTest {
     void verificarVencimientoNoCambiaElEstadoSiEstaFresca() {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-17", "vendedor-1", "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),
-                "lote-1", null, null, null, RolVendedor.CAFICULTOR);
+                "lote-1", null, null, null, Rol.CAFICULTOR);
 
         presentacion.verificarVencimiento();
 
@@ -219,7 +219,7 @@ class PresentacionTrazableTest {
     void registrarNotaDeCataNulaLanzaExcepcion() {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-18", "vendedor-1", "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),
-                "lote-1", null, null, null, RolVendedor.CAFICULTOR);
+                "lote-1", null, null, null, Rol.CAFICULTOR);
 
         assertThrows(ReglaDominioException.class, () -> presentacion.registrarNotaCata(null));
     }
@@ -228,7 +228,7 @@ class PresentacionTrazableTest {
     void registrarNotaDeCataValidaLaAsigna() {
         PresentacionTrazable presentacion = PresentacionTrazable.publicar("pres-19", "vendedor-1", "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeriaValida(),
-                "lote-1", null, null, null, RolVendedor.CAFICULTOR);
+                "lote-1", null, null, null, Rol.CAFICULTOR);
         NotaDeCata nota = new NotaDeCata(List.of("Chocolate", "Panela"));
 
         presentacion.registrarNotaCata(nota);
@@ -239,7 +239,7 @@ class PresentacionTrazableTest {
     private PresentacionTrazable cafeTostadoConFecha(String id, LocalDate fecha) {
         return PresentacionTrazable.publicar(id, "vendedor-1", "Café Tostado", TipoDePresentacion.CAFE_TOSTADO,
                 new Precio(32000, "COP"), new Cantidad(50, "kg"), galeriaValida(), null, "transformacion-1",
-                PerfilTueste.MEDIO, new FechaDeTueste(fecha), RolVendedor.TOSTADOR);
+                PerfilTueste.MEDIO, new FechaDeTueste(fecha), Rol.TOSTADOR);
     }
 
     @Test
