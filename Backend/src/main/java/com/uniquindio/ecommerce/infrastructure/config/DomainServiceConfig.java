@@ -7,6 +7,7 @@ import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeBajaDePresentacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
+import com.uniquindio.ecommerce.Domain.service.VerificadorDeEmail;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,6 +26,10 @@ public class DomainServiceConfig {
         return new ServicioDePublicacion(loteRepositorio, transformacionRepositorio, usuarioRepositorio);
     }
 
+    @Bean
+    public VerificadorDeEmail verificadorDeEmail(UsuarioRepositorio usuarioRepositorio) {
+        return new VerificadorDeEmail(usuarioRepositorio);
+    }
     @Bean
     public ServicioDeReposicion servicioDeReposicion(LoteRepositorio loteRepositorio,
                                                      TransformacionRepositorio transformacionRepositorio) {
