@@ -64,37 +64,38 @@ class UsuarioTest {
     }
 
     @Test
-    void cambiarContrasenaConActualIncorrectaNoCambiaEstadoYLanzaExcepcion() {
-        EncriptadorContrasenaRepositorio encriptador = new EncriptadorBCryptMemoria();
-        String passInicial = "Password123!";
-        String passHashInicial = encriptador.encriptar(passInicial);
-
+    void cambiarContrasenaDirectaActualizaElHashYRechazaNull() {
         Usuario usuario = Usuario.registrar(
-                "usr-1", "Joseph Cortés", emailValido, new Contrasena(passHashInicial),
+                "usr-1", "Joseph Cortés", emailValido, new Contrasena("hashInicial123"),
                 telefonoValido, fechaValida, Rol.CAFICULTOR
         );
 
-        Contrasena passActualIncorrecta = new Contrasena("MalaPassword123!");
-        Contrasena nuevaPass = new Contrasena("NuevaPass123!");
+        // Cambia la contraseña correctamente
+        usuario.cambiarContrasenaDirecta(new Contrasena("nuevoHash456"));
+        assertEquals("nuevoHash456", usuario.getContrasena().contrasena());
 
+        // Rechaza nulo y mantiene el estado anterior
         assertThrows(ReglaDominioException.class, () ->
-                usuario.cambiarContrasenaConVerificacion(passActualIncorrecta, nuevaPass, encriptador)
+                usuario.cambiarContrasenaDirecta(null)
         );
-
-        // Verifica que el estado no cambió
-        assertEquals(passHashInicial, usuario.getContrasena().contrasena());
+        assertEquals("nuevoHash456", usuario.getContrasena().contrasena());
     }
 
     @Test
-    void cambiarContrasenaNullSeRechaza() {
-        EncriptadorContrasenaRepositorio encriptador = new EncriptadorBCryptMemoria();
-        Usuario usuario = Usuario.registrar(
-                "usr-1", "Joseph Cortés", emailValido, new Contrasena("Password123!"),
-                telefonoValido, fechaValida, Rol.CAFICULTOR
-        );
+    void noSePuedeRegistrarUsuarioMenorDeEdad() {
+        FechaDeNacimiento menorDeEdad = new FechaDeNacimiento(LocalDate.now().minusYears(17));
 
         assertThrows(ReglaDominioException.class, () ->
-                usuario.cambiarContrasenaConVerificacion(null, new Contrasena("NuevaPass123!"), encriptador)
+                Usuario.registrar("usr-1", "Usuario Menor", emailValido, new Contrasena("hash"),
+                        telefonoValido, menorDeEdad, Rol.COMPRADOR)
+        );
+    }
+
+    @Test
+    void noSePuedeRegistrarUsuarioSinFechaDeNacimiento() {
+        assertThrows(ReglaDominioException.class, () ->
+                Usuario.registrar("usr-1", "Sin Fecha", emailValido, new Contrasena("hash"),
+                        telefonoValido, null, Rol.COMPRADOR)
         );
     }
 }

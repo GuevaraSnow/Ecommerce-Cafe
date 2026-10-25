@@ -2,6 +2,7 @@ package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
+import com.uniquindio.ecommerce.Domain.valueobject.ContrasenaPlana;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
 import com.uniquindio.ecommerce.application.dto.request.RecuperarContrasenaRequest;
 import com.uniquindio.ecommerce.application.dto.request.RestablecerContrasenaRequest;
@@ -36,6 +37,13 @@ public class UsuarioMapper {
             return null;
         }
         return new Email(request.email());
+    }
+
+    public ContrasenaPlana toContrasenaPlana(String clavePlanaTexto) {
+        if (clavePlanaTexto == null || clavePlanaTexto.isBlank()) {
+            return null;
+        }
+        return new ContrasenaPlana(clavePlanaTexto);
     }
 
     public Contrasena toContrasena(RestablecerContrasenaRequest request) {

@@ -47,6 +47,12 @@ public class Usuario {
         if (contrasena == null) {
             throw new ReglaDominioException("La contraseña no puede ser nula.");
         }
+        if (fechaDeNacimiento == null) {
+            throw new ReglaDominioException("La fecha de nacimiento es obligatoria.");
+        }
+        if (!fechaDeNacimiento.esMayorDeEdad()) {
+            throw new ReglaDominioException("El usuario debe ser mayor de 18 años para registrarse.");
+        }
         if (rol == null) {
             throw new ReglaDominioException("El rol no puede ser nulo.");
         }
@@ -148,22 +154,15 @@ public class Usuario {
         this.codigoRecuperacion = null;
     }
 
-    public void cambiarContrasenaConVerificacion(Contrasena contrasenaActualFormulario,
-                                                 Contrasena nuevaContrasena,
-                                                 EncriptadorContrasenaRepositorio encriptador) {
-        if (contrasenaActualFormulario == null || nuevaContrasena == null) {
-            throw new ReglaDominioException("La contraseña actual y la nueva contraseña son obligatorias.");
+    /**
+     * Asigna una nueva contraseña encriptada. La verificación de la contraseña actual
+     * y la encriptación son coordinadas por ServicioDeContrasena (Domain Service).
+     */
+    public void cambiarContrasenaDirecta(Contrasena nuevaContrasenaEncriptada) {
+        if (nuevaContrasenaEncriptada == null) {
+            throw new ReglaDominioException("La nueva contraseña no puede ser nula.");
         }
-        if (encriptador == null) {
-            throw new ReglaDominioException("El encriptador no puede ser nulo.");
-        }
-
-        if (!encriptador.coinciden(contrasenaActualFormulario.contrasena(), this.contrasena.contrasena())) {
-            throw new ReglaDominioException("La contraseña actual ingresada no es correcta.");
-        }
-
-        String nuevaEncriptada = encriptador.encriptar(nuevaContrasena.contrasena());
-        this.contrasena = new Contrasena(nuevaEncriptada);
+        this.contrasena = nuevaContrasenaEncriptada;
     }
 
     public void eliminarLogicamente() {
