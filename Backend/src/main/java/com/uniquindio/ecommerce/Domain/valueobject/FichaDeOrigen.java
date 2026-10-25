@@ -1,18 +1,21 @@
 package com.uniquindio.ecommerce.Domain.valueobject;
 
 import com.uniquindio.ecommerce.Domain.entity.Lote;
-import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Record DTO / VO de lectura que consolida la trazabilidad del café:
- * Finca + Cosecha + Lote + Transformación.
+ * Record DTO / VO de lectura que consolida la trazabilidad del café
+ * con datos puros, sin acoplar la entidad Transformacion.
  */
 public record FichaDeOrigen(
         String fincaNombre,
         String cosechaInfo,
-        List lotesOrigen,
-        Transformacion transformacion
+        List<Lote> lotesOrigen,
+        String transformacionId,
+        String tostadorId,
+        LocalDate fechaTransformacion,
+        PerfilTueste perfilTuesteResultante
 ) {
 }
