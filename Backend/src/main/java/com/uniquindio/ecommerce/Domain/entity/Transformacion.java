@@ -6,18 +6,17 @@ import com.uniquindio.ecommerce.Domain.valueobject.PerfilTueste;
 import com.uniquindio.ecommerce.Domain.valueobject.PorcentajeDeMerma;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Entidad Transformacion rediseñada.
  * Mantiene el registro de la cantidad de entrada, la merma aplicada,
- * la cantidad resultante producida y la cantidad resultante disponible.
+ * la cantidad resultante producida y la cantidad resultante disponible para un único Lote.
  */
 public class Transformacion {
 
     private final String id;
-    private final List loteIds;
+    private final String loteCodigo;
     private final Cantidad cantidadEntrada;
     private final PorcentajeDeMerma merma;
     private final Cantidad cantidadResultante;
@@ -26,11 +25,11 @@ public class Transformacion {
     private final LocalDate fecha;
     private final PerfilTueste perfilTuesteResultante;
 
-    private Transformacion(String id, List loteIds, Cantidad cantidadEntrada, PorcentajeDeMerma merma,
+    private Transformacion(String id, String loteCodigo, Cantidad cantidadEntrada, PorcentajeDeMerma merma,
                            Cantidad cantidadResultante, Cantidad cantidadResultanteDisponible,
                            String tostadorId, LocalDate fecha, PerfilTueste perfilTuesteResultante) {
         this.id = id;
-        this.loteIds = loteIds;
+        this.loteCodigo = loteCodigo;
         this.cantidadEntrada = cantidadEntrada;
         this.merma = merma;
         this.cantidadResultante = cantidadResultante;
@@ -43,14 +42,14 @@ public class Transformacion {
     /**
      * Registra una Transformación calculando automáticamente la cantidad resultante con la merma.
      */
-    public static Transformacion registrar(String id, List loteIds, Cantidad cantidadEntrada,
+    public static Transformacion registrar(String id, String loteCodigo, Cantidad cantidadEntrada,
                                            PorcentajeDeMerma merma, String tostadorId, LocalDate fecha,
                                            PerfilTueste perfilTuesteResultante) {
         if (id == null || id.isBlank()) {
             throw new ReglaDominioException("La Transformación debe tener un identificador");
         }
-        if (loteIds == null || loteIds.isEmpty()) {
-            throw new ReglaDominioException("La Transformación debe usar al menos un Lote de origen");
+        if (loteCodigo == null || loteCodigo.isBlank()) {
+            throw new ReglaDominioException("La Transformación debe indicar el código del Lote de origen");
         }
         if (cantidadEntrada == null) {
             throw new ReglaDominioException("La Transformación debe indicar la Cantidad de entrada");
@@ -60,6 +59,10 @@ public class Transformacion {
         }
         if (merma == null) {
             throw new ReglaDominioException("La Transformación debe especificar el porcentaje de merma");
+        }
+        // Validación de rango de merma entre 12% y 22%
+        if (merma.valor() < 0.12 || merma.valor() > 0.22) {
+            throw new ReglaDominioException("El porcentaje de merma debe estar entre el 12% y el 22%");
         }
         if (tostadorId == null || tostadorId.isBlank()) {
             throw new ReglaDominioException("La Transformación debe indicar quién la ejecutó");
@@ -74,16 +77,15 @@ public class Transformacion {
             throw new ReglaDominioException("La Transformación debe indicar el Perfil de Tueste resultante");
         }
 
-        // Cálculo de la cantidad resultante aplicando la merma a la cantidad de entrada
         Cantidad resultante = cantidadEntrada.aplicarMerma(merma);
 
         return new Transformacion(
                 id,
-                List.copyOf(loteIds),
+                loteCodigo,
                 cantidadEntrada,
                 merma,
                 resultante,
-                resultante, // Inicialmente la cantidad disponible es igual a la resultante
+                resultante,
                 tostadorId,
                 fecha,
                 perfilTuesteResultante
@@ -97,13 +99,12 @@ public class Transformacion {
         if (cantidadAAsignar == null) {
             throw new ReglaDominioException("La cantidad a asignar no puede ser nula");
         }
-        // Utiliza el método restar del Value Object Cantidad
         this.cantidadResultanteDisponible = this.cantidadResultanteDisponible.restar(cantidadAAsignar);
     }
 
-    // Getters
+    // Getters con tipos genéricos fuertes
     public String getId() { return id; }
-    public List getLoteIds() { return loteIds; }
+    public String getLoteCodigo() { return loteCodigo; }
     public Cantidad getCantidadEntrada() { return cantidadEntrada; }
     public PorcentajeDeMerma getMerma() { return merma; }
     public Cantidad getCantidadResultante() { return cantidadResultante; }

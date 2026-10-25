@@ -8,8 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +17,7 @@ class TransformacionTest {
     @DisplayName("Debería registrar una Transformación exitosamente cuando todos los datos son válidos")
     void registrar_deberiaCrearTransformacion_cuandoDatosSonValidos() {
         String id = "TRANS-001";
-        List lotes = List.of("LOT-2024-001");
+        String loteCodigo = "LOT-2024-001";
         Cantidad cantidadEntrada = new Cantidad(50.0, "kg");
         PorcentajeDeMerma merma = new PorcentajeDeMerma(0.18);
         String tostadorId = "TOST-001";
@@ -28,7 +26,7 @@ class TransformacionTest {
 
         Transformacion transformacion = Transformacion.registrar(
                 id,
-                lotes,
+                loteCodigo,
                 cantidadEntrada,
                 merma,
                 tostadorId,
@@ -38,20 +36,20 @@ class TransformacionTest {
 
         assertNotNull(transformacion);
         assertEquals(id, transformacion.getId());
+        assertEquals("LOT-2024-001", transformacion.getLoteCodigo());
         assertEquals(41.0, transformacion.getCantidadResultante().valor(), 0.0001);
     }
 
     @Test
-    @DisplayName("Debería lanzar ReglaDominioException si la lista de lotes está vacía")
-    void registrar_deberiaLanzarExcepcion_cuandoListaLotesEstaVacia() {
-        List lotesVacios = Collections.emptyList();
+    @DisplayName("Debería lanzar ReglaDominioException si el código del lote es nulo o en blanco")
+    void registrar_deberiaLanzarExcepcion_cuandoLoteEsInvalido() {
         Cantidad cantidadEntrada = new Cantidad(50.0, "kg");
         PorcentajeDeMerma merma = new PorcentajeDeMerma(0.18);
 
         assertThrows(ReglaDominioException.class, () ->
                 Transformacion.registrar(
                         "TRANS-002",
-                        lotesVacios,
+                        "   ",
                         cantidadEntrada,
                         merma,
                         "TOST-001",
@@ -64,7 +62,6 @@ class TransformacionTest {
     @Test
     @DisplayName("Debería lanzar ReglaDominioException si la fecha es futura")
     void registrar_deberiaLanzarExcepcion_cuandoFechaEsFutura() {
-        List lotes = List.of("LOT-2024-001");
         Cantidad cantidadEntrada = new Cantidad(50.0, "kg");
         PorcentajeDeMerma merma = new PorcentajeDeMerma(0.18);
         LocalDate fechaFutura = LocalDate.now().plusDays(1);
@@ -72,7 +69,7 @@ class TransformacionTest {
         assertThrows(ReglaDominioException.class, () ->
                 Transformacion.registrar(
                         "TRANS-003",
-                        lotes,
+                        "LOT-2024-001",
                         cantidadEntrada,
                         merma,
                         "TOST-001",
