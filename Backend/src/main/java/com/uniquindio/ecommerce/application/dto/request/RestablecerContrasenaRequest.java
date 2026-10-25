@@ -9,8 +9,9 @@ public record RestablecerContrasenaRequest(
         String email,
 
         @NotBlank(message = "El código de recuperación es obligatorio")
-        String codigoRecuperacion,
+        String codigo,
 
         @NotBlank(message = "La nueva contraseña es obligatoria")
         String nuevaContrasena
-) {}
+) {
+}
