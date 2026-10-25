@@ -2,7 +2,6 @@ package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
-import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeRecuperacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
 import com.uniquindio.ecommerce.application.dto.request.RestablecerContrasenaRequest;
@@ -22,10 +21,9 @@ public class RestablecerContrasena {
 
         Usuario usuario = usuarioRepositorio.buscarPorEmail(email).orElseThrow();
 
-        CodigoDeRecuperacion codigoEnviado = CodigoDeRecuperacion.reconstruir(request.codigoRecuperacion());
         Contrasena nuevaContrasena = new Contrasena(request.nuevaContrasena());
 
-        usuario.cambiarContrasena(codigoEnviado, nuevaContrasena);
+        usuario.cambiarContrasena(request.codigoRecuperacion(), nuevaContrasena);
 
         usuarioRepositorio.guardar(usuario);
     }
