@@ -51,9 +51,15 @@ class PublicarPresentacionTest {
     }
 
     private void registrarTransformacion(String id, double cantidadEntradaKg) {
-        transformaciones.guardar(Transformacion.registrar(id, List.of("LOT-2026-001"),
-                new Cantidad(cantidadEntradaKg, "kg"), new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(),
-                PerfilTueste.MEDIO));
+        transformaciones.guardar(Transformacion.registrar(
+                id,
+                "LOT-2026-001", // <- En lugar de List.of("LOT-2026-001")
+                new Cantidad(cantidadEntradaKg, "kg"),
+                new PorcentajeDeMerma(0.18),
+                "tostador-1",
+                LocalDate.now(),
+                PerfilTueste.MEDIO
+        ));
     }
 
     private Presentacion publicarCafeVerde(String id, String loteId, double cantidadKg) {

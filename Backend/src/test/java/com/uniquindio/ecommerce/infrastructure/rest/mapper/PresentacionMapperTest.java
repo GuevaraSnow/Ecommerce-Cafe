@@ -71,7 +71,7 @@ class PresentacionMapperTest {
     }
 
     private PublicarPresentacionRequest cafeTostadoDesdeTransformacion() {
-        transformaciones.guardar(Transformacion.registrar("transformacion-1", List.of("lote-1"),
+        transformaciones.guardar(Transformacion.registrar("transformacion-1","lote-1",
                 new Cantidad(50, "kg"), new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(),
                 PerfilTueste.MEDIO));
         return new PublicarPresentacionRequest("Café Tostado", TipoDePresentacion.CAFE_TOSTADO,
