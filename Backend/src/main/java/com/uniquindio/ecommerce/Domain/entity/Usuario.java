@@ -56,8 +56,16 @@ public class Usuario {
 
     public static Usuario reconstruir(String id, String nombre, Email email, Contrasena contrasena,
                                       Telefono telefono, FechaDeNacimiento fechaDeNacimiento,
+                                      Rol rol, CodigoDeRecuperacion codigoRecuperacion, boolean eliminado) {
+        Usuario usuario = new Usuario(id, nombre, email, contrasena, telefono, fechaDeNacimiento, rol, codigoRecuperacion);
+        usuario.eliminado = eliminado;
+        return usuario;
+    }
+
+    public static Usuario reconstruir(String id, String nombre, Email email, Contrasena contrasena,
+                                      Telefono telefono, FechaDeNacimiento fechaDeNacimiento,
                                       Rol rol, CodigoDeRecuperacion codigoRecuperacion) {
-        return new Usuario(id, nombre, email, contrasena, telefono, fechaDeNacimiento, rol, codigoRecuperacion);
+        return reconstruir(id, nombre, email, contrasena, telefono, fechaDeNacimiento, rol, codigoRecuperacion, false);
     }
 
     private static void validarId(String id) {
@@ -125,6 +133,20 @@ public class Usuario {
         this.telefono = nuevoTelefono;
     }
 
+
+    public void cambiarContrasena(String codigoTexto, Contrasena nuevaContrasena) {
+        if (this.codigoRecuperacion == null || !this.codigoRecuperacion.estaVigente()) {
+            throw new ReglaDominioException("El código de recuperación ha expirado o no ha sido solicitado.");
+        }
+        if (!this.codigoRecuperacion.coincideCon(codigoTexto)) {
+            throw new ReglaDominioException("El código de recuperación proporcionado no es válido.");
+        }
+        if (nuevaContrasena == null) {
+            throw new ReglaDominioException("La nueva contraseña no puede ser nula.");
+        }
+        this.contrasena = nuevaContrasena;
+        this.codigoRecuperacion = null;
+    }
 
     public void cambiarContrasenaConVerificacion(Contrasena contrasenaActualFormulario,
                                                  Contrasena nuevaContrasena,
