@@ -58,7 +58,7 @@ class PresentacionMapperTest {
         return new PublicarPresentacion(presentaciones, new ServicioDePublicacion(lotes, transformaciones, usuarios)).ejecutar(
                 "pres-1", "vendedor-1", r.loteId(), r.transformacionId(), r.titulo(), r.tipo(),
                 mapper.toPrecio(r.precio()), mapper.toCantidad(r.cantidad()), mapper.toGaleria(r.galeria()),
-                r.perfilTueste(), rol, mapper.toFechaDeTueste(r.fechaTueste()));
+                r.perfilTueste(), mapper.toFechaDeTueste(r.fechaTueste()));
     }
 
     private PublicarPresentacionRequest cafeVerdeDesdeLote() {
