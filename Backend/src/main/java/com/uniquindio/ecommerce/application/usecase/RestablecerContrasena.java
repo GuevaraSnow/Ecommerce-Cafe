@@ -2,10 +2,8 @@ package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
-import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeRecuperacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
-import com.uniquindio.ecommerce.application.dto.request.RestablecerContrasenaRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,15 +15,10 @@ public class RestablecerContrasena {
     private final UsuarioRepositorio usuarioRepositorio;
 
     @Transactional
-    public void ejecutar(RestablecerContrasenaRequest request) {
-        Email email = new Email(request.email());
-
+    public void ejecutar(Email email, String codigoTexto, Contrasena nuevaContrasena) {
         Usuario usuario = usuarioRepositorio.buscarPorEmail(email).orElseThrow();
 
-        CodigoDeRecuperacion codigoEnviado = CodigoDeRecuperacion.reconstruir(request.codigoRecuperacion());
-        Contrasena nuevaContrasena = new Contrasena(request.nuevaContrasena());
-
-        usuario.cambiarContrasena(codigoEnviado, nuevaContrasena);
+        usuario.cambiarContrasena(codigoTexto, nuevaContrasena);
 
         usuarioRepositorio.guardar(usuario);
     }

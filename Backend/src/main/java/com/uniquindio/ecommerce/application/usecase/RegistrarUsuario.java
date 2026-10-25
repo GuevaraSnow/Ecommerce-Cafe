@@ -20,13 +20,13 @@ public class RegistrarUsuario {
     private final VerificadorDeEmail verificadorDeEmail;
 
     @Transactional
-    public Usuario ejecutar(String nombre, Email email, Contrasena contrasenaPlana,
-                            Telefono telefono, FechaDeNacimiento fechaNacimiento, Rol rol, Boolean eliminado ) {
+    public Usuario ejecutar(String nombre, Email email, ContrasenaPlana contrasenaPlana,
+                            Telefono telefono, FechaDeNacimiento fechaNacimiento, Rol rol) {
 
         verificadorDeEmail.verificarEmailUnico(email);
 
         String id = UUID.randomUUID().toString();
-        String contrasenaEncriptada = encriptadorContrasenaRepositorio.encriptar(contrasenaPlana.contrasena());
+        String contrasenaEncriptada = encriptadorContrasenaRepositorio.encriptar(contrasenaPlana.valor());
         Contrasena contrasena = new Contrasena(contrasenaEncriptada);
 
         Usuario usuario = Usuario.registrar(

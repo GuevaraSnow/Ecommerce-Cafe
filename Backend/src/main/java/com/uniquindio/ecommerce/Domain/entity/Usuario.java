@@ -47,6 +47,12 @@ public class Usuario {
         if (contrasena == null) {
             throw new ReglaDominioException("La contraseña no puede ser nula.");
         }
+        if (fechaDeNacimiento == null) {
+            throw new ReglaDominioException("La fecha de nacimiento es obligatoria.");
+        }
+        if (!fechaDeNacimiento.esMayorDeEdad()) {
+            throw new ReglaDominioException("El usuario debe ser mayor de 18 años para registrarse.");
+        }
         if (rol == null) {
             throw new ReglaDominioException("El rol no puede ser nulo.");
         }
@@ -56,8 +62,16 @@ public class Usuario {
 
     public static Usuario reconstruir(String id, String nombre, Email email, Contrasena contrasena,
                                       Telefono telefono, FechaDeNacimiento fechaDeNacimiento,
+                                      Rol rol, CodigoDeRecuperacion codigoRecuperacion, boolean eliminado) {
+        Usuario usuario = new Usuario(id, nombre, email, contrasena, telefono, fechaDeNacimiento, rol, codigoRecuperacion);
+        usuario.eliminado = eliminado;
+        return usuario;
+    }
+
+    public static Usuario reconstruir(String id, String nombre, Email email, Contrasena contrasena,
+                                      Telefono telefono, FechaDeNacimiento fechaDeNacimiento,
                                       Rol rol, CodigoDeRecuperacion codigoRecuperacion) {
-        return new Usuario(id, nombre, email, contrasena, telefono, fechaDeNacimiento, rol, codigoRecuperacion);
+        return reconstruir(id, nombre, email, contrasena, telefono, fechaDeNacimiento, rol, codigoRecuperacion, false);
     }
 
     private static void validarId(String id) {
@@ -126,22 +140,29 @@ public class Usuario {
     }
 
 
-    public void cambiarContrasenaConVerificacion(Contrasena contrasenaActualFormulario,
-                                                 Contrasena nuevaContrasena,
-                                                 EncriptadorContrasenaRepositorio encriptador) {
-        if (contrasenaActualFormulario == null || nuevaContrasena == null) {
-            throw new ReglaDominioException("La contraseña actual y la nueva contraseña son obligatorias.");
+    public void cambiarContrasena(String codigoTexto, Contrasena nuevaContrasena) {
+        if (this.codigoRecuperacion == null || !this.codigoRecuperacion.estaVigente()) {
+            throw new ReglaDominioException("El código de recuperación ha expirado o no ha sido solicitado.");
         }
-        if (encriptador == null) {
-            throw new ReglaDominioException("El encriptador no puede ser nulo.");
+        if (!this.codigoRecuperacion.coincideCon(codigoTexto)) {
+            throw new ReglaDominioException("El código de recuperación proporcionado no es válido.");
         }
+        if (nuevaContrasena == null) {
+            throw new ReglaDominioException("La nueva contraseña no puede ser nula.");
+        }
+        this.contrasena = nuevaContrasena;
+        this.codigoRecuperacion = null;
+    }
 
-        if (!encriptador.coinciden(contrasenaActualFormulario.contrasena(), this.contrasena.contrasena())) {
-            throw new ReglaDominioException("La contraseña actual ingresada no es correcta.");
+    /**
+     * Asigna una nueva contraseña encriptada. La verificación de la contraseña actual
+     * y la encriptación son coordinadas por ServicioDeContrasena (Domain Service).
+     */
+    public void cambiarContrasenaDirecta(Contrasena nuevaContrasenaEncriptada) {
+        if (nuevaContrasenaEncriptada == null) {
+            throw new ReglaDominioException("La nueva contraseña no puede ser nula.");
         }
-
-        String nuevaEncriptada = encriptador.encriptar(nuevaContrasena.contrasena());
-        this.contrasena = new Contrasena(nuevaEncriptada);
+        this.contrasena = nuevaContrasenaEncriptada;
     }
 
     public void eliminarLogicamente() {

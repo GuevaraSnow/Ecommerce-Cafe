@@ -7,7 +7,7 @@ import java.util.Random;
 
 /**
  * Value Object para la recuperación de contraseña
- * Genera un codigo numerico que se expira en 15 minutos
+ * Genera un código numérico que expira en 15 minutos
  */
 public record CodigoDeRecuperacion(String codigo, LocalDateTime fechaExpiracion) {
 
@@ -20,20 +20,19 @@ public record CodigoDeRecuperacion(String codigo, LocalDateTime fechaExpiracion)
         }
     }
 
-
     public static CodigoDeRecuperacion generar() {
         String codigoGenerado = String.format("%06d", new Random().nextInt(900000) + 100000);
         return new CodigoDeRecuperacion(codigoGenerado, LocalDateTime.now().plusMinutes(15));
     }
 
-
     public boolean estaVigente() {
         return LocalDateTime.now().isBefore(fechaExpiracion);
     }
 
-    public static CodigoDeRecuperacion reconstruir(String codigo) {
-        // Al reconstruir para validar el intento de restablecimiento,
-        // se asigna la fecha actual para permitir la verificación contra la instancia guardada.
-        return new CodigoDeRecuperacion(codigo, LocalDateTime.now());
+    public boolean coincideCon(String codigoTexto) {
+        if (codigoTexto == null) {
+            return false;
+        }
+        return this.codigo.equals(codigoTexto.trim());
     }
 }

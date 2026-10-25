@@ -86,7 +86,7 @@ public class PresentacionController {
         Presentacion presentacion = publicarPresentacion.ejecutar(UUID.randomUUID().toString(), vendedorId,
                 request.loteId(), request.transformacionId(), request.titulo(), request.tipo(),
                 mapper.toPrecio(request.precio()), mapper.toCantidad(request.cantidad()),
-                mapper.toGaleria(request.galeria()), request.perfilTueste(), rol,
+                mapper.toGaleria(request.galeria()), request.perfilTueste(),
                 mapper.toFechaDeTueste(request.fechaTueste()));
         return creada(presentacion);
     }

@@ -22,7 +22,7 @@ class ArticuloDeMerchandisingTest {
 
     @Test
     void publicarValidoAsignaMaterialYDescripcion() {
-        ArticuloDeMerchandising articulo = ArticuloDeMerchandising.publicar("pres-1", "vendedor-1", Rol.VENDEDOR_DERIVADOS, "Manilla",
+        ArticuloDeMerchandising articulo = ArticuloDeMerchandising.publicar("pres-1", "vendedor-1", "Manilla",
                 TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 galeriaValida(), "semilla de café e hilo encerado", "Manilla artesanal");
 
@@ -33,35 +33,35 @@ class ArticuloDeMerchandisingTest {
     @Test
     void materialNuloFalla() {
         assertThrows(ReglaDominioException.class, () -> ArticuloDeMerchandising.publicar("pres-2", "vendedor-1",
-                Rol.VENDEDOR_DERIVADOS,"Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
+                "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 galeriaValida(), null, "Manilla artesanal"));
     }
 
     @Test
     void materialEnBlancoFalla() {
         assertThrows(ReglaDominioException.class, () -> ArticuloDeMerchandising.publicar("pres-3", "vendedor-1",
-                Rol.VENDEDOR_DERIVADOS,"Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
+                "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 galeriaValida(), "  ", "Manilla artesanal"));
     }
 
     @Test
     void descripcionNulaFalla() {
         assertThrows(ReglaDominioException.class, () -> ArticuloDeMerchandising.publicar("pres-4", "vendedor-1",
-                Rol.VENDEDOR_DERIVADOS,"Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
+                "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 galeriaValida(), "semilla de café", null));
     }
 
     @Test
     void descripcionEnBlancoFalla() {
         assertThrows(ReglaDominioException.class, () -> ArticuloDeMerchandising.publicar("pres-5", "vendedor-1",
-                Rol.VENDEDOR_DERIVADOS,"Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
+                "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
                 galeriaValida(), "semilla de café", " "));
     }
 
     @Test
     void noSePuedeMedirEnKgComoElCafe() {
         assertThrows(ReglaDominioException.class, () -> ArticuloDeMerchandising.publicar("pres-6", "vendedor-1",
-                Rol.VENDEDOR_DERIVADOS,"Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "kg"),
+                "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "kg"),
                 galeriaValida(), "semilla de café", "Manilla artesanal"));
     }
 }

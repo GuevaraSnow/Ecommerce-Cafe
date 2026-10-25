@@ -12,9 +12,9 @@ public class ArticuloDeMerchandising extends Presentacion {
     private final String material;
     private final String descripcion;
 
-    private ArticuloDeMerchandising(String id, String vendedorId, Rol rolVendedor, String titulo, TipoDePresentacion tipoPresentacion,
+    private ArticuloDeMerchandising(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
                                     Precio precio, Cantidad cantidadDisponible, Galeria galeria, String material, String descripcion) {
-        super(id, vendedorId, rolVendedor, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
+        super(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
         this.material = material;
         this.descripcion = descripcion;
     }
@@ -25,10 +25,10 @@ public class ArticuloDeMerchandising extends Presentacion {
      *
      * @throws ReglaDominioException si se incumple alguna regla de negocio
      */
-    static ArticuloDeMerchandising publicar(String id, String vendedorId, Rol vendedorRol,  String titulo,
-                                             TipoDePresentacion tipoPresentacion, Precio precio,
-                                             Cantidad cantidadDisponible, Galeria galeria, String material,
-                                             String descripcion) {
+    static ArticuloDeMerchandising publicar(String id, String vendedorId, String titulo,
+                                            TipoDePresentacion tipoPresentacion, Precio precio,
+                                            Cantidad cantidadDisponible, Galeria galeria, String material,
+                                            String descripcion) {
         if (material == null || material.isBlank()) {
             throw new ReglaDominioException("El Artículo de Merchandising debe especificar un material");
         }
@@ -39,7 +39,7 @@ public class ArticuloDeMerchandising extends Presentacion {
             throw new ReglaDominioException(
                     "Un Artículo de Merchandising se cuenta en 'unidad', no en " + cantidadDisponible.unidad());
         }
-        return new ArticuloDeMerchandising(id, vendedorId, vendedorRol, titulo, tipoPresentacion, precio, cantidadDisponible,
+        return new ArticuloDeMerchandising(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
                 galeria, material, descripcion);
     }
 

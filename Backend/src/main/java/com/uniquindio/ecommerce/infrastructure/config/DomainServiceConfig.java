@@ -1,13 +1,7 @@
 package com.uniquindio.ecommerce.infrastructure.config;
 
-import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
-import com.uniquindio.ecommerce.Domain.repository.LoteRepositorio;
-import com.uniquindio.ecommerce.Domain.repository.TransformacionRepositorio;
-import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
-import com.uniquindio.ecommerce.Domain.service.ServicioDeBajaDePresentacion;
-import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
-import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
-import com.uniquindio.ecommerce.Domain.service.VerificadorDeEmail;
+import com.uniquindio.ecommerce.Domain.repository.*;
+import com.uniquindio.ecommerce.Domain.service.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,6 +28,11 @@ public class DomainServiceConfig {
     public ServicioDeReposicion servicioDeReposicion(LoteRepositorio loteRepositorio,
                                                      TransformacionRepositorio transformacionRepositorio) {
         return new ServicioDeReposicion(loteRepositorio, transformacionRepositorio);
+    }
+
+    @Bean
+    public ServicioDeContrasena servicioDeContrasena(EncriptadorContrasenaRepositorio encriptador) {
+        return new ServicioDeContrasena(encriptador);
     }
 
     @Bean

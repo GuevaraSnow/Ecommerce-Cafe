@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Prueba la capa web de los comandos: los casos de uso están simulados, el mapper y el manejador de errores son los reales. */
 @WebMvcTest(PresentacionController.class)
 @Import(PresentacionMapper.class)
 class PresentacionControllerTest {
@@ -119,7 +118,7 @@ class PresentacionControllerTest {
     @Test
     void publicarUnaPresentacionTrazableResponde201() throws Exception {
         given(publicarPresentacion.ejecutar(any(), eq("vendedor-1"), eq("LOT-2026-001"), any(), eq("Café Verde"),
-                eq(TipoDePresentacion.CAFE_VERDE), any(), any(), any(), any(), eq(Rol.CAFICULTOR), any()))
+                eq(TipoDePresentacion.CAFE_VERDE), any(), any(), any(), any(), any()))
                 .willReturn(manilla());
 
         mockMvc.perform(post("/api/presentaciones")
@@ -343,7 +342,6 @@ class PresentacionControllerTest {
 
     @Test
     void programarUnDescuentoFueraDeRangoResponde400PorElDominio() throws Exception {
-        // el mapper construye el Descuento y el dominio lo rechaza antes de llegar al caso de uso
         mockMvc.perform(put("/api/presentaciones/pres-1/descuento")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
