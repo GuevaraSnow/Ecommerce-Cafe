@@ -1,7 +1,7 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
-import com.uniquindio.ecommerce.Domain.repository.NotificadorCorreoRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.NotificadorDeCorreo;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
@@ -31,7 +31,7 @@ class RecuperarContrasenaTest {
     private UsuarioRepositorio usuarioRepositorio;
 
     @Mock
-    private NotificadorCorreoRepositorio notificadorCorreoRepositorio;
+    private NotificadorDeCorreo notificadorDeCorreo;
 
     @InjectMocks
     private RecuperarContrasena recuperarContrasena;
@@ -56,6 +56,6 @@ class RecuperarContrasenaTest {
         recuperarContrasena.ejecutar(email);
 
         verify(usuarioRepositorio, times(1)).guardar(usuario);
-        verify(notificadorCorreoRepositorio, times(1)).enviarCodigoDeRecuperacion(eq(email), anyString());
+        verify(notificadorDeCorreo, times(1)).enviarCodigoDeRecuperacion(eq(email), anyString());
     }
 }
