@@ -71,7 +71,7 @@ class ServicioDeReposicionTest {
 
     @Test
     void reponerCafeTostadoDescuentaDeLaTransformacion() {
-        transformaciones.guardar(Transformacion.registrar("t-1", List.of("LOT-2026-001"), new Cantidad(50, "kg"),
+        transformaciones.guardar(Transformacion.registrar("t-1", "LOT-2026-001", new Cantidad(50, "kg"),
                 new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(), PerfilTueste.MEDIO)); // resultante 41 kg
         Presentacion tostado = Presentacion.publicar("pres-3", "vendedor-1", null, "t-1", "Café Medio",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(10, "kg"), galeria(),

@@ -35,7 +35,7 @@ class ServicioDePublicacionTest {
     }
 
     private void registrarTransformacion(String id, PerfilTueste perfil) {
-        transformaciones.guardar(Transformacion.registrar(id, List.of("LOT-2026-001"), new Cantidad(50, "kg"),
+        transformaciones.guardar(Transformacion.registrar(id, "LOT-2026-001", new Cantidad(50, "kg"),
                 new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(), perfil));
     }
 
