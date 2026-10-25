@@ -5,7 +5,6 @@ import com.uniquindio.ecommerce.Domain.repository.NotificadorCorreoRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeRecuperacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
-import com.uniquindio.ecommerce.application.dto.request.RecuperarContrasenaRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +17,7 @@ public class RecuperarContrasena {
     private final NotificadorCorreoRepositorio notificadorCorreoRepositorio;
 
     @Transactional
-    public String ejecutar(RecuperarContrasenaRequest request) {
-        Email email = new Email(request.email());
-
+    public void ejecutar(Email email) {
         Usuario usuario = usuarioRepositorio.buscarPorEmail(email).orElseThrow();
 
         CodigoDeRecuperacion codigo = CodigoDeRecuperacion.generar();
@@ -29,7 +26,5 @@ public class RecuperarContrasena {
         usuarioRepositorio.guardar(usuario);
 
         notificadorCorreoRepositorio.enviarCodigoDeRecuperacion(email, codigo.codigo());
-
-        return codigo.codigo();
     }
 }
