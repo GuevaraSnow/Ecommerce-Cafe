@@ -1,10 +1,9 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
-import com.uniquindio.ecommerce.Domain.repository.EncriptadorContrasenaRepositorio;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
-import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
-import com.uniquindio.ecommerce.application.dto.request.CambiarContrasenaRequest;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeContrasena;
+import com.uniquindio.ecommerce.Domain.valueobject.ContrasenaPlana;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,16 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CambiarContrasena {
 
     private final UsuarioRepositorio usuarioRepositorio;
-    private final EncriptadorContrasenaRepositorio encriptadorDeContrasena;
+    private final ServicioDeContrasena servicioDeContrasena;
 
     @Transactional
-    public void ejecutar(String usuarioId, CambiarContrasenaRequest request) {
+    public void ejecutar(String usuarioId, String contrasenaActualTexto, ContrasenaPlana nuevaContrasenaPlana) {
         Usuario usuario = usuarioRepositorio.buscarPorId(usuarioId).orElseThrow();
 
-        Contrasena contrasenaActual = new Contrasena(request.contrasenaActual());
-        Contrasena nuevaContrasena = new Contrasena(request.nuevaContrasena());
-
-        usuario.cambiarContrasenaConVerificacion(contrasenaActual, nuevaContrasena, encriptadorDeContrasena);
+        servicioDeContrasena.cambiarContrasena(usuario, contrasenaActualTexto, nuevaContrasenaPlana);
 
         usuarioRepositorio.guardar(usuario);
     }
