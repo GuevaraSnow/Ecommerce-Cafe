@@ -80,19 +80,18 @@ class RestablecerContrasenaTest {
         usuario.asignarCodigoRecuperacion(codigoGenerado);
         repositorioMemoria.guardar(usuario);
 
-        // Ejecución del restablecimiento
+        // Ejecución del restablecimiento con tipos del dominio
         RestablecerContrasena casoDeUso = new RestablecerContrasena(repositorioMemoria);
-        com.uniquindio.ecommerce.application.dto.request.RestablecerContrasenaRequest request =
-                new com.uniquindio.ecommerce.application.dto.request.RestablecerContrasenaRequest(
-                        "joseph@uniquindio.edu.co",
-                        codigoGenerado.codigo(),
-                        "ClaveRestablecida123!"
-                );
 
-        casoDeUso.ejecutar(request);
+        casoDeUso.ejecutar(
+                new Email("joseph@uniquindio.edu.co"),
+                codigoGenerado.codigo(),
+                new Contrasena("ClaveRestablecida123!")
+        );
 
         Usuario usuarioActualizado = repositorioMemoria.buscarPorEmail(new Email("joseph@uniquindio.edu.co")).orElseThrow();
         assertEquals("ClaveRestablecida123!", usuarioActualizado.getContrasena().contrasena());
         assertNull(usuarioActualizado.getCodigoRecuperacion());
     }
-}
+
+    }
