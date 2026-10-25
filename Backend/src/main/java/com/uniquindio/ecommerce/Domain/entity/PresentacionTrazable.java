@@ -21,10 +21,10 @@ public class PresentacionTrazable extends Presentacion {
     private final FechaDeTueste fechaTueste;
     private NotaDeCata notaDeCata;
 
-    private PresentacionTrazable(String id, String vendedorId, Rol rolVendedor, String titulo, TipoDePresentacion tipoPresentacion,
-                          Precio precio, Cantidad cantidadDisponible, Galeria galeria,
-                          OrigenDePresentacion origen, PerfilTueste perfilDeTueste, FechaDeTueste fechaTueste) {
-        super(id, vendedorId, rolVendedor, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
+    private PresentacionTrazable(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
+                                 Precio precio, Cantidad cantidadDisponible, Galeria galeria,
+                                 OrigenDePresentacion origen, PerfilTueste perfilDeTueste, FechaDeTueste fechaTueste) {
+        super(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
         this.origen = origen;
         this.perfilDeTueste = perfilDeTueste;
         this.fechaTueste = fechaTueste;
@@ -40,10 +40,10 @@ public class PresentacionTrazable extends Presentacion {
      * @throws ReglaDominioException si se incumple alguna regla de negocio
      */
     static PresentacionTrazable publicar(String id, String vendedorId, String titulo,
-                                          TipoDePresentacion tipoPresentacion, Precio precio,
-                                          Cantidad cantidadDisponible, Galeria galeria, String loteId,
-                                          String transformacionId, PerfilTueste perfilDeTueste,
-                                          FechaDeTueste fechaTueste, Rol rolVendedor) {
+                                         TipoDePresentacion tipoPresentacion, Precio precio,
+                                         Cantidad cantidadDisponible, Galeria galeria, String loteId,
+                                         String transformacionId, PerfilTueste perfilDeTueste,
+                                         FechaDeTueste fechaTueste, Rol rolVendedor) {
         if (rolVendedor == null) {
             throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
         }
@@ -85,20 +85,14 @@ public class PresentacionTrazable extends Presentacion {
                     + "Tostador; un " + rolVendedor + " solo puede publicar café tostado con Perfil TRADICIONAL");
         }
 
-        return new PresentacionTrazable(id, vendedorId, rolVendedor, titulo, tipoPresentacion, precio, cantidadDisponible,
+        return new PresentacionTrazable(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
                 galeria, origen, perfilDeTueste, fechaTueste);
     }
 
-    /**
-     * Indica si la Presentación sigue dentro de los días de frescura tras el
-     * tueste (regla D). Las Presentaciones sin fecha de tueste (café verde)
-     * siempre se consideran frescas.
-     */
     public boolean estaFresca() {
         return estaFresca(LocalDate.now());
     }
 
-    /** Igual que {@link #estaFresca()}, pero evaluada en la fecha indicada. */
     public boolean estaFresca(LocalDate hoy) {
         if (fechaTueste == null) {
             return true;
@@ -107,28 +101,15 @@ public class PresentacionTrazable extends Presentacion {
         return dias <= DIAS_MAXIMOS_FRESCURA;
     }
 
-    /**
-     * El estado se calcula: pasados los días de frescura la Presentación es
-     * VENCIDA aunque nadie la haya tocado (regla D), y eso manda sobre
-     * cualquier otro estado (activa, agotada o pausada). Así una Presentación
-     * vencida no se vende, no se pausa, no se reactiva y no vuelve a la venta
-     * al reponer stock, sin depender de ninguna tarea que la marque.
-     */
     @Override
     public EstadoDePublicacion getEstado() {
         return estadoAl(LocalDate.now());
     }
 
-    /** El estado que tiene la Presentación en la fecha indicada. */
     public EstadoDePublicacion estadoAl(LocalDate hoy) {
         return estaFresca(hoy) ? super.getEstado() : EstadoDePublicacion.VENCIDA;
     }
 
-    /**
-     * Guarda el vencimiento en el estado de la Presentación si ya ocurrió (regla D).
-     * No es necesario para que el estado sea correcto (se calcula); sirve para que
-     * lo guardado coincida cuando el estado se consulta directamente en la base de datos.
-     */
     public void verificarVencimiento() {
         if (!estaFresca()) {
             marcarVencida();

@@ -8,13 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Caso de uso: PublicarPresentacion.
- * (Actor: Caficultor, Tostador o Vendedor de Derivados) — publica una
- * Presentación Trazable. No tiene lógica: delega en el Domain Service
- * {@link ServicioDePublicacion}, que valida y descuenta del Origen, y guarda
- * la Presentación resultante.
- */
 @Service
 @RequiredArgsConstructor
 public class PublicarPresentacion {
@@ -24,11 +17,11 @@ public class PublicarPresentacion {
 
     @Transactional
     public Presentacion ejecutar(String id, String vendedorId, String loteId, String transformacionId,
-                                  String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
-                                  Cantidad cantidadDisponible, Galeria galeria, PerfilTueste perfilDeTueste,
-                                  Rol rolVendedor, FechaDeTueste fechaTueste) {
+                                 String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
+                                 Cantidad cantidadDisponible, Galeria galeria, PerfilTueste perfilDeTueste,
+                                 FechaDeTueste fechaTueste) {
         Presentacion presentacion = servicioDePublicacion.publicar(id, vendedorId, loteId, transformacionId,
-                titulo, tipoPresentacion, precio, cantidadDisponible, galeria, perfilDeTueste, rolVendedor,
+                titulo, tipoPresentacion, precio, cantidadDisponible, galeria, perfilDeTueste,
                 fechaTueste);
         presentacionRepositorio.guardar(presentacion);
         return presentacion;

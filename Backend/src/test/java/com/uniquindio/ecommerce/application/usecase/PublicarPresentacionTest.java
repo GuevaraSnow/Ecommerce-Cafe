@@ -60,17 +60,17 @@ class PublicarPresentacionTest {
         registrarUsuario("vendedor-1", Rol.CAFICULTOR);
         return publicar.ejecutar(id, "vendedor-1", loteId, null, "Café Verde", TipoDePresentacion.CAFE_VERDE,
                 new Precio(28000, "COP"), new Cantidad(cantidadKg, "kg"), galeriaValida(), null,
-                Rol.CAFICULTOR, null);
+                null);
     }
 
     @Test
     void publicaCafeTostadoYDescuentaLaCantidadResultanteDisponible(){
         registrarUsuario("vendedor-1", Rol.TOSTADOR);
-        registrarTransformacion("transformacion-1", 50); // resultante = 41 kg (18% merma)
+        registrarTransformacion("transformacion-1", 50);
 
         Presentacion presentacion = publicar.ejecutar("pres-1", "vendedor-1", null, "transformacion-1",
                 "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(20, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
+                new Cantidad(20, "kg"), galeriaValida(), PerfilTueste.MEDIO,
                 new FechaDeTueste(LocalDate.now()));
 
         assertTrue(presentacion instanceof PresentacionTrazable);
@@ -82,11 +82,11 @@ class PublicarPresentacionTest {
     @Test
     void noSePuedePublicarMasCantidadDeLaResultanteDisponible() {
         registrarUsuario("vendedor-1", Rol.TOSTADOR);
-        registrarTransformacion("transformacion-2", 50); // resultante = 41 kg
+        registrarTransformacion("transformacion-2", 50);
 
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-2", "vendedor-1", null,
                 "transformacion-2", "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(50, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
+                new Cantidad(50, "kg"), galeriaValida(), PerfilTueste.MEDIO,
                 new FechaDeTueste(LocalDate.now())));
 
         assertTrue(presentaciones.buscarPorId("pres-2").isEmpty());
@@ -95,15 +95,15 @@ class PublicarPresentacionTest {
     @Test
     void publicarDosVecesDeLaMismaTransformacionAcumulaElDescuento() {
         registrarUsuario("vendedor-1", Rol.TOSTADOR);
-        registrarTransformacion("transformacion-3", 50); // resultante = 41 kg
+        registrarTransformacion("transformacion-3", 50);
 
         publicar.ejecutar("pres-3a", "vendedor-1", null, "transformacion-3", "Café Tostado Medio",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(30, "kg"), galeriaValida(),
-                PerfilTueste.MEDIO, Rol.TOSTADOR, new FechaDeTueste(LocalDate.now()));
+                PerfilTueste.MEDIO, new FechaDeTueste(LocalDate.now()));
 
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-3b", "vendedor-1", null,
                 "transformacion-3", "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(15, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
+                new Cantidad(15, "kg"), galeriaValida(), PerfilTueste.MEDIO,
                 new FechaDeTueste(LocalDate.now())));
     }
 
@@ -160,7 +160,7 @@ class PublicarPresentacionTest {
         registrarUsuario("vendedor-1", Rol.TOSTADOR);
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-9", "vendedor-1", null,
                 "no-existe", "Café Tostado Medio", TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"),
-                new Cantidad(10, "kg"), galeriaValida(), PerfilTueste.MEDIO, Rol.TOSTADOR,
+                new Cantidad(10, "kg"), galeriaValida(), PerfilTueste.MEDIO,
                 new FechaDeTueste(LocalDate.now())));
 
         assertTrue(presentaciones.buscarPorId("pres-9").isEmpty());
@@ -171,6 +171,17 @@ class PublicarPresentacionTest {
         registrarUsuario("vendedor-1", Rol.TOSTADOR);
         assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-10", "vendedor-1", null, null,
                 "Manilla", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),
-                galeriaValida(), null, Rol.VENDEDOR_DERIVADOS, null));
+                galeriaValida(), null, null));
+    }
+
+    @Test
+    void caficultorNoPuedePublicarEnPerfilOscuroAvanzado() {
+        registrarUsuario("caficultor-1", Rol.CAFICULTOR);
+        registrarLote("LOT-2026-005", 100);
+
+        assertThrows(ReglaDominioException.class, () -> publicar.ejecutar("pres-11", "caficultor-1", "LOT-2026-005", null,
+                "Café Oscuro Prohibido", TipoDePresentacion.CAFE_TOSTADO, new Precio(35000, "COP"),
+                new Cantidad(10, "kg"), galeriaValida(), PerfilTueste.OSCURO,
+                new FechaDeTueste(LocalDate.now())));
     }
 }

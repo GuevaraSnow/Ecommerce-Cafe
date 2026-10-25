@@ -6,18 +6,9 @@ import com.uniquindio.ecommerce.Domain.valueobject.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
-/**
- * Unidad final empacada que el Comprador puede adquirir. Raíz abstracta del
- * agregado: concentra el ciclo de vida común a sus dos subclases,
- * {@link PresentacionTrazable} (café y derivados consumibles, siempre con
- * Origen) y {@link ArticuloDeMerchandising} (no alimenticio, sin Origen).
- * Se crea únicamente mediante {@link #publicar} para garantizar que las
- * reglas de negocio del dominio se cumplan desde su origen.
- */
 public abstract class Presentacion {
     private final String id;
     private final String vendedorId;
-    private final Rol rolVendedor;
     private final String titulo;
     private final TipoDePresentacion tipoPresentacion;
     private Precio precio;
@@ -27,11 +18,10 @@ public abstract class Presentacion {
     private EstadoDePublicacion estado;
     private boolean eliminada;
 
-    protected Presentacion(String id, String vendedorId, Rol rolVendedor, String titulo,
-                          TipoDePresentacion tipoPresentacion, Precio precio, Cantidad cantidadDisponible, Galeria galeria) {
+    protected Presentacion(String id, String vendedorId, String titulo,
+                           TipoDePresentacion tipoPresentacion, Precio precio, Cantidad cantidadDisponible, Galeria galeria) {
         this.id = id;
         this.vendedorId = vendedorId;
-        this.rolVendedor = rolVendedor;
         this.titulo = titulo;
         this.tipoPresentacion = tipoPresentacion;
         this.precio = precio;
@@ -41,20 +31,11 @@ public abstract class Presentacion {
         this.eliminada = false;
     }
 
-    /**
-     * Crea una Presentación validando identificador, vendedor, precio, cantidad
-     * inicial y galería. El Tipo de Presentación decide la subclase: si es
-     * MERCHANDISING delega en {@link ArticuloDeMerchandising#publicar}; en
-     * cualquier otro caso delega en {@link PresentacionTrazable#publicar},
-     * que valida sus propias reglas (Origen, frescura, perfil de tueste).
-     *
-     * @throws ReglaDominioException si se incumple alguna regla de negocio
-     */
     public static Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
-                                         String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
-                                         Cantidad cantidadDisponible, Galeria galeria,
-                                         PerfilTueste perfilDeTueste, Rol rolVendedor,
-                                         FechaDeTueste fechaTueste, String material, String descripcion) {
+                                        String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
+                                        Cantidad cantidadDisponible, Galeria galeria,
+                                        PerfilTueste perfilDeTueste, Rol rolVendedor,
+                                        FechaDeTueste fechaTueste, String material, String descripcion) {
         if (id == null || id.isBlank()) {
             throw new ReglaDominioException("La Presentación debe tener un identificador");
         }
@@ -93,18 +74,13 @@ public abstract class Presentacion {
                 throw new ReglaDominioException(
                         "Un Artículo de Merchandising no tiene Origen: no puede provenir de un Lote ni de una Transformación");
             }
-            return ArticuloDeMerchandising.publicar(id, vendedorId, rolVendedor, titulo, tipoPresentacion, precio,
+            return ArticuloDeMerchandising.publicar(id, vendedorId, titulo, tipoPresentacion, precio,
                     cantidadDisponible, galeria, material, descripcion);
         }
         return PresentacionTrazable.publicar(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
                 galeria, loteId, transformacionId, perfilDeTueste, fechaTueste, rolVendedor);
     }
 
-    /**
-     * Descuenta cantidad disponible (p. ej. al confirmarse una compra).
-     * Si una Presentación ACTIVA llega a cero, queda AGOTADA; una Vencida o
-     * Inactiva conserva su estado, para que reponer stock no la devuelva a la venta.
-     */
     public void descontarCantidad(Cantidad cantidadUsada) {
         validarNoEliminada();
         this.cantidadDisponible = this.cantidadDisponible.restar(cantidadUsada);
@@ -113,7 +89,6 @@ public abstract class Presentacion {
         }
     }
 
-    /** Repone cantidad disponible, reactivando la Presentación si estaba AGOTADA. */
     public void reponerCantidad(Cantidad cantidadNueva) {
         validarNoEliminada();
         this.cantidadDisponible = this.cantidadDisponible.sumar(cantidadNueva);
@@ -122,25 +97,14 @@ public abstract class Presentacion {
         }
     }
 
-    /**
-     * Verifica, sin modificar nada, que se puede reponer esa cantidad: la
-     * Presentación no está dada de baja, la cantidad es positiva y viene en la
-     * misma unidad. Permite validar antes de descontar del Origen.
-     *
-     * @throws ReglaDominioException si no se puede reponer
-     */
     public void verificarQueSePuedeReponer(Cantidad cantidad) {
         validarNoEliminada();
         if (cantidad == null || cantidad.valor() <= 0) {
             throw new ReglaDominioException("La cantidad a reponer debe ser mayor a cero");
         }
-        cantidadDisponible.sumar(cantidad); // Cantidad es inmutable: aquí solo valida la unidad
+        cantidadDisponible.sumar(cantidad);
     }
 
-    /**
-     * Registra los descriptores de sabor del vendedor. Por defecto se rechaza:
-     * solo la Presentación Trazable admite Nota de Cata.
-     */
     public void registrarNotaCata(NotaDeCata nota) {
         throw new ReglaDominioException("Solo una Presentación Trazable admite Nota de Cata");
     }
@@ -153,10 +117,6 @@ public abstract class Presentacion {
         this.precio = nuevoPrecio;
     }
 
-    /**
-     * Precio al que se vende en esa fecha: el Precio con el Descuento aplicado si
-     * hay uno programado que rige ese día; en cualquier otro caso, el Precio normal.
-     */
     public Precio precioVigente(LocalDate hoy) {
         if (descuento != null && descuento.estaVigenteEn(hoy)) {
             return precio.aplicarDescuento(descuento);
@@ -164,7 +124,6 @@ public abstract class Presentacion {
         return precio;
     }
 
-    /** Programa un Descuento por temporada; si ya había uno, lo reemplaza. */
     public void programarDescuento(Descuento nuevoDescuento) {
         validarNoEliminada();
         if (nuevoDescuento == null) {
@@ -173,7 +132,6 @@ public abstract class Presentacion {
         this.descuento = nuevoDescuento;
     }
 
-    /** Quita el Descuento programado, vigente o no; la Presentación vuelve a su Precio normal. */
     public void quitarDescuento() {
         validarNoEliminada();
         this.descuento = null;
@@ -187,16 +145,10 @@ public abstract class Presentacion {
         this.galeria = nuevaGaleria;
     }
 
-    /** AGOTADA no se asigna desde afuera: solo ocurre cuando una Presentación activa se queda sin stock. */
     private void marcarAgotada() {
         this.estado = EstadoDePublicacion.AGOTADA;
     }
 
-    /**
-     * Pausa temporalmente la Presentación (reversible), sin darla de baja. Solo
-     * se pausa lo que está a la venta: una Presentación Agotada o Vencida no se
-     * pausa, porque reactivarla después la devolvería a la venta.
-     */
     public void desactivar() {
         validarNoEliminada();
         if (getEstado() != EstadoDePublicacion.ACTIVA) {
@@ -206,7 +158,6 @@ public abstract class Presentacion {
         this.estado = EstadoDePublicacion.INACTIVA;
     }
 
-    /** Reactiva una Presentación que estaba pausada manualmente; exige cantidad disponible. */
     public void activar() {
         validarNoEliminada();
         if (getEstado() != EstadoDePublicacion.INACTIVA) {
@@ -218,31 +169,22 @@ public abstract class Presentacion {
         this.estado = EstadoDePublicacion.ACTIVA;
     }
 
-    /** Marca la Presentación como Vencida; usado por subclases con regla de frescura (regla D). */
     protected void marcarVencida() {
         this.estado = EstadoDePublicacion.VENCIDA;
     }
 
-    /** Indica si la Presentación puede venderse: está Activa y no fue dada de baja. */
     public boolean estaDisponibleParaVenta() {
         return !eliminada && getEstado() == EstadoDePublicacion.ACTIVA;
     }
 
-    /**
-     * Verifica, sin modificar nada, que se puede vender esa cantidad: la
-     * Presentación está disponible para la venta y su stock alcanza.
-     *
-     * @throws ReglaDominioException si no está disponible o no hay stock suficiente
-     */
     public void verificarQueSePuedeVender(Cantidad cantidad) {
         if (!estaDisponibleParaVenta()) {
             throw new ReglaDominioException("La Presentación " + id
                     + " no está disponible para la venta (dada de baja, pausada, agotada o vencida)");
         }
-        cantidadDisponible.restar(cantidad); // Cantidad es inmutable: solo valida que alcance
+        cantidadDisponible.restar(cantidad);
     }
 
-    /** Da de baja la Presentación (borrado lógico); nunca se elimina físicamente. */
     public void darDeBaja() {
         this.eliminada = true;
     }
@@ -257,13 +199,10 @@ public abstract class Presentacion {
 
     public String getVendedorId() {return vendedorId;}
 
-    public Rol getRolVendedor() { return rolVendedor; }
-
     public String getTitulo() {return titulo;}
 
     public Precio getPrecio() {return precio;}
 
-    /** Descuento programado, o {@code null} si no hay ninguno. */
     public Descuento getDescuento() {return descuento;}
 
     public TipoDePresentacion getTipoPresentacion() {return tipoPresentacion;}
