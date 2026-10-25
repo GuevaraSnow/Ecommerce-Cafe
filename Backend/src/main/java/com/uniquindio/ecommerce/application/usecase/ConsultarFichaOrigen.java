@@ -10,7 +10,6 @@ import com.uniquindio.ecommerce.Domain.valueobject.FichaDeOrigen;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ConsultarFichaOrigen {
 
@@ -23,26 +22,14 @@ public class ConsultarFichaOrigen {
     }
 
     public FichaDeOrigen ejecutar(String transformacionId) {
-        Optional transformacionOpt = transformacionRepositorio.buscarPorId(transformacionId);
+        Transformacion transformacion = transformacionRepositorio.buscarPorId(transformacionId)
+                .orElseThrow(() -> new ReglaDominioException("No se encontró la transformación especificada: " + transformacionId));
 
-        if (transformacionOpt == null || transformacionOpt.isEmpty()) {
-            throw new ReglaDominioException("No se encontró la transformación especificada: " + transformacionId);
-        }
+        List<Lote> lotes = new ArrayList<>();
 
-        // Casteo explícito a Transformacion para resolver el error de tipos en .get()
-        Transformacion transformacion = (Transformacion) transformacionOpt.get();
-
-        List lotes = new ArrayList<>();
-
-        for (Object item : transformacion.getLoteIds()) {
-            String codigoStr = item.toString();
-            CodigoDeLote codigo = new CodigoDeLote(codigoStr);
-
-            Optional loteOpt = loteRepositorio.buscarPorCodigo(codigo);
-            if (loteOpt != null && loteOpt.isPresent()) {
-                lotes.add(loteOpt.get());
-            }
-        }
+        // Búsqueda del único Lote asociado a la Transformación
+        CodigoDeLote codigo = new CodigoDeLote(transformacion.getLoteCodigo());
+        loteRepositorio.buscarPorCodigo(codigo).ifPresent(lotes::add);
 
         // Trazabilidad consolidada
         String fincaNombre = lotes.isEmpty() ? "Desconocida" : "Finca del Quindío";
