@@ -8,4 +8,16 @@ public record CodigoDeLote(String valor) {
             throw new ReglaDominioException("Código de Lote inválido: " + valor);
         }
     }
+
+    public int anio() {
+        String codigo = valor;
+        String[] split = codigo.split("-");
+        return Integer.parseInt(split[1]);
+    }
+
+    public int numero() {
+        String codigo = valor;
+        String[] split = codigo.split("-");
+        return Integer.parseInt(split[2]);
+    }
 }
