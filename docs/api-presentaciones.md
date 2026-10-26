@@ -23,8 +23,24 @@ las aplica el dominio y las excepciones las traduce `GlobalExceptionHandler`.
 | `DELETE /{id}` | `EliminarPresentacion` | — | 204 |
 
 - El **id** de una Presentación nuevo lo genera el servidor (UUID) en el controlador; el cliente nunca lo envía.
-- El Vendedor y su Rol llegan por ahora en los encabezados `X-Vendedor-Id` y `X-Rol`;
-  cuando exista autenticación saldrán del usuario autenticado.
+- El Vendedor y su Rol salen **del token JWT**, nunca del cuerpo ni de encabezados propios: el sujeto del
+  token es el id del usuario y el claim `rol` su Rol.
+
+## Seguridad
+
+Las consultas (`GET`) son públicas. Todo lo demás exige `Authorization: Bearer <token>`:
+
+| Operación | Quién puede | Si no cumple |
+| --- | --- | --- |
+| Publicar (`POST /` y `POST /merchandising`) | Caficultor, Tostador o Vendedor de Derivados (que pueda publicar ese tipo lo decide el dominio) | sin token, 401; con otro rol, 403 |
+| Cambiar precio, stock, pausa, galería, nota, descuento o dar de baja | El Vendedor que **publicó** esa Presentación | sin token, 401; otro usuario, 403 |
+
+- Si la Presentación no existe se responde 404 aunque el usuario no sea su dueño, para no revelar qué ids existen.
+- El token se firma con HS256 y la clave `app.jwt.secret` (variable de entorno `JWT_SECRET`), y dura
+  `app.jwt.duracion-minutos`. Un token vencido, mal firmado o que no es un JWT responde 401.
+- Los roles y la propiedad se declaran con `@PreAuthorize` en el controlador; las reglas generales viven en
+  `SecurityConfig`. El token lo emite `JwtService.generarToken(usuarioId, rol)`, que debe llamar el inicio de
+  sesión.
 
 ## Consultas (`PresentacionConsultaController`)
 

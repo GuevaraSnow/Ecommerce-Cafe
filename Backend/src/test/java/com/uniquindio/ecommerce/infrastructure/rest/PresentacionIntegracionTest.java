@@ -6,12 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -38,11 +41,21 @@ class PresentacionIntegracionTest {
     @Autowired
     private MockMvc mockMvc;
 
+    /** Un usuario autenticado: el sujeto del token es su id y "rol" su Rol. */
+    private RequestPostProcessor vendedor(String id, String rol) {
+        return jwt().jwt(token -> token.subject(id).claim("rol", rol))
+                .authorities(new SimpleGrantedAuthority(rol));
+    }
+
+    /** El dueño de las presentaciones de ejemplo pres-taza-1, pres-pausada, pres-agotada y pres-eliminada. */
+    private RequestPostProcessor duenoDeLaTaza() {
+        return vendedor("usr-derivados", "VENDEDOR_DERIVADOS");
+    }
+
     /** Publica el artículo por HTTP y devuelve su id, leído del Location. */
     private String publicarArticulo() throws Exception {
         MvcResult resultado = mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Vendedor-Id", "usr-derivados")
-                        .header("X-Rol", "VENDEDOR_DERIVADOS")
+                        .with(vendedor("usr-derivados", "VENDEDOR_DERIVADOS"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(ARTICULO))
                 .andExpect(status().isCreated())
@@ -94,12 +107,12 @@ class PresentacionIntegracionTest {
     void pausarUnaPresentacionLaSacaDelCatalogoYReactivarlaLaDevuelve() throws Exception {
         String id = publicarArticulo();
 
-        mockMvc.perform(post("/api/presentaciones/" + id + "/pausa")).andExpect(status().isOk())
+        mockMvc.perform(post("/api/presentaciones/" + id + "/pausa").with(duenoDeLaTaza())).andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("INACTIVA"));
         mockMvc.perform(get("/api/presentaciones/sugerencias").param("texto", "posavasos"))
                 .andExpect(jsonPath("$.length()").value(0));
 
-        mockMvc.perform(post("/api/presentaciones/" + id + "/reactivacion")).andExpect(status().isOk());
+        mockMvc.perform(post("/api/presentaciones/" + id + "/reactivacion").with(duenoDeLaTaza())).andExpect(status().isOk());
         mockMvc.perform(get("/api/presentaciones/sugerencias").param("texto", "posavasos"))
                 .andExpect(jsonPath("$[0].id").value(id));
     }
@@ -107,11 +120,13 @@ class PresentacionIntegracionTest {
     @Test
     void cambiarElPrecioYProgramarUnDescuentoSeGuardanYSeVenEnLaConsulta() throws Exception {
         mockMvc.perform(put("/api/presentaciones/pres-taza-1/precio")
+                        .with(duenoDeLaTaza())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"precio": {"monto": 20000, "moneda": "COP"}}"""))
                 .andExpect(status().isOk());
         mockMvc.perform(put("/api/presentaciones/pres-taza-1/descuento")
+                        .with(duenoDeLaTaza())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"porcentaje": 10, "fechaInicio": "2020-01-01", "fechaFin": "2099-12-31"}"""))
@@ -125,7 +140,7 @@ class PresentacionIntegracionTest {
 
     @Test
     void darDeBajaUnaPresentacionLaSacaDelCatalogoPeroSigueExistiendoPorId() throws Exception {
-        mockMvc.perform(delete("/api/presentaciones/pres-taza-1")).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/presentaciones/pres-taza-1").with(duenoDeLaTaza())).andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/presentaciones").param("titulo", "taza"))
                 .andExpect(jsonPath("$.totalElementos").value(0));
@@ -153,8 +168,7 @@ class PresentacionIntegracionTest {
     @Test
     void publicarConUnRolQueNoPuedePublicarMerchandisingResponde400YNoGuardaNada() throws Exception {
         mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Vendedor-Id", "usr-tostador")
-                        .header("X-Rol", "TOSTADOR")
+                        .with(vendedor("usr-tostador", "TOSTADOR"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(ARTICULO))
                 .andExpect(status().isBadRequest());

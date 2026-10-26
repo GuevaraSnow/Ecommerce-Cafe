@@ -6,6 +6,9 @@ import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.usecase.*;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.PresentacionMapper;
+import com.uniquindio.ecommerce.infrastructure.security.AutorizacionDePresentacion;
+import com.uniquindio.ecommerce.infrastructure.security.SecurityConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -13,6 +16,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,7 +30,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -31,11 +41,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PresentacionController.class)
-@Import(PresentacionMapper.class)
+@Import({PresentacionMapper.class, SecurityConfig.class})
 class PresentacionControllerTest {
 
     @Autowired
+    private WebApplicationContext contexto;
+
     private MockMvc mockMvc;
+
+    /** Se simula que la regla de propiedad ya la aprobó: aquí se prueba el controlador; la regla se prueba en SeguridadPresentacionTest. */
+    @MockitoBean(name = "autorizacionDePresentacion")
+    private AutorizacionDePresentacion autorizacion;
+
+    /** Todas las peticiones llevan por defecto el token de un Vendedor de Derivados; un test puede poner otro con .with(token(...)). */
+    @BeforeEach
+    void prepararLaPeticion() {
+        given(autorizacion.esDuenoDe(any(), any())).willReturn(true);
+        mockMvc = MockMvcBuilders.webAppContextSetup(contexto)
+                .apply(springSecurity())
+                .defaultRequest(get("/").with(token("vendedor-1", "VENDEDOR_DERIVADOS")))
+                .build();
+    }
 
     @MockitoBean
     private PublicarPresentacion publicarPresentacion;
@@ -65,6 +91,12 @@ class PresentacionControllerTest {
     private static final String CANTIDAD = """
             {"valor": 5, "unidad": "unidad"}""";
 
+    /** Simula la petición de un usuario ya autenticado: el sujeto del token es el Vendedor y "rol" su Rol. */
+    private RequestPostProcessor token(String vendedorId, String rol) {
+        return jwt().jwt(token -> token.subject(vendedorId).claim("rol", rol))
+                .authorities(new SimpleGrantedAuthority(rol));
+    }
+
     private ArticuloDeMerchandising manilla() {
         return (ArticuloDeMerchandising) Presentacion.publicar("pres-1", "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
                 new Precio(15000, "COP"), new Cantidad(20, "unidad"),
@@ -87,8 +119,7 @@ class PresentacionControllerTest {
                 eq(Rol.VENDEDOR_DERIVADOS))).willReturn(manilla());
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol", "VENDEDOR_DERIVADOS")
+                        .with(token("vendedor-1", "VENDEDOR_DERIVADOS"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isCreated())
@@ -104,8 +135,7 @@ class PresentacionControllerTest {
                 .willReturn(manilla());
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol", "VENDEDOR_DERIVADOS")
+                        .with(token("vendedor-1", "VENDEDOR_DERIVADOS"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isCreated());
@@ -122,8 +152,7 @@ class PresentacionControllerTest {
                 .willReturn(manilla());
 
         mockMvc.perform(post("/api/presentaciones")
-                        .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol", "CAFICULTOR")
+                        .with(token("vendedor-1", "CAFICULTOR"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"titulo": "Café Verde", "tipo": "CAFE_VERDE", "loteId": "LOT-2026-001",
@@ -136,8 +165,7 @@ class PresentacionControllerTest {
     @Test
     void publicarConElCuerpoIncompletoResponde400ConLosCamposYNoLlamaAlCasoDeUso() throws Exception {
         mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol", "VENDEDOR_DERIVADOS")
+                        .with(token("vendedor-1", "VENDEDOR_DERIVADOS"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"titulo": " ", "precio": {"monto": -5, "moneda": "COP"}}"""))
@@ -150,33 +178,12 @@ class PresentacionControllerTest {
     }
 
     @Test
-    void publicarSinElEncabezadoDelVendedorResponde400() throws Exception {
-        mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Rol", "VENDEDOR_DERIVADOS")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(publicarMerchandisingBody()))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.mensaje").value("Falta el encabezado 'X-Vendedor-Id'"));
-    }
-
-    @Test
-    void publicarConUnRolDesconocidoResponde400() throws Exception {
-        mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol", "REY")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(publicarMerchandisingBody()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void siElDominioRechazaLaPublicacionResponde400ConSuMensaje() throws Exception {
         given(publicarArticulo.ejecutar(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .willThrow(new ReglaDominioException("Solo un Vendedor de Derivados puede publicar un Artículo de Merchandising"));
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
-                        .header("X-Vendedor-Id", "vendedor-1")
-                        .header("X-Rol", "TOSTADOR")
+                        .with(token("vendedor-1", "TOSTADOR"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
                 .andExpect(status().isBadRequest())

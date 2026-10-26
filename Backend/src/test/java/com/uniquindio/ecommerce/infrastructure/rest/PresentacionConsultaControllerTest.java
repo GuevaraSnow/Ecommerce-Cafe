@@ -11,6 +11,7 @@ import com.uniquindio.ecommerce.infrastructure.rest.mapper.PresentacionMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** Prueba la capa web de las consultas: los casos de uso están simulados, el mapper y el manejador de errores son los reales. */
 @WebMvcTest(PresentacionConsultaController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import(PresentacionMapper.class)
 class PresentacionConsultaControllerTest {
 

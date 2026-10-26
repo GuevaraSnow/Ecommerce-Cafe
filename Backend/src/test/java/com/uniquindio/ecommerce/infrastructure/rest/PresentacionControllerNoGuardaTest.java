@@ -7,6 +7,7 @@ import com.uniquindio.ecommerce.application.usecase.*;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.PresentacionMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -29,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * que cuando el recurso no existe (404) o se rompe una regla de negocio (400) no se guarda nada.
  */
 @WebMvcTest(PresentacionController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({PresentacionMapper.class, CambiarPrecioDePresentacion.class})
 class PresentacionControllerNoGuardaTest {
 
