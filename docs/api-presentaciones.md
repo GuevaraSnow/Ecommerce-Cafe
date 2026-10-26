@@ -23,8 +23,24 @@ las aplica el dominio y las excepciones las traduce `GlobalExceptionHandler`.
 | `DELETE /{id}` | `EliminarPresentacion` | — | 204 |
 
 - El **id** de una Presentación nuevo lo genera el servidor (UUID) en el controlador; el cliente nunca lo envía.
-- El Vendedor y su Rol llegan por ahora en los encabezados `X-Vendedor-Id` y `X-Rol-Vendedor`;
-  cuando exista autenticación saldrán del usuario autenticado.
+- El Vendedor y su Rol salen **del token JWT**, nunca del cuerpo ni de encabezados propios: el sujeto del
+  token es el id del usuario y el claim `rol` su Rol.
+
+## Seguridad
+
+Las consultas (`GET`) son públicas. Todo lo demás exige `Authorization: Bearer <token>`:
+
+| Operación | Quién puede | Si no cumple |
+| --- | --- | --- |
+| Publicar (`POST /` y `POST /merchandising`) | Caficultor, Tostador o Vendedor de Derivados (que pueda publicar ese tipo lo decide el dominio) | sin token, 401; con otro rol, 403 |
+| Cambiar precio, stock, pausa, galería, nota, descuento o dar de baja | El Vendedor que **publicó** esa Presentación | sin token, 401; otro usuario, 403 |
+
+- Si la Presentación no existe se responde 404 aunque el usuario no sea su dueño, para no revelar qué ids existen.
+- El token se firma con HS256 y la clave `app.jwt.secret` (variable de entorno `JWT_SECRET`), y dura
+  `app.jwt.duracion-minutos`. Un token vencido, mal firmado o que no es un JWT responde 401.
+- Los roles y la propiedad se declaran con `@PreAuthorize` en el controlador; las reglas generales viven en
+  `SecurityConfig`. El token lo emite `JwtService.generarToken(usuarioId, rol)`, que debe llamar el inicio de
+  sesión.
 
 ## Consultas (`PresentacionConsultaController`)
 
@@ -48,3 +64,15 @@ Todo error trae `{ timestamp, status, mensaje }`.
 | Cuerpo con campos inválidos o que no es JSON | 400 con el campo y su mensaje |
 | Parámetro o encabezado faltante, de tipo inválido o fuera de rango | 400 |
 | La Presentación no existe (`NoSuchElementException`) | 404 |
+
+## Persistencia
+
+Las Presentaciones se guardan en H2 con JPA (`PresentacionRepositorioJpa`). Las dos variantes comparten
+la tabla `presentaciones` (herencia `SINGLE_TABLE`, columna `clase`: `TRAZABLE` o `MERCHANDISING`); la
+galería y la nota de cata van en `presentacion_galeria` y `presentacion_nota_cata`, con su posición para
+conservar el orden. Los datos de ejemplo están en `data-presentacion.sql`.
+
+- El catálogo y las sugerencias solo devuelven lo **disponible para la venta**: activo, sin baja y, si es
+  café tostado, con menos de 30 días desde el tueste (el estado `VENCIDA` se calcula, por eso la consulta
+  también revisa la fecha y no solo la columna `estado`).
+- La versión en memoria (`PresentacionRepositorioMemoria`) ya no es un bean; se conserva para las pruebas.

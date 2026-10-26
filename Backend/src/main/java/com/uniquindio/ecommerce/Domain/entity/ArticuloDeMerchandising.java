@@ -19,6 +19,26 @@ public class ArticuloDeMerchandising extends Presentacion {
         this.descripcion = descripcion;
     }
 
+    private ArticuloDeMerchandising(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
+                                    Precio precio, Cantidad cantidadDisponible, Galeria galeria,
+                                    EstadoDePublicacion estado, boolean eliminada, Descuento descuento,
+                                    String material, String descripcion) {
+        super(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible, galeria,
+                estado, eliminada, descuento);
+        this.material = material;
+        this.descripcion = descripcion;
+    }
+
+    /** Revive un Artículo de Merchandising ya guardado, tal como quedó. No valida: solo la usa la persistencia. */
+    public static ArticuloDeMerchandising reconstruir(String id, String vendedorId, String titulo,
+                                                      TipoDePresentacion tipoPresentacion, Precio precio,
+                                                      Cantidad cantidadDisponible, Galeria galeria,
+                                                      EstadoDePublicacion estado, boolean eliminada,
+                                                      Descuento descuento, String material, String descripcion) {
+        return new ArticuloDeMerchandising(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
+                galeria, estado, eliminada, descuento, material, descripcion);
+    }
+
     /**
      * Valida y crea un Artículo de Merchandising (exención 7-B: sin Origen,
      * Perfil de Tueste ni Fecha de Tueste).
