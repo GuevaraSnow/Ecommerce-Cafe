@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
  */
 public class PresentacionTrazable extends Presentacion {
 
-    static final int DIAS_MAXIMOS_FRESCURA = 30;
+    public static final int DIAS_MAXIMOS_FRESCURA = 30;
 
     private final OrigenDePresentacion origen;
     private final PerfilTueste perfilDeTueste;
@@ -29,6 +29,34 @@ public class PresentacionTrazable extends Presentacion {
         this.perfilDeTueste = perfilDeTueste;
         this.fechaTueste = fechaTueste;
         this.notaDeCata = null;
+    }
+
+    private PresentacionTrazable(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
+                                 Precio precio, Cantidad cantidadDisponible, Galeria galeria,
+                                 EstadoDePublicacion estado, boolean eliminada, Descuento descuento,
+                                 OrigenDePresentacion origen, PerfilTueste perfilDeTueste,
+                                 FechaDeTueste fechaTueste, NotaDeCata notaDeCata) {
+        super(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible, galeria,
+                estado, eliminada, descuento);
+        this.origen = origen;
+        this.perfilDeTueste = perfilDeTueste;
+        this.fechaTueste = fechaTueste;
+        this.notaDeCata = notaDeCata;
+    }
+
+    /**
+     * Revive una Presentación Trazable ya guardada, tal como quedó. No valida (por ejemplo, no
+     * revisa la frescura ni el rol): solo la usa la persistencia.
+     */
+    public static PresentacionTrazable reconstruir(String id, String vendedorId, String titulo,
+                                                   TipoDePresentacion tipoPresentacion, Precio precio,
+                                                   Cantidad cantidadDisponible, Galeria galeria,
+                                                   EstadoDePublicacion estado, boolean eliminada,
+                                                   Descuento descuento, OrigenDePresentacion origen,
+                                                   PerfilTueste perfilDeTueste, FechaDeTueste fechaTueste,
+                                                   NotaDeCata notaDeCata) {
+        return new PresentacionTrazable(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible,
+                galeria, estado, eliminada, descuento, origen, perfilDeTueste, fechaTueste, notaDeCata);
     }
 
     /**

@@ -31,6 +31,19 @@ public abstract class Presentacion {
         this.eliminada = false;
     }
 
+    /**
+     * Constructor para revivir una Presentación ya guardada, con el estado, la baja y el
+     * Descuento tal como quedaron. No valida: solo lo usan los {@code reconstruir} de las subclases.
+     */
+    protected Presentacion(String id, String vendedorId, String titulo, TipoDePresentacion tipoPresentacion,
+                           Precio precio, Cantidad cantidadDisponible, Galeria galeria,
+                           EstadoDePublicacion estado, boolean eliminada, Descuento descuento) {
+        this(id, vendedorId, titulo, tipoPresentacion, precio, cantidadDisponible, galeria);
+        this.estado = estado;
+        this.eliminada = eliminada;
+        this.descuento = descuento;
+    }
+
     public static Presentacion publicar(String id, String vendedorId, String loteId, String transformacionId,
                                         String titulo, TipoDePresentacion tipoPresentacion, Precio precio,
                                         Cantidad cantidadDisponible, Galeria galeria,

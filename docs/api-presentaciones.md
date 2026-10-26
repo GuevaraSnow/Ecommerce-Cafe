@@ -23,7 +23,7 @@ las aplica el dominio y las excepciones las traduce `GlobalExceptionHandler`.
 | `DELETE /{id}` | `EliminarPresentacion` | — | 204 |
 
 - El **id** de una Presentación nuevo lo genera el servidor (UUID) en el controlador; el cliente nunca lo envía.
-- El Vendedor y su Rol llegan por ahora en los encabezados `X-Vendedor-Id` y `X-Rol-Vendedor`;
+- El Vendedor y su Rol llegan por ahora en los encabezados `X-Vendedor-Id` y `X-Rol`;
   cuando exista autenticación saldrán del usuario autenticado.
 
 ## Consultas (`PresentacionConsultaController`)
@@ -48,3 +48,15 @@ Todo error trae `{ timestamp, status, mensaje }`.
 | Cuerpo con campos inválidos o que no es JSON | 400 con el campo y su mensaje |
 | Parámetro o encabezado faltante, de tipo inválido o fuera de rango | 400 |
 | La Presentación no existe (`NoSuchElementException`) | 404 |
+
+## Persistencia
+
+Las Presentaciones se guardan en H2 con JPA (`PresentacionRepositorioJpa`). Las dos variantes comparten
+la tabla `presentaciones` (herencia `SINGLE_TABLE`, columna `clase`: `TRAZABLE` o `MERCHANDISING`); la
+galería y la nota de cata van en `presentacion_galeria` y `presentacion_nota_cata`, con su posición para
+conservar el orden. Los datos de ejemplo están en `data-presentacion.sql`.
+
+- El catálogo y las sugerencias solo devuelven lo **disponible para la venta**: activo, sin baja y, si es
+  café tostado, con menos de 30 días desde el tueste (el estado `VENCIDA` se calcula, por eso la consulta
+  también revisa la fecha y no solo la columna `estado`).
+- La versión en memoria (`PresentacionRepositorioMemoria`) ya no es un bean; se conserva para las pruebas.
