@@ -1,12 +1,16 @@
-package com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper;
+package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 
 import com.uniquindio.ecommerce.Domain.entity.Finca;
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
+
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.FincaEntity;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.TransformacionEntity;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.UsuarioEntity;
+import com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper.FincaPersistenceMapper;
+import com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper.TransformacionPersistenceMapper;
+import com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper.UsuarioPersistenceMapper;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
