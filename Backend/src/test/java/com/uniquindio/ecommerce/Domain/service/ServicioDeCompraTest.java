@@ -29,7 +29,7 @@ class ServicioDeCompraTest {
         Presentacion presentacion = Presentacion.publicar(id, "vendedor-1", "LOT-2026-001", null, "Cafe verde " + id,
                 TipoDePresentacion.CAFE_VERDE, new Precio(50000, "COP"), new Cantidad(kg, "kg"),
                 new Galeria(List.of(new ImagenDePresentacion("https://img.cafe/" + id + ".jpg", true))),
-                null, RolVendedor.CAFICULTOR, null, null, null);
+                null, Rol.CAFICULTOR, null, null, null);
         presentaciones.guardar(presentacion);
         return presentacion;
     }

@@ -30,4 +30,10 @@ public record CodigoDeRecuperacion(String codigo, LocalDateTime fechaExpiracion)
     public boolean estaVigente() {
         return LocalDateTime.now().isBefore(fechaExpiracion);
     }
+
+    public static CodigoDeRecuperacion reconstruir(String codigo) {
+        // Al reconstruir para validar el intento de restablecimiento,
+        // se asigna la fecha actual para permitir la verificación contra la instancia guardada.
+        return new CodigoDeRecuperacion(codigo, LocalDateTime.now());
+    }
 }

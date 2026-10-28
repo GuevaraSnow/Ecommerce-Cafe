@@ -22,6 +22,9 @@ import java.util.Optional;
  */
 public class Compra {
 
+    /** Plazo para pedir el reembolso de café físico, contado desde la entrega. */
+    public static final int HORAS_PARA_REEMBOLSO = 48;
+
     private final String id;
     private final String compradorId;
     private final LocalDate fechaCompra;
@@ -186,6 +189,44 @@ public class Compra {
         }
         cambiarEstado(EstadoDeCompra.ENTREGADA);
         this.fechaEntrega = fechaEntrega;
+    }
+
+    /**
+     * Marca la Compra como REEMBOLSADA. Lo decide ServicioDeReembolso cuando todas sus
+     * Presentaciones tienen reembolso aprobado; con un reembolso parcial la Compra sigue ENTREGADA.
+     *
+     * @throws ReglaDominioException si la Compra no está ENTREGADA
+     */
+    public void reembolsar() {
+        if (estado != EstadoDeCompra.ENTREGADA) {
+            throw new ReglaDominioException("Solo se puede reembolsar una compra entregada (estado actual: " + estado + ")");
+        }
+        cambiarEstado(EstadoDeCompra.REEMBOLSADA);
+    }
+
+    /**
+     * Verifica, sin modificar nada, que se puede pedir el reembolso de esa Presentación:
+     * lo pide quien hizo la Compra, la Compra está ENTREGADA, el momento cae dentro de las
+     * 48 horas siguientes a la entrega (las 48 h exactas todavía cuentan) y la Presentación
+     * está en la Compra.
+     *
+     * @throws ReglaDominioException si alguna de esas condiciones no se cumple
+     */
+    public void verificarQueSePuedeReembolsar(String compradorId, String presentacionId, LocalDateTime momento) {
+        if (!this.compradorId.equals(compradorId)) {
+            throw new ReglaDominioException("Solo quien hizo la compra puede pedir su reembolso");
+        }
+        if (estado != EstadoDeCompra.ENTREGADA) {
+            throw new ReglaDominioException("Solo se puede pedir reembolso de una compra entregada (estado actual: "
+                    + estado + ")");
+        }
+        if (momento == null || momento.isAfter(fechaEntrega.plusHours(HORAS_PARA_REEMBOLSO))) {
+            throw new ReglaDominioException("El reembolso solo se puede pedir dentro de las "
+                    + HORAS_PARA_REEMBOLSO + " horas siguientes a la entrega");
+        }
+        if (!incluye(presentacionId)) {
+            throw new ReglaDominioException("La Presentacion " + presentacionId + " no esta en esta compra");
+        }
     }
 
     private void cambiarEstado(EstadoDeCompra nuevo) {

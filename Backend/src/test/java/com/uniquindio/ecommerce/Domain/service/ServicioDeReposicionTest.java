@@ -34,13 +34,13 @@ class ServicioDeReposicionTest {
     private Presentacion cafeVerdeDelLote(String codigo, double kg) {
         return Presentacion.publicar("pres-1", "vendedor-1", codigo, null, "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(kg, "kg"), galeria(), null,
-                RolVendedor.CAFICULTOR, null, null, null);
+                Rol.CAFICULTOR, null, null, null);
     }
 
     private Presentacion merchandising() {
         return Presentacion.publicar("pres-2", "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
                 new Precio(15000, "COP"), new Cantidad(20, "unidad"), galeria(), null,
-                RolVendedor.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
+                Rol.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
     }
 
     private Cantidad disponibleEnLote(String codigo) {
@@ -75,7 +75,7 @@ class ServicioDeReposicionTest {
                 new PorcentajeDeMerma(0.18), "tostador-1", LocalDate.now(), PerfilTueste.MEDIO)); // resultante 41 kg
         Presentacion tostado = Presentacion.publicar("pres-3", "vendedor-1", null, "t-1", "Café Medio",
                 TipoDePresentacion.CAFE_TOSTADO, new Precio(32000, "COP"), new Cantidad(10, "kg"), galeria(),
-                PerfilTueste.MEDIO, RolVendedor.TOSTADOR, new FechaDeTueste(LocalDate.now()), null, null);
+                PerfilTueste.MEDIO, Rol.TOSTADOR, new FechaDeTueste(LocalDate.now()), null, null);
 
         servicio.reponer(tostado, new Cantidad(15, "kg"));
 

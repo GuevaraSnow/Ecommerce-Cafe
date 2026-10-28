@@ -1,44 +1,32 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.Comprador;
-import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
-import com.uniquindio.ecommerce.Domain.repository.CompradorRepositorio;
+import com.uniquindio.ecommerce.Domain.entity.Usuario;
+import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
+import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeRecuperacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
+import com.uniquindio.ecommerce.application.dto.request.RestablecerContrasenaRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
+@Service
+@RequiredArgsConstructor
 public class RestablecerContrasena {
 
-    private final CompradorRepositorio compradorRepositorio;
+    private final UsuarioRepositorio usuarioRepositorio;
 
-    public RestablecerContrasena(CompradorRepositorio compradorRepositorio) {
-        this.compradorRepositorio = compradorRepositorio;
-    }
+    @Transactional
+    public void ejecutar(RestablecerContrasenaRequest request) {
+        Email email = new Email(request.email());
 
-    public void ejecutar(Email email, String codigoIngresado, Contrasena nuevaContrasena) {
-        Optional compradorOpt = compradorRepositorio.buscarPorEmail(email);
+        Usuario usuario = usuarioRepositorio.buscarPorEmail(email).orElseThrow();
 
-        if (compradorOpt == null || compradorOpt.isEmpty()) {
-            throw new ReglaDominioException("Usuario no encontrado.");
-        }
+        CodigoDeRecuperacion codigoEnviado = CodigoDeRecuperacion.reconstruir(request.codigoRecuperacion());
+        Contrasena nuevaContrasena = new Contrasena(request.nuevaContrasena());
 
-        // Casteo explícito a Comprador para evitar problemas de inferencia
-        Comprador comprador = (Comprador) compradorOpt.get();
+        usuario.cambiarContrasena(codigoEnviado, nuevaContrasena);
 
-        if (comprador.getCodigoRecuperacion() == null) {
-            throw new ReglaDominioException("No hay una solicitud de recuperación activa para este usuario.");
-        }
-
-        if (!comprador.getCodigoRecuperacion().codigo().equals(codigoIngresado)) {
-            throw new ReglaDominioException("El código ingresado es incorrecto.");
-        }
-
-        if (!comprador.getCodigoRecuperacion().estaVigente()) {
-            throw new ReglaDominioException("El código de recuperación ha expirado.");
-        }
-
-        comprador.cambiarContrasena(nuevaContrasena);
-        compradorRepositorio.guardar(comprador);
+        usuarioRepositorio.guardar(usuario);
     }
 }

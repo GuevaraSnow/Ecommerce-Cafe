@@ -19,13 +19,13 @@ final class PresentacionesDePrueba {
     static Presentacion merchandising(String id) {
         return Presentacion.publicar(id, "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
                 new Precio(15000, "COP"), new Cantidad(20, "unidad"), galeria(), null,
-                RolVendedor.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
+                Rol.VENDEDOR_DERIVADOS, null, "semilla de café", "Manilla artesanal");
     }
 
     /** Café verde con 200 kg, proveniente del Lote LOT-2026-001. */
     static Presentacion cafeVerde(String id) {
         return Presentacion.publicar(id, "vendedor-1", "LOT-2026-001", null, "Café Verde",
                 TipoDePresentacion.CAFE_VERDE, new Precio(28000, "COP"), new Cantidad(200, "kg"), galeria(), null,
-                RolVendedor.CAFICULTOR, null, null, null);
+                Rol.CAFICULTOR, null, null, null);
     }
 }

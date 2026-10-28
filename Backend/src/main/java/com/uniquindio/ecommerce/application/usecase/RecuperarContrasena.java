@@ -1,34 +1,31 @@
 package com.uniquindio.ecommerce.application.usecase;
 
-import com.uniquindio.ecommerce.Domain.entity.Comprador;
-import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
-import com.uniquindio.ecommerce.Domain.repository.CompradorRepositorio;
+import com.uniquindio.ecommerce.Domain.entity.Usuario;
+import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeRecuperacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
+import com.uniquindio.ecommerce.application.dto.request.RecuperarContrasenaRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
+@Service
+@RequiredArgsConstructor
 public class RecuperarContrasena {
 
-    private final CompradorRepositorio compradorRepositorio;
+    private final UsuarioRepositorio usuarioRepositorio;
 
-    public RecuperarContrasena(CompradorRepositorio compradorRepositorio) {
-        this.compradorRepositorio = compradorRepositorio;
-    }
+    @Transactional
+    public String ejecutar(RecuperarContrasenaRequest request) {
+        Email email = new Email(request.email());
 
-    public CodigoDeRecuperacion ejecutar(Email email) {
-        Optional compradorOpt = compradorRepositorio.buscarPorEmail(email);
-
-        if (compradorOpt == null || compradorOpt.isEmpty()) {
-            throw new ReglaDominioException("No existe un usuario asociado al email ingresado.");
-        }
-
-        Comprador comprador = (Comprador) compradorOpt.get();
+        Usuario usuario = usuarioRepositorio.buscarPorEmail(email).orElseThrow();
 
         CodigoDeRecuperacion codigo = CodigoDeRecuperacion.generar();
-        comprador.asignarCodigoRecuperacion(codigo);
-        compradorRepositorio.guardar(comprador);
+        usuario.asignarCodigoRecuperacion(codigo);
 
-        return codigo;
+        usuarioRepositorio.guardar(usuario);
+
+        return codigo.codigo();
     }
 }

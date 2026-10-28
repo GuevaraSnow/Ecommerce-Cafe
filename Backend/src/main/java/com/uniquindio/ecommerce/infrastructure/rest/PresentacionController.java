@@ -1,7 +1,7 @@
 package com.uniquindio.ecommerce.infrastructure.rest;
 
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
-import com.uniquindio.ecommerce.Domain.valueobject.RolVendedor;
+import com.uniquindio.ecommerce.Domain.valueobject.Rol;
 import com.uniquindio.ecommerce.application.dto.request.CambiarPrecioRequest;
 import com.uniquindio.ecommerce.application.dto.request.ProgramarDescuentoRequest;
 import com.uniquindio.ecommerce.application.dto.request.PublicarArticuloMerchandisingRequest;
@@ -58,7 +58,7 @@ import java.util.UUID;
 public class PresentacionController {
 
     private static final String VENDEDOR = "X-Vendedor-Id";
-    private static final String ROL = "X-Rol-Vendedor";
+    private static final String ROL = "X-Rol";
 
     private final PublicarPresentacion publicarPresentacion;
     private final PublicarArticuloMerchandising publicarArticulo;
@@ -81,7 +81,7 @@ public class PresentacionController {
     @ApiResponse(responseCode = "400", description = "Datos mal formados o regla de negocio violada")
     public ResponseEntity<PresentacionResponse> publicar(
             @RequestHeader(VENDEDOR) String vendedorId,
-            @RequestHeader(ROL) RolVendedor rol,
+            @RequestHeader(ROL) Rol rol,
             @Valid @RequestBody PublicarPresentacionRequest request) {
         Presentacion presentacion = publicarPresentacion.ejecutar(UUID.randomUUID().toString(), vendedorId,
                 request.loteId(), request.transformacionId(), request.titulo(), request.tipo(),
@@ -98,7 +98,7 @@ public class PresentacionController {
     @ApiResponse(responseCode = "400", description = "Datos mal formados o regla de negocio violada")
     public ResponseEntity<PresentacionResponse> publicarMerchandising(
             @RequestHeader(VENDEDOR) String vendedorId,
-            @RequestHeader(ROL) RolVendedor rol,
+            @RequestHeader(ROL) Rol rol,
             @Valid @RequestBody PublicarArticuloMerchandisingRequest request) {
         Presentacion articulo = publicarArticulo.ejecutar(UUID.randomUUID().toString(), vendedorId,
                 request.titulo(), mapper.toPrecio(request.precio()), mapper.toCantidad(request.cantidad()),
