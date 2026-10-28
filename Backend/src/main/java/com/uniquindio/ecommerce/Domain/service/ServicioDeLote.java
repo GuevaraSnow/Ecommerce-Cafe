@@ -14,14 +14,9 @@ public class ServicioDeLote {
 
     public Lote registrar(int anio, Cantidad cantidad, String fincaId, ProcesoDeBeneficio proceso,
                           EstadoDelCafe estado, Cosecha cosecha, VariedadDeCafe variedad){
-        String numeroLote = nuevoNumero(loteRepositorio.obtenerNumeroMasAlto(anio));
-        CodigoDeLote codigoDeLote = new CodigoDeLote("LOT-" + anio + "-" + numeroLote);
+        CodigoDeLote codigoDeLote = CodigoDeLote.crear(anio,loteRepositorio.obtenerNumeroMasAlto(anio)+1);
 
         return Lote.registrar(codigoDeLote, cantidad, fincaId, proceso, estado, cosecha, variedad);
     }
 
-    private String nuevoNumero(int numero){
-        int numeroSiguiente = numero+1;
-        return String.format("%03d", numeroSiguiente);
-    }
 }

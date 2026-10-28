@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.Domain.service;
 
 import com.uniquindio.ecommerce.Domain.entity.Lote;
+import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.infrastructure.persistence.LoteRepositorioMemoria;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,17 @@ public class ServicioDeLoteTest {
         loteRepositorioMemoria.guardar(lote2);
         assertEquals(1, lote1.getCodigoDeLote().numero());
         assertEquals(1, lote2.getCodigoDeLote().numero());
+    }
+
+    @Test
+    void noSePuedeMasDe999Lotes(){
+        Lote lote1 = loteConCodigo("LOT-2026-999");
+        loteRepositorioMemoria.guardar(lote1);
+
+        assertThrows(ReglaDominioException.class, () -> servicioDeLote.registrar(2026, new Cantidad(200, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Caturra")));
     }
 
 }
