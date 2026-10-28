@@ -18,5 +18,4 @@ public class ServicioDeLote {
 
         return Lote.registrar(codigoDeLote, cantidad, fincaId, proceso, estado, cosecha, variedad);
     }
-
 }
