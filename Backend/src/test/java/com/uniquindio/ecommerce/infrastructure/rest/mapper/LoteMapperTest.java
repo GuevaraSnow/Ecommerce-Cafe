@@ -21,7 +21,7 @@ class LoteMapperTest {
     private final LoteMapper mapper = new LoteMapper();
 
     private RegistrarLoteRequest request(double valor, EstadoDelCafe estado) {
-        return new RegistrarLoteRequest("LOT-2026-045", new CantidadRequest(valor, "kg"), "finca-1",
+        return new RegistrarLoteRequest(new CantidadRequest(valor, "kg"), "finca-1",
                 ProcesoDeBeneficio.Lavado, estado,
                 new CosechaRequest(Year.now().getValue(), TemporadaDeCosecha.TRAVIESA), "Caturra");
     }

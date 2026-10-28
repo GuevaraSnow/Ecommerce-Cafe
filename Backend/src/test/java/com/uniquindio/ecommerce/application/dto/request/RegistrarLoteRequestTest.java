@@ -28,7 +28,7 @@ class RegistrarLoteRequestTest {
     }
 
     private RegistrarLoteRequest requestValido() {
-        return new RegistrarLoteRequest("LOT-2026-045", new CantidadRequest(200.0, "kg"), "finca-1",
+        return new RegistrarLoteRequest(new CantidadRequest(200.0, "kg"), "finca-1",
                 ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
                 new CosechaRequest(2026, TemporadaDeCosecha.TRAVIESA), "Caturra");
     }
@@ -40,19 +40,19 @@ class RegistrarLoteRequestTest {
 
     @Test
     void losCamposObligatoriosVaciosSeReportan() {
-        RegistrarLoteRequest vacio = new RegistrarLoteRequest(" ", null, " ", null, null, null, " ");
+        RegistrarLoteRequest vacio = new RegistrarLoteRequest(null, " ", null, null, null, " ");
 
-        assertEquals(Set.of("codigo", "cantidad", "fincaId", "procesoDeBeneficio", "estado", "cosecha", "variedad"),
+        assertEquals(Set.of("cantidad", "fincaId", "procesoDeBeneficio", "estado", "cosecha", "variedad"),
                 camposInvalidos(vacio));
     }
 
     @Test
     void laValidacionBajaHastaLosCamposAnidados() {
-        RegistrarLoteRequest anidadosVacios = new RegistrarLoteRequest("LOT-2026-045",
+        RegistrarLoteRequest anidadosVacios = new RegistrarLoteRequest(
                 new CantidadRequest(null, " "), "finca-1", ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
                 new CosechaRequest(null, null), "Caturra");
 
-        assertEquals(Set.of("cantidad.valor", "cantidad.unidad", "cosecha.anio", "cosecha.temporada"),
+        assertEquals(Set.of("cantidad.unidad", "cosecha.anio", "cosecha.temporada"),
                 camposInvalidos(anidadosVacios));
     }
 }

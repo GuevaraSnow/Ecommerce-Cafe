@@ -11,9 +11,6 @@ import jakarta.validation.constraints.NotNull;
 // Solo valida la forma de la entrada; las reglas de negocio (cantidad positiva,
 // estado distinto de TOSTADO, formato del código) las aplica el dominio.
 public record RegistrarLoteRequest(
-        @NotBlank(message = "El código del lote es obligatorio")
-        String codigo,
-
         @NotNull(message = "La cantidad es obligatoria")
         @Valid
         CantidadRequest cantidad,
