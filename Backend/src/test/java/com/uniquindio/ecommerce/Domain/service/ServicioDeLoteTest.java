@@ -32,4 +32,41 @@ public class ServicioDeLoteTest {
         assertEquals(8, nuevo.getCodigoDeLote().numero());
     }
 
+    @Test
+    void cadaRegistroDaUnCodigoConsecutivo(){
+        Lote lote1 = servicioDeLote.registrar(2027, new Cantidad(200, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Caturra"));
+
+        loteRepositorioMemoria.guardar(lote1);
+
+        Lote  lote2 = servicioDeLote.registrar(2027, new Cantidad(200, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Caturra"));
+
+        loteRepositorioMemoria.guardar(lote2);
+
+        assertEquals(1, lote1.getCodigoDeLote().numero());
+        assertEquals(2, lote2.getCodigoDeLote().numero());
+
+    }
+
+    @Test
+    void cadaAnioSeReinciaElNumero(){
+        Lote lote1 = servicioDeLote.registrar(2077, new Cantidad(200, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Caturra"));
+        loteRepositorioMemoria.guardar(lote1);
+        Lote  lote2 = servicioDeLote.registrar(2027, new Cantidad(200, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Caturra"));
+        loteRepositorioMemoria.guardar(lote2);
+        assertEquals(1, lote1.getCodigoDeLote().numero());
+        assertEquals(1, lote2.getCodigoDeLote().numero());
+    }
+
 }

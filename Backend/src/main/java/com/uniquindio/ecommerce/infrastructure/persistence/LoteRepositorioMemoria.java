@@ -23,7 +23,8 @@ public class LoteRepositorioMemoria implements LoteRepositorio {
     }
 
     @Override
-    public Collection<Lote> obtenerTodos() {
-        return lotes.values();
+    public int obtenerNumeroMasAlto(int anio) {
+        Collection<Lote> lotesAnio = lotes.values().stream().filter(lote -> lote.getCodigoDeLote().anio() == anio).toList();
+        return lotesAnio.stream().mapToInt(lote -> lote.getCodigoDeLote().numero()).max().orElse(0);
     }
 }

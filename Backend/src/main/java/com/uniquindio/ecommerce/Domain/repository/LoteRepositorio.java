@@ -3,7 +3,6 @@ package com.uniquindio.ecommerce.Domain.repository;
 import com.uniquindio.ecommerce.Domain.entity.Lote;
 import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeLote;
 
-import java.util.Collection;
 import java.util.Optional;
 
 public interface LoteRepositorio {
@@ -12,5 +11,7 @@ public interface LoteRepositorio {
 
     void guardar(Lote lote);
 
-    Collection<Lote> obtenerTodos();
+    /** Obtiene el numero mas alto de ese año para asignarselo al nuevo lote a registrar,
+     si no hay lotes ese año devuelve 0 */
+    int obtenerNumeroMasAlto(int anio);
 }
