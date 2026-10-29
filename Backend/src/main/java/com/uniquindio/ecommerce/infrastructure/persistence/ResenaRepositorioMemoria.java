@@ -4,7 +4,9 @@ import com.uniquindio.ecommerce.Domain.entity.Resena;
 import com.uniquindio.ecommerce.Domain.repository.ResenaRepositorio;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,6 +24,14 @@ public class ResenaRepositorioMemoria implements ResenaRepositorio {
     @Override
     public void guardar(Resena resena) {
         resenas.put(resena.getId(), resena);
+    }
+
+    @Override
+    public List<Resena> buscarPorPresentacion(String presentacionId) {
+        return resenas.values().stream()
+                .filter(resena -> resena.getPresentacionId().equals(presentacionId))
+                .sorted(Comparator.comparing(Resena::getFecha).reversed())
+                .toList();
     }
 
     @Override
