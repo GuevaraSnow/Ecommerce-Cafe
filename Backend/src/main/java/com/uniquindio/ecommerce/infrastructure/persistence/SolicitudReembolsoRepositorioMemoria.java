@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Repository
+// Reemplazado por SolicitudReembolsoRepositorioJpa; con los dos activos Spring lanza NoUniqueBeanDefinitionException
+//@Repository
 public class SolicitudReembolsoRepositorioMemoria implements SolicitudReembolsoRepositorio {
 
     private final Map<String, SolicitudReembolso> solicitudes = new HashMap<>();

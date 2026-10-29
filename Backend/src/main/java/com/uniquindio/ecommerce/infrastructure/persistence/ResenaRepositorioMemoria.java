@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Repository
+// Reemplazado por ResenaRepositorioJpa; con los dos activos Spring lanza NoUniqueBeanDefinitionException
+//@Repository
 public class ResenaRepositorioMemoria implements ResenaRepositorio {
 
     private final Map<String, Resena> resenas = new HashMap<>();

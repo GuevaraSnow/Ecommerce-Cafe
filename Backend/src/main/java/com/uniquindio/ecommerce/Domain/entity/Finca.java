@@ -86,4 +86,14 @@ public class Finca {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    /**
+     * Reconstruye una entidad Finca desde la persistencia sin ejecutar validaciones de creación.
+     */
+    public static Finca reconstruir(String id, String propietarioId, String nombre,
+                                    Ubicacion ubicacion, Altitud altitud, boolean eliminadaLogicamente) {
+        Finca finca = new Finca(id, propietarioId, nombre, ubicacion, altitud);
+        finca.eliminadaLogicamente = eliminadaLogicamente;
+        return finca;
+    }
 }
