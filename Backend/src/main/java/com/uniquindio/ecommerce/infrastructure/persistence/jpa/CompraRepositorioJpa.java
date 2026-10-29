@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -29,6 +30,13 @@ public class CompraRepositorioJpa implements CompraRepositorio {
     @Override
     public void guardar(Compra compra) {
         dataRepository.save(mapper.toEntity(compra));
+    }
+
+    @Override
+    public List<Compra> buscarPorComprador(String compradorId) {
+        return dataRepository.findByCompradorIdOrderByFechaCompraDesc(compradorId).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override

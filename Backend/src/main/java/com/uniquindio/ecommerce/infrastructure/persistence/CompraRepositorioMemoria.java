@@ -5,7 +5,9 @@ import com.uniquindio.ecommerce.Domain.repository.CompraRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +25,14 @@ public class CompraRepositorioMemoria implements CompraRepositorio {
     @Override
     public void guardar(Compra compra) {
         compras.put(compra.getId(), compra);
+    }
+
+    @Override
+    public List<Compra> buscarPorComprador(String compradorId) {
+        return compras.values().stream()
+                .filter(compra -> compra.getCompradorId().equals(compradorId))
+                .sorted(Comparator.comparing(Compra::getFechaCompra).reversed())
+                .toList();
     }
 
     @Override
