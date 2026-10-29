@@ -125,4 +125,18 @@ public class Transformacion {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    /**
+     * Reconstruye una entidad Transformacion desde la persistencia sin ejecutar validaciones de creación.
+     */
+    public static Transformacion reconstruir(String id, String loteCodigo, Cantidad cantidadEntrada,
+                                             PorcentajeDeMerma merma, Cantidad cantidadResultante,
+                                             Cantidad cantidadResultanteDisponible, String tostadorId,
+                                             LocalDate fecha, PerfilTueste perfilTuesteResultante) {
+        return new Transformacion(
+                id, loteCodigo, cantidadEntrada, merma,
+                cantidadResultante, cantidadResultanteDisponible,
+                tostadorId, fecha, perfilTuesteResultante
+        );
+    }
 }

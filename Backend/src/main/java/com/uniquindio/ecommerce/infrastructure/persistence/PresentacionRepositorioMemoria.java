@@ -4,7 +4,6 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
-import org.springframework.stereotype.Repository;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-@Repository
+/** Versión en memoria del puerto; ya no es un bean: el adaptador activo es PresentacionRepositorioJpa. Se conserva para las pruebas. */
 public class PresentacionRepositorioMemoria implements PresentacionRepositorio {
     private final Map<String, Presentacion> presentaciones = new HashMap<>();
 

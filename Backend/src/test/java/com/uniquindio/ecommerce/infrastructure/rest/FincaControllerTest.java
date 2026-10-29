@@ -9,6 +9,7 @@ import com.uniquindio.ecommerce.application.usecase.RegistrarFinca;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.FincaMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(FincaController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import(FincaMapper.class)
 class FincaControllerTest {
 
