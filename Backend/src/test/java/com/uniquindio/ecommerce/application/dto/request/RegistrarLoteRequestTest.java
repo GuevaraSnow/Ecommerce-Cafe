@@ -52,7 +52,7 @@ class RegistrarLoteRequestTest {
                 new CantidadRequest(null, " "), "finca-1", ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
                 new CosechaRequest(null, null), "Caturra");
 
-        assertEquals(Set.of("cantidad.unidad", "cosecha.anio", "cosecha.temporada"),
+        assertEquals(Set.of("cantidad.unidad", "cantidad.valor", "cosecha.anio", "cosecha.temporada"),
                 camposInvalidos(anidadosVacios));
     }
 }
