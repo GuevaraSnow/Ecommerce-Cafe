@@ -3,15 +3,20 @@ package com.uniquindio.ecommerce.infrastructure.rest;
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.*;
+import com.uniquindio.ecommerce.application.dto.response.LoginResponse;
 import com.uniquindio.ecommerce.application.dto.response.UsuarioResponse;
 import com.uniquindio.ecommerce.application.usecase.*;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.UsuarioMapper;
+import com.uniquindio.ecommerce.infrastructure.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,8 +28,6 @@ import java.net.URI;
 @Tag(name = "Usuarios", description = "Autenticación, perfil y gestión de usuarios")
 public class UsuarioController {
 
-    private static final String USUARIO_HEADER = "X-Usuario-Id";
-
     private final RegistrarUsuario registrarUsuario;
     private final IniciarSesion iniciarSesion;
     private final RecuperarContrasena recuperarContrasena;
@@ -32,6 +35,7 @@ public class UsuarioController {
     private final EditarPerfil editarPerfil;
     private final CambiarContrasena cambiarContrasena;
     private final UsuarioMapper mapper;
+    private final JwtService jwtService;
 
     @PostMapping("/registro")
     @Operation(summary = "Registrar un usuario")
@@ -59,16 +63,18 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Iniciar sesión")
-    @ApiResponse(responseCode = "200", description = "Login exitoso")
+    @Operation(summary = "Iniciar sesión y obtener token JWT")
+    @ApiResponse(responseCode = "200", description = "Login exitoso con token")
     @ApiResponse(responseCode = "400", description = "Credenciales inválidas")
-    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         Usuario usuario = iniciarSesion.ejecutar(
                 new Email(request.email()),
                 new Contrasena(request.contrasena())
         );
 
-        return ResponseEntity.ok(mapper.toResponse(usuario));
+        String token = jwtService.generarToken(usuario.getId(), usuario.getRol());
+
+        return ResponseEntity.ok(new LoginResponse(token, mapper.toResponse(usuario)));
     }
 
     @PostMapping("/recuperar-contrasena")
@@ -94,23 +100,25 @@ public class UsuarioController {
     }
 
     @PutMapping("/perfil")
-    @Operation(summary = "Editar perfil del usuario autenticado")
+    @Operation(summary = "Editar perfil del usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "Perfil actualizado")
-    @ApiResponse(responseCode = "400", description = "Encabezado X-Usuario-Id faltante o datos inválidos")
+    @ApiResponse(responseCode = "401", description = "No autenticado o token inválido")
     public ResponseEntity<UsuarioResponse> editarPerfil(
-            @RequestHeader(USUARIO_HEADER) String usuarioId,
+            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody EditarPerfilRequest request) {
+        String usuarioId = jwt.getSubject();
         Usuario usuario = editarPerfil.ejecutar(usuarioId, request);
         return ResponseEntity.ok(mapper.toResponse(usuario));
     }
 
     @PutMapping("/perfil/contrasena")
-    @Operation(summary = "Cambiar contraseña del usuario autenticado")
+    @Operation(summary = "Cambiar contraseña del usuario autenticado", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "Contraseña cambiada exitosamente")
-    @ApiResponse(responseCode = "400", description = "Contraseña actual incorrecta o nueva inválida")
+    @ApiResponse(responseCode = "401", description = "No autenticado o token inválido")
     public ResponseEntity<Void> cambiarContrasena(
-            @RequestHeader(USUARIO_HEADER) String usuarioId,
+            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CambiarContrasenaRequest request) {
+        String usuarioId = jwt.getSubject();
         cambiarContrasena.ejecutar(
                 usuarioId,
                 request.contrasenaActual(),
