@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.infrastructure.config;
 
 import com.uniquindio.ecommerce.Domain.service.ServicioDeBajaDePresentacion;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeLote;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,14 @@ class DomainServiceConfigTest {
     @Autowired
     private ServicioDeBajaDePresentacion servicioDeBajaDePresentacion;
 
+    @Autowired
+    private ServicioDeLote servicioDeLote;
+
     @Test
     void springRegistraLosDomainServicesComoBeans() {
         assertNotNull(servicioDePublicacion);
         assertNotNull(servicioDeReposicion);
         assertNotNull(servicioDeBajaDePresentacion);
+        assertNotNull(servicioDeLote);
     }
 }

@@ -39,4 +39,9 @@ public class DomainServiceConfig {
     public ServicioDeBajaDePresentacion servicioDeBajaDePresentacion(CompraRepositorio compraRepositorio) {
         return new ServicioDeBajaDePresentacion(compraRepositorio);
     }
+
+    @Bean
+    public ServicioDeLote servicioDeLote(LoteRepositorio loteRepositorio){
+        return new ServicioDeLote(loteRepositorio);
+    }
 }
