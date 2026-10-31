@@ -47,7 +47,8 @@ Finca ─► Lote ─► Transformación ─► Presentación ─► Compra ─�
 ## Tecnologías
 
 - **Java 21** y **Spring Boot 4.1.1** (Gradle con wrapper)
-- **Spring Data JPA** con **H2** en memoria, las tablas las crea Hibernate y los datos de ejemplo se cargan al arrancar (`data-*.sql`)
+- **Spring Data JPA** con **H2** en memoria por defecto (las tablas las crea Hibernate y los datos de ejemplo se cargan al arrancar, `data-*.sql`) y **MariaDB** en un contenedor con el perfil `mariadb`
+- **Docker** y **Docker Compose** para empaquetar la aplicación y su base de datos
 - **Spring Security** con **JWT** (HS256, 60 minutos): el token lleva el id del usuario, su correo, su rol y su vencimiento
 - **SpringDoc / Swagger UI** para documentar y probar la API desde el navegador
 - **Lombok**, **Bean Validation**
@@ -107,6 +108,21 @@ cd Backend
 - **Probar con Swagger:** haz `POST /api/usuarios/login` con un usuario de la tabla de abajo, copia el `token` de la respuesta, pulsa **Authorize** y pégalo (sin la palabra `Bearer`).
 - **Postman:** importa la colección y córrela en orden con el Runner (`baseUrl` = `http://localhost:8080`); cada corrida registra usuarios nuevos, así que se puede repetir.
 - **Pruebas:** `./gradlew test` (ver [Pruebas](#pruebas)).
+
+### Con MariaDB y Docker
+
+Con el perfil `mariadb` los datos **sobreviven al apagar** la aplicación. Requisito: Docker.
+
+```bash
+cd Backend
+./gradlew bootJar                  # genera build/libs/*-SNAPSHOT.jar
+docker compose up --build -d       # MariaDB (puerto 3307) y la aplicación (puerto 8080)
+```
+
+- La base empieza **vacía** (no se cargan los `data-*.sql`): registra usuarios con `POST /api/usuarios/registro`, eligiendo el rol, y luego inicia sesión.
+- `docker compose down` apaga todo y **conserva los datos** en el volumen; `docker compose down -v` los borra.
+- Para correr la aplicación fuera de Docker contra un MariaDB ya levantado: `docker compose up -d mariadb` y luego `./gradlew bootRun --args='--spring.profiles.active=mariadb'`.
+- El perfil está en `Backend/src/main/resources/application-mariadb.properties`; la imagen se define en `Backend/Dockerfile` y los servicios en `Backend/docker-compose.yml`.
 
 ---
 
