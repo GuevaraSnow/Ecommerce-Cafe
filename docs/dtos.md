@@ -28,13 +28,15 @@ saltarse la regla A declarando un rol falso).
 
 | Campo | Por qué es necesario aquí |
 | --- | --- |
-| `codigo` | Identidad del Lote (formato `LOT-AAAA-NNN`) |
-| `cantidad` (valor, unidad) | Cantidad inicial disponible; mayor a cero |
+| `cantidad` (`CantidadRequest`: valor, unidad) | Cantidad inicial disponible; mayor a cero |
 | `fincaId` | Referencia a la Finca de origen (otro agregado, por id) |
 | `procesoDeBeneficio` | Lavado / Honey / Natural; define el perfil de sabor |
 | `estado` (`EstadoDelCafe`) | Verde o Pergamino; el dominio rechaza Tostado |
-| `cosecha` (año, temporada) | Parte de lo que identifica el origen del café |
+| `cosecha` (año, temporada) | Parte de lo que identifica el origen del café; solo se acepta la del año de registro o la anterior |
 | `variedad` | Castillo, Caturra, Geisha…; dato de trazabilidad |
+
+**Campos que NO incluye, a propósito:** el `codigo` del Lote (`LOT-AAAA-NNN`): lo genera el servidor con el
+siguiente número del año de registro, para que el cliente no pueda repetir ni saltarse un código.
 
 ### Operaciones sobre una Presentación publicada: un Request por operación
 

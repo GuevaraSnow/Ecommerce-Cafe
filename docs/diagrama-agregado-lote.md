@@ -26,11 +26,17 @@ transforma ni publica más café del que el Lote tiene disponible.
 4. **Un Lote dado de baja nunca puede transformarse ni publicarse.** `descontar()` lo verifica antes
    de operar.
 
-5. **Un Lote ya usado en una Transformación nunca se borra físicamente:** solo
-   `eliminarLogicamente()`, para no romper la trazabilidad de las Presentaciones derivadas.
+5. **Un Lote nunca se borra físicamente:** solo `eliminarLogicamente()` (la baja), para no romper la
+   trazabilidad de las Transformaciones y Presentaciones derivadas. Un Lote dado de baja deja de mostrarse en
+   la consulta, pero se sigue pudiendo cargar para la Ficha de Origen y para rechazar usos nuevos.
 
 6. **El Código de Lote es la identidad, es inmutable y siempre sigue el formato `LOT-AAAA-NNN`.**
-   `equals()` y `hashCode()` se calculan solo sobre él.
+   `equals()` y `hashCode()` se calculan solo sobre él. Lo genera el servidor (`ServicioDeLote`): el año de
+   registro más el siguiente número de ese año, de 001 a 999.
+
+7. **Una Cosecha solo se registra si es del año de registro o del anterior** (regla del registro, en
+   `ServicioDeLote`, no del valor `Cosecha`): un Lote ya guardado conserva su Cosecha aunque pasen los años,
+   y por eso `Lote.reconstruir(...)` no repite las validaciones de creación.
 
 ## Dentro del límite
 
@@ -48,7 +54,7 @@ transforma ni publica más café del que el Lote tiene disponible.
 | Entidad | Referencia |
 | --- | --- |
 | `Finca` | `fincaID` |
-| `Transformación` | la Transformación guarda su lista de `loteIds` |
+| `Transformación` | la Transformación guarda el `loteCodigo` del que sale |
 | `PresentacionTrazable` | la Presentación guarda `origen.loteId`; al publicarla como café sin tostar se descuenta del Lote |
 | `FichaDeOrigen` | se arma por lectura |
 
@@ -56,4 +62,4 @@ transforma ni publica más café del que el Lote tiene disponible.
 
 ## Regla de transacción
 
-Cada método de negocio de la raíz se guarda en **una única transacción** y deja el agregado en estado válido. Si alguna invariante falla, se lanza `ReglaDominioException` y no se modifica nada. Cuando una operación toca dos agregados, la coordinación vive en el caso de uso, no en las entidades: `RegistrarTransformacion` descuenta de los Lotes la cantidad de entrada del tueste, y `PublicarPresentacion` descuenta del Lote el café sin tostar que se publica.
+Cada método de negocio de la raíz se guarda en **una única transacción** y deja el agregado en estado válido. Si alguna invariante falla, se lanza `ReglaDominioException` y no se modifica nada. Cuando una operación toca dos agregados, la coordinación vive en el caso de uso, no en las entidades: `RegistrarTransformacion` (con `ServicioDeTransformacion`) descuenta del Lote la cantidad de entrada del tueste, y `PublicarPresentacion` (con `ServicioDePublicacion`) descuenta del Lote el café sin tostar que se publica.

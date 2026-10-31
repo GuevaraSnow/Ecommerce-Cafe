@@ -18,18 +18,13 @@ que la separa es su id.
 | **Presentación** (raíz abstracta) | `id` propio; sigue siendo la misma aunque cambie stock o precio | Publicar, descontar y reponer cantidad, agotarse, pausarse, dar de baja | Dos publicaciones idénticas siguen siendo dos: si una se agota o se da de baja, la otra sigue a la venta |
 | **PresentaciónTrazable** (subclase) | Hereda el `id` + Origen obligatorio | Además controla frescura (puede quedar Vencida) y recibe Nota de Cata | Dos bolsas idénticas del mismo Origen son dos publicaciones con stock independiente |
 | **ArticuloDeMerchandising** (subclase) | Hereda el `id`; sin Origen | Ciclo común (stock, pausa, baja) | Dos manillas idénticas del mismo vendedor son dos artículos con stock independiente |
-| **Lote** | `CodigoDeLote` (`LOT-2026-045`), independiente de su cantidad | Su cantidad se descuenta con cada Transformación; eliminación lógica | Dos Lotes con la misma Finca, Cosecha, Proceso y cantidad siguen siendo dos: tostar uno no descuenta del otro |
+| **Lote** | `CodigoDeLote` (`LOT-2026-045`, lo genera el servidor), independiente de su cantidad | Su cantidad se descuenta con cada Transformación; eliminación lógica | Dos Lotes con la misma Finca, Cosecha, Proceso y cantidad siguen siendo dos: tostar uno no descuenta del otro |
 | **Transformación** | `id` propio | Su cantidad resultante disponible baja con cada Presentación publicada desde ella | Dos tuestes idénticos (mismos Lotes, cantidad, merma, Tostador y fecha) son dos eventos, cada uno con su propio saldo |
 | **Finca** | `id` propio (el nombre puede repetirse); pertenece a un Caficultor | Se registra y puede eliminarse lógicamente sin perder la trazabilidad de sus Lotes | Dos Fincas "La Esperanza" del mismo dueño, municipio y altura siguen siendo dos terrenos |
-| **Vendedor** | `id` propio, generado al registrarse | Se registra y puede darse de baja; lo que publicó sigue atribuido a él | Dos Vendedores con el mismo nombre y rol son dos cuentas distintas |
-| **Comprador** | `id` propio (su cuenta), no sus datos de contacto | Cambia contraseña, recibe códigos de recuperación, eliminación lógica | Dos Compradores con el mismo nombre y teléfono son dos personas distintas |
+| **Usuario** (con `Rol`) | `id` propio, generado al registrarse; su correo es único pero no es su identidad | Se registra, edita su perfil, cambia contraseña, recibe códigos de recuperación y se da de baja lógica; lo que publicó o compró sigue atribuido a él | Dos Usuarios con el mismo nombre, teléfono y rol son dos cuentas distintas (el correo es lo único que no puede repetirse) |
 | **Compra** (raíz) | `id` propio para trazabilidad y disputas | Mientras está pendiente es el carrito (se agregan, cambian y quitan Presentaciones); al confirmarse fija la dirección de envío y sigue el tramo logístico (enviada, entregada) con transiciones válidas | Dos Compras idénticas (mismo comprador, productos y fecha) son dos pedidos: cancelar uno no cancela el otro |
 | **Reseña** | `id` propio; referencia por id al Comprador, la Presentación y su vendedor | Se deja solo con una Compra entregada (una por Comprador y Presentación); el vendedor dueño la responde una sola vez | Dos Reseñas con el mismo texto y calificación son dos opiniones distintas |
 | **Solicitud de Reembolso** | `id` propio; referencia por id a la Compra, a la Presentación que se reembolsa y a su vendedor | Solicitada → Aprobada / Rechazada, una sola vez y solo por el vendedor dueño de la Presentación | Dos solicitudes idénticas son dos trámites: aprobar una no resuelve la otra |
-| **Notificación** | `id` propio y destinatario | No leída → leída | Dos avisos idénticos son dos: leer uno no marca el otro |
-| **Curso** | `id` propio; sigue siendo el mismo aunque cambie precio o contenido | Publicación, nuevas Lecciones, eliminación lógica | Dos Cursos idénticos (mismo Formador, título y precio) son dos cursos con inscritos distintos |
-| **Lección** (interna de Curso) | Identidad **local**: su número de orden dentro del Curso; fuera del Curso no existe | Su Archivo Digital puede reemplazarse sin dejar de ser la misma Lección | Dos Lecciones con el mismo título y archivo en posiciones distintas son dos lecciones |
-| **Inscripción** | `id` propio; une Comprador, Curso y Compra | Registra primer acceso y revocación | Dos Inscripciones idénticas son dos accesos: revocar una no revoca la otra |
 
 ## Value Objects
 
@@ -40,9 +35,9 @@ que la separa es su id.
 | **Cantidad** | record | Valor + unidad (kg, g, ml, unidad); igual por valor y unidad (no convierte: `0,5 kg` y `500 g` son valores distintos); restar devuelve una nueva |
 | **DetalleDeCompra** | record | Línea de una Compra (compraId, presentacionId, precio congelado, cantidad), una sola por Presentación; sin identidad propia, se compara por valor |
 | **PorcentajeDeMerma** | record | Porcentaje de peso perdido al tostar (12 %–22 %); dos Transformaciones con 18 % comparten el valor |
-| **CodigoDeLote** | record | Formato `LOT-AAAA-NNN`; el código en sí no tiene historia |
+| **CodigoDeLote** | record | Formato `LOT-AAAA-NNN`: el año de registro y un número consecutivo de 001 a 999 por año; lo genera `ServicioDeLote` con `CodigoDeLote.crear(año, número)`; el código en sí no tiene historia |
 | **VariedadDeCafe** | record | Un nombre (Castillo, Caturra, Geisha…) validado en el constructor; no es un conjunto cerrado, así que no es enum; dos Lotes "Caturra" comparten el valor |
-| **Cosecha** | record | Año + temporada (`2026-Traviesa`); solo etiqueta un Lote |
+| **Cosecha** | record | Año + temporada (`2026-Traviesa`); solo etiqueta un Lote. Su única invariante es no ser de un año futuro: que sea del año de registro o del anterior es una regla del **registro** (`ServicioDeLote`), no del valor, porque con el tiempo un Lote antiguo seguiría siendo válido |
 | **OrigenDePresentacion** | record | Referencia a un Lote **o** una Transformación (exactamente uno); fijo al publicar |
 | **FechaDeTueste** | record | Solo una fecha (nunca futura) |
 | **NotaDeCata** | record | Descriptores de sabor; dos notas iguales son intercambiables |
@@ -50,9 +45,8 @@ que la separa es su id.
 | **TextoDeResena** | record | Texto de la Reseña o de su respuesta: no vacío, máximo 500 caracteres |
 | **RespuestaAResena** | record | Texto + fecha de la respuesta del vendedor; vive dentro de la Reseña, sin identidad propia |
 | **Galeria / ImagenDePresentacion** | record | Entre 1 y 10 imágenes, una principal; agregar una imagen produce otra Galería |
-| **Altitud / Ubicación / Email / Teléfono / Contraseña / FechaDeNacimiento** | record | Valores de atributo sin identidad; si cambian, se reemplazan |
+| **Altitud / Ubicación / Email / Teléfono / Contraseña / ContrasenaPlana / FechaDeNacimiento** | record | Valores de atributo sin identidad; si cambian, se reemplazan. `ContrasenaPlana` es la contraseña tal como la escribe el usuario (se valida: mínimo 8 caracteres, una mayúscula y un número) y `Contrasena` es la ya encriptada que se guarda |
 | **DireccionDeEnvio** | record | Ciudad + dirección + destinatario; se fija al confirmar la Compra y no cambia aunque el comprador cambie de dirección después |
 | **CodigoDeRecuperacion** | record | Código + fecha de expiración (15 min); si vence se genera otro, no se edita |
 | **FichaDeOrigen** | record de lectura | Reconstrucción de la cadena; no se persiste ni se edita |
-| **EstadoDeCompra, TipoDePresentacion, EstadoDePublicacion, PerfilTueste, ProcesoDeBeneficio, EstadoDelCafe, TemporadaDeCosecha, RolVendedor, TipoDeComprador, EstadoDeReembolso, TipoDeNotificacion** | enum | Conjunto cerrado de valores, sin identidad ni historia propia; quien cambia de estado es la entidad |
-| **ArchivoDigital, TamanoDeArchivo, TipoDeArchivo, Duracion, NivelDelCurso, TematicaDelCurso** | record / enum | Atributos de Curso y Lección, reemplazables por valor |
+| **EstadoDeCompra, TipoDePresentacion, EstadoDePublicacion, PerfilTueste, ProcesoDeBeneficio, EstadoDelCafe, TemporadaDeCosecha, Rol, EstadoDeReembolso** | enum | Conjunto cerrado de valores, sin identidad ni historia propia; quien cambia de estado es la entidad |
