@@ -6,6 +6,7 @@
   <img src="https://img.shields.io/badge/Gradle-wrapper-02303A?style=flat-square&logo=gradle&logoColor=white"/>
   <img src="https://img.shields.io/badge/JPA-H2-1E88E5?style=flat-square"/>
   <img src="https://img.shields.io/badge/Seguridad-JWT_HS256-black?style=flat-square&logo=jsonwebtokens&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff&style=flat-square"/>
   <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat-square&logo=swagger&logoColor=black"/>
   <img src="https://img.shields.io/badge/Pruebas-875-brightgreen?style=flat-square"/>
 </p>
