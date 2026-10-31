@@ -1,13 +1,20 @@
 package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
+import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.ContrasenaPlana;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
-import com.uniquindio.ecommerce.application.dto.request.RecuperarContrasenaRequest;
-import com.uniquindio.ecommerce.application.dto.request.RestablecerContrasenaRequest;
+import com.uniquindio.ecommerce.Domain.valueobject.FechaDeNacimiento;
+import com.uniquindio.ecommerce.Domain.valueobject.Telefono;
 import com.uniquindio.ecommerce.application.dto.response.UsuarioResponse;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
+/**
+ * Traduce entre los DTO de Usuario y el dominio. No aplica reglas de negocio: los constructores de los Value
+ * Objects son quienes validan y lanzan ReglaDominioException, que aquí nunca se captura.
+ */
 @Component
 public class UsuarioMapper {
 
@@ -24,24 +31,26 @@ public class UsuarioMapper {
         );
     }
 
-    public Email toEmail(RecuperarContrasenaRequest request) {
-        if (request == null || request.email() == null) {
-            return null;
-        }
-        return new Email(request.email());
+    public Email toEmail(String email) {
+        return new Email(email);
     }
 
-    public Email toEmail(RestablecerContrasenaRequest request) {
-        if (request == null || request.email() == null) {
-            return null;
-        }
-        return new Email(request.email());
+    /** La contraseña tal como llega al iniciar sesión: sin reglas de seguridad, solo se compara. */
+    public Contrasena toContrasena(String contrasena) {
+        return new Contrasena(contrasena);
     }
 
-    public ContrasenaPlana toContrasenaPlana(String clavePlanaTexto) {
-        if (clavePlanaTexto == null || clavePlanaTexto.isBlank()) {
-            return null;
-        }
-        return new ContrasenaPlana(clavePlanaTexto);
+    /** La contraseña nueva en texto plano: el Value Object valida que sea segura. */
+    public ContrasenaPlana toContrasenaPlana(String contrasena) {
+        return new ContrasenaPlana(contrasena);
+    }
+
+    /** Un teléfono ausente o en blanco es "sin teléfono": devuelve {@code null}. */
+    public Telefono toTelefono(String telefono) {
+        return telefono != null && !telefono.isBlank() ? new Telefono(telefono) : null;
+    }
+
+    public FechaDeNacimiento toFechaDeNacimiento(LocalDate fecha) {
+        return new FechaDeNacimiento(fecha);
     }
 }
