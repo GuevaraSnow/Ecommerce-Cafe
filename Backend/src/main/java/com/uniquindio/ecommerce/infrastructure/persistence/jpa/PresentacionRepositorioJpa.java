@@ -5,6 +5,8 @@ import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.PresentacionVendida;
+import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.PresentacionEntity;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper.PresentacionPersistenceMapper;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,11 @@ public class PresentacionRepositorioJpa implements PresentacionRepositorio {
         return dataRepository.buscarDisponibles(texto, null, null, null, null, null, fechaMinimaDeTueste(),
                         PageRequest.of(0, limite))
                 .getContent().stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public List<PresentacionVendida> masVendidas(int limite) {
+        return dataRepository.masVendidas(EstadoDeCompra.VENTAS, PageRequest.of(0, limite));
     }
 
     /** Un café tostado antes de esta fecha ya no está fresco (más de 30 días): la Presentación está vencida. */

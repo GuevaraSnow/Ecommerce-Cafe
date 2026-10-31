@@ -2,9 +2,11 @@ package com.uniquindio.ecommerce.infrastructure.rest;
 
 import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
 import com.uniquindio.ecommerce.application.dto.response.PaginaResponse;
+import com.uniquindio.ecommerce.application.dto.response.PresentacionMasVendidaResponse;
 import com.uniquindio.ecommerce.application.dto.response.PresentacionResponse;
 import com.uniquindio.ecommerce.application.dto.response.SugerenciaResponse;
 import com.uniquindio.ecommerce.application.usecase.BuscarPresentaciones;
+import com.uniquindio.ecommerce.application.usecase.ConsultarMasVendidas;
 import com.uniquindio.ecommerce.application.usecase.ConsultarPresentacion;
 import com.uniquindio.ecommerce.application.usecase.SugerirPresentaciones;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.PresentacionMapper;
@@ -36,6 +38,7 @@ public class PresentacionConsultaController {
     private final ConsultarPresentacion consultarPresentacion;
     private final BuscarPresentaciones buscarPresentaciones;
     private final SugerirPresentaciones sugerirPresentaciones;
+    private final ConsultarMasVendidas consultarMasVendidas;
     private final PresentacionMapper mapper;
 
     @GetMapping("/{id}")
@@ -64,6 +67,18 @@ public class PresentacionConsultaController {
             @Max(value = 50, message = "El tamaño de página no puede superar 50") int tamano) {
         return mapper.toPaginaResponse(buscarPresentaciones.ejecutar(
                 mapper.toFiltro(titulo, tipo, vendedorId, precioMinimo, precioMaximo, calificacionMinima), pagina, tamano));
+    }
+
+    @GetMapping("/mas-vendidas")
+    @Operation(summary = "Ranking de las Presentaciones más vendidas",
+            description = "Ordenado por número de Compras y, si empatan, por ingresos. Solo cuentan las Compras "
+                    + "confirmadas, enviadas y entregadas.")
+    @ApiResponse(responseCode = "400", description = "El límite es inválido")
+    public List<PresentacionMasVendidaResponse> masVendidas(
+            @RequestParam(defaultValue = "5")
+            @Min(value = 1, message = "El límite debe ser al menos 1")
+            @Max(value = 20, message = "El límite no puede superar 20") int limite) {
+        return consultarMasVendidas.ejecutar(limite).stream().map(mapper::toMasVendidaResponse).toList();
     }
 
     @GetMapping("/sugerencias")
