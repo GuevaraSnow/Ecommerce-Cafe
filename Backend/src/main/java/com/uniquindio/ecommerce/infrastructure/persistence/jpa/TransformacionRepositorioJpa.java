@@ -4,13 +4,11 @@ import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.repository.TransformacionRepositorio;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper.TransformacionPersistenceMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
 public class TransformacionRepositorioJpa implements TransformacionRepositorio {
 
