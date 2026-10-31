@@ -72,8 +72,8 @@ public class PresentacionMapper {
     }
 
     public FiltroDePresentaciones toFiltro(String titulo, TipoDePresentacion tipo, String vendedorId,
-                                           Double precioMinimo, Double precioMaximo) {
-        return new FiltroDePresentaciones(titulo, tipo, vendedorId, precioMinimo, precioMaximo);
+                                           Double precioMinimo, Double precioMaximo, Double calificacionMinima) {
+        return new FiltroDePresentaciones(titulo, tipo, vendedorId, precioMinimo, precioMaximo, calificacionMinima);
     }
 
     public PaginaResponse<PresentacionResponse> toPaginaResponse(Pagina<Presentacion> pagina) {

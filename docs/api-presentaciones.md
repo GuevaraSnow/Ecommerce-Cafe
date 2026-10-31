@@ -47,7 +47,7 @@ Las consultas (`GET`) son públicas. Todo lo demás exige `Authorization: Bearer
 | Método y ruta | Caso de uso | Parámetros | Respuesta |
 | --- | --- | --- | --- |
 | `GET /{id}` | `ConsultarPresentacion` | — | 200 `PresentacionResponse` |
-| `GET /` | `BuscarPresentaciones` | `titulo`, `tipo`, `vendedorId`, `precioMinimo`, `precioMaximo`, `pagina` (0 por defecto, mínimo 0), `tamano` (10 por defecto, entre 1 y 50) | 200 `PaginaResponse` |
+| `GET /` | `BuscarPresentaciones` | `titulo`, `tipo`, `vendedorId`, `precioMinimo`, `precioMaximo`, `calificacionMinima` (promedio de reseñas, de 1 a 5; sin reseñas no aparece), `pagina` (0 por defecto, mínimo 0), `tamano` (10 por defecto, entre 1 y 50) | 200 `PaginaResponse` |
 | `GET /sugerencias` | `SugerirPresentaciones` | `texto` (obligatorio), `limite` (5 por defecto, entre 1 y 10) | 200 lista de `SugerenciaResponse` |
 
 - Las listas solo incluyen Presentaciones **disponibles para la venta** (activas y no dadas de baja),

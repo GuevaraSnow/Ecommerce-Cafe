@@ -15,7 +15,9 @@ interface PresentacionJpaDataRepository extends JpaRepository<PresentacionEntity
     /**
      * Presentaciones disponibles para la venta: activas, no dadas de baja y, si son trazables, con
      * fecha de tueste igual o posterior a {@code fechaMinimaDeTueste} (frescas). Los criterios en
-     * {@code null} no filtran. Ordenadas por título; el paginado y el conteo los hace la base de datos.
+     * {@code null} no filtran. {@code calificacionMinima} se compara con el promedio de las Reseñas de la
+     * Presentación (calculado en la base): sin Reseñas no hay promedio y la Presentación no cumple.
+     * Ordenadas por título; el paginado y el conteo los hace la base de datos.
      */
     @Query("""
             select p from PresentacionEntity p
@@ -29,6 +31,8 @@ interface PresentacionJpaDataRepository extends JpaRepository<PresentacionEntity
               and (:vendedorId is null or p.vendedorId = :vendedorId)
               and (:precioMinimo is null or p.precio.monto >= :precioMinimo)
               and (:precioMaximo is null or p.precio.monto <= :precioMaximo)
+              and (:calificacionMinima is null
+                   or (select avg(r.calificacion) from ResenaEntity r where r.presentacionId = p.id) >= :calificacionMinima)
             order by lower(p.titulo), p.id
             """)
     Page<PresentacionEntity> buscarDisponibles(@Param("titulo") String titulo,
@@ -36,6 +40,7 @@ interface PresentacionJpaDataRepository extends JpaRepository<PresentacionEntity
                                                @Param("vendedorId") String vendedorId,
                                                @Param("precioMinimo") Double precioMinimo,
                                                @Param("precioMaximo") Double precioMaximo,
+                                               @Param("calificacionMinima") Double calificacionMinima,
                                                @Param("fechaMinimaDeTueste") LocalDate fechaMinimaDeTueste,
                                                Pageable pageable);
 }

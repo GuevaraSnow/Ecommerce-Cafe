@@ -37,15 +37,15 @@ public class PresentacionRepositorioJpa implements PresentacionRepositorio {
     @Override
     public Pagina<Presentacion> buscarDisponibles(FiltroDePresentaciones filtro, int pagina, int tamano) {
         Page<PresentacionEntity> resultado = dataRepository.buscarDisponibles(filtro.titulo(), filtro.tipo(),
-                filtro.vendedorId(), filtro.precioMinimo(), filtro.precioMaximo(), fechaMinimaDeTueste(),
-                PageRequest.of(pagina, tamano));
+                filtro.vendedorId(), filtro.precioMinimo(), filtro.precioMaximo(), filtro.calificacionMinima(),
+                fechaMinimaDeTueste(), PageRequest.of(pagina, tamano));
         return new Pagina<>(resultado.getContent().stream().map(mapper::toDomain).toList(),
                 pagina, tamano, resultado.getTotalElements());
     }
 
     @Override
     public List<Presentacion> sugerirDisponiblesPorTitulo(String texto, int limite) {
-        return dataRepository.buscarDisponibles(texto, null, null, null, null, fechaMinimaDeTueste(),
+        return dataRepository.buscarDisponibles(texto, null, null, null, null, null, fechaMinimaDeTueste(),
                         PageRequest.of(0, limite))
                 .getContent().stream().map(mapper::toDomain).toList();
     }
