@@ -15,6 +15,6 @@ public class ConsultarLote {
 
     @Transactional(readOnly = true)
     public Lote ejecutar(CodigoDeLote codigoDeLote) {
-        return loteRepositorio.buscarPorCodigo(codigoDeLote).orElseThrow();
+        return loteRepositorio.buscarNoEliminadoPorCodigo(codigoDeLote).orElseThrow();
     }
 }

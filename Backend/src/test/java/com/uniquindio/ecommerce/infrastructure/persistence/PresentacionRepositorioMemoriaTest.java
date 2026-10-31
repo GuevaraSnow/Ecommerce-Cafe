@@ -52,6 +52,15 @@ class PresentacionRepositorioMemoriaTest {
     }
 
     @Test
+    void buscarNoEliminadaNoDevuelveUnaPresentacionDadaDeBaja() {
+        repositorio.buscarPorId("p-taza").orElseThrow().darDeBaja();
+
+        assertTrue(repositorio.buscarNoEliminadaPorId("p-manilla").isPresent());
+        assertTrue(repositorio.buscarNoEliminadaPorId("p-taza").isEmpty());
+        assertTrue(repositorio.buscarPorId("p-taza").isPresent());
+    }
+
+    @Test
     void sinFiltrosListaTodoOrdenadoPorTitulo() {
         Pagina<Presentacion> pagina = repositorio.buscarDisponibles(SIN_FILTROS, 0, 10);
 

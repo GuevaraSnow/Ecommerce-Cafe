@@ -37,7 +37,7 @@ class ConsultarLoteTest {
                 new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
                 new VariedadDeCafe("Caturra"));
 
-        when(loteRepositorio.buscarPorCodigo(codigoDeLote)).thenReturn(Optional.of(lote));
+        when(loteRepositorio.buscarNoEliminadoPorCodigo(codigoDeLote)).thenReturn(Optional.of(lote));
 
         assertSame(lote, consultarLote.ejecutar(codigoDeLote));
         verify(loteRepositorio, never()).guardar(any());
@@ -46,9 +46,19 @@ class ConsultarLoteTest {
     @Test
     void consultarUnLoteInexistenteLanzaNoEncontrado() {
         CodigoDeLote codigoInexistente = CodigoDeLote.crear(Year.now().getValue(), 999);
-        when(loteRepositorio.buscarPorCodigo(codigoInexistente)).thenReturn(Optional.empty());
+        when(loteRepositorio.buscarNoEliminadoPorCodigo(codigoInexistente)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> consultarLote.ejecutar(codigoInexistente));
         verify(loteRepositorio, never()).guardar(any());
+    }
+
+    @Test
+    void consultarUnLoteDadoDeBajaLanzaNoEncontradoSinBuscarloConLaVariantePlana() {
+        CodigoDeLote codigoDeBaja = CodigoDeLote.crear(Year.now().getValue(), 7);
+        when(loteRepositorio.buscarNoEliminadoPorCodigo(codigoDeBaja)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> consultarLote.ejecutar(codigoDeBaja));
+
+        verify(loteRepositorio, never()).buscarPorCodigo(any());
     }
 }

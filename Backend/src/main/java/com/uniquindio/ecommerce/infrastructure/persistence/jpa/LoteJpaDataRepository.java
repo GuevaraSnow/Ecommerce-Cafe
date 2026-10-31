@@ -12,4 +12,7 @@ interface LoteJpaDataRepository extends JpaRepository<LoteEntity, String> {
 
     Optional<LoteEntity> findFirstByCodigoDeLoteStartingWithOrderByCodigoDeLoteDesc(String prefijo);
 
+    /** Un Lote por su código, sin los dados de baja. */
+    Optional<LoteEntity> findByCodigoDeLoteAndEliminadoLogicamenteFalse(String codigoDeLote);
+
 }
