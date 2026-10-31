@@ -6,13 +6,11 @@ import com.uniquindio.ecommerce.Domain.valueobject.Email;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.UsuarioEntity;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper.UsuarioPersistenceMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
 public class UsuarioRepositorioJpa implements UsuarioRepositorio {
 

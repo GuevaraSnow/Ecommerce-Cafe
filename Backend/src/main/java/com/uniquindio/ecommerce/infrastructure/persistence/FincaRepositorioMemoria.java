@@ -2,13 +2,13 @@ package com.uniquindio.ecommerce.infrastructure.persistence;
 
 import com.uniquindio.ecommerce.Domain.entity.Finca;
 import com.uniquindio.ecommerce.Domain.repository.FincaRepositorio;
-import org.springframework.stereotype.Repository;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
+// Reemplazado por FincaRepositorioJpa; con los dos activos Spring lanza NoUniqueBeanDefinitionException
+//@Repository
 public class FincaRepositorioMemoria implements FincaRepositorio {
 
     private final Map<String, Finca> fagas = new ConcurrentHashMap<>();

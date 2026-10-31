@@ -1,7 +1,6 @@
 package com.uniquindio.ecommerce.infrastructure.rest;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
-import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.*;
 import com.uniquindio.ecommerce.application.dto.response.LoginResponse;
 import com.uniquindio.ecommerce.application.dto.response.UsuarioResponse;
@@ -42,15 +41,12 @@ public class UsuarioController {
     @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente")
     @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya registrado")
     public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody RegistrarUsuarioRequest request) {
-        Telefono telefono = request.telefono() != null && !request.telefono().isBlank()
-                ? new Telefono(request.telefono()) : null;
-
         Usuario usuario = registrarUsuario.ejecutar(
                 request.nombre(),
-                new Email(request.email()),
-                new ContrasenaPlana(request.contrasena()),
-                telefono,
-                new FechaDeNacimiento(request.fechaNacimiento()),
+                mapper.toEmail(request.email()),
+                mapper.toContrasenaPlana(request.contrasena()),
+                mapper.toTelefono(request.telefono()),
+                mapper.toFechaDeNacimiento(request.fechaNacimiento()),
                 request.rol()
         );
 
@@ -69,8 +65,8 @@ public class UsuarioController {
             description = "Credenciales inválidas: el correo no existe, la contraseña no coincide o el usuario está dado de baja (mismo mensaje en los tres casos)")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         Usuario usuario = iniciarSesion.ejecutar(
-                new Email(request.email()),
-                new Contrasena(request.contrasena())
+                mapper.toEmail(request.email()),
+                mapper.toContrasena(request.contrasena())
         );
 
         String token = jwtService.generarToken(usuario.getId(), usuario.getEmail().email(), usuario.getRol());
@@ -83,7 +79,7 @@ public class UsuarioController {
     @ApiResponse(responseCode = "200", description = "Código de recuperación generado")
     @ApiResponse(responseCode = "404", description = "Email no registrado")
     public ResponseEntity<Void> solicitarRecuperacion(@Valid @RequestBody RecuperarContrasenaRequest request) {
-        recuperarContrasena.ejecutar(new Email(request.email()));
+        recuperarContrasena.ejecutar(mapper.toEmail(request.email()));
         return ResponseEntity.ok().build();
     }
 
@@ -93,9 +89,9 @@ public class UsuarioController {
     @ApiResponse(responseCode = "400", description = "Código inválido o expirado, o la contraseña no es segura")
     public ResponseEntity<Void> restablecerContrasena(@Valid @RequestBody RestablecerContrasenaRequest request) {
         restablecerContrasena.ejecutar(
-                new Email(request.email()),
+                mapper.toEmail(request.email()),
                 request.codigo(),
-                new ContrasenaPlana(request.nuevaContrasena())
+                mapper.toContrasenaPlana(request.nuevaContrasena())
         );
         return ResponseEntity.ok().build();
     }
@@ -107,8 +103,7 @@ public class UsuarioController {
     public ResponseEntity<UsuarioResponse> editarPerfil(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody EditarPerfilRequest request) {
-        String usuarioId = jwt.getSubject();
-        Usuario usuario = editarPerfil.ejecutar(usuarioId, request);
+        Usuario usuario = editarPerfil.ejecutar(jwt.getSubject(), request.nombre(), mapper.toTelefono(request.telefono()));
         return ResponseEntity.ok(mapper.toResponse(usuario));
     }
 
@@ -119,11 +114,10 @@ public class UsuarioController {
     public ResponseEntity<Void> cambiarContrasena(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CambiarContrasenaRequest request) {
-        String usuarioId = jwt.getSubject();
         cambiarContrasena.ejecutar(
-                usuarioId,
+                jwt.getSubject(),
                 request.contrasenaActual(),
-                new ContrasenaPlana(request.nuevaContrasena())
+                mapper.toContrasenaPlana(request.nuevaContrasena())
         );
         return ResponseEntity.ok().build();
     }
