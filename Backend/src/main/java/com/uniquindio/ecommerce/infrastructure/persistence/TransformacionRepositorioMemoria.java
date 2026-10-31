@@ -2,13 +2,13 @@ package com.uniquindio.ecommerce.infrastructure.persistence;
 
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.repository.TransformacionRepositorio;
-import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Repository
+// Reemplazado por TransformacionRepositorioJpa; con los dos activos Spring lanza NoUniqueBeanDefinitionException
+//@Repository
 public class TransformacionRepositorioMemoria implements TransformacionRepositorio {
 
     private final Map<String, Transformacion> transformaciones = new HashMap<>();

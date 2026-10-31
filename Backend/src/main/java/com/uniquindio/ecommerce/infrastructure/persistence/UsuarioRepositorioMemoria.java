@@ -3,13 +3,13 @@ package com.uniquindio.ecommerce.infrastructure.persistence;
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
-import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Repository
+// Reemplazado por UsuarioRepositorioJpa; con los dos activos Spring lanza NoUniqueBeanDefinitionException
+//@Repository
 public class UsuarioRepositorioMemoria implements UsuarioRepositorio {
 
     private final Map<String, Usuario> usuarios = new HashMap<>();
