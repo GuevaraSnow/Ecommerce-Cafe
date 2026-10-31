@@ -28,14 +28,8 @@ public class ServicioDePublicacion {
         var usuario = usuarioRepositorio.buscarPorId(vendedorId)
                 .orElseThrow();
 
-        Rol rolUsuario = usuario.getRol();
-
-        if (rolUsuario == Rol.COMPRADOR) {
-            throw new ReglaDominioException("Un usuario con rol COMPRADOR no está autorizado para publicar presentaciones.");
-        }
-
         Presentacion presentacion = Presentacion.publicar(id, vendedorId, loteId, transformacionId, titulo,
-                tipoPresentacion, precio, cantidadDisponible, galeria, perfilDeTueste, rolUsuario, fechaTueste,
+                tipoPresentacion, precio, cantidadDisponible, galeria, perfilDeTueste, usuario.getRol(), fechaTueste,
                 null, null);
 
         if (!(presentacion instanceof PresentacionTrazable trazable)) {

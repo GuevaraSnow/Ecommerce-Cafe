@@ -143,9 +143,9 @@ class LoteControllerTest {
 
     @Test
     void postUnCampoRompeUnaReglaDeNegocioDevuelve422() throws Exception {
-        String jsonCantidadNegativa = """
+        String jsonUnidadInvalida = """
                 {
-                  "cantidad": { "valor": -100, "unidad": "kg" },
+                  "cantidad": { "valor": 100, "unidad": "toneladas" },
                   "fincaId": "finca-1",
                   "procesoDeBeneficio": "Lavado",
                   "estado": "PERGAMINO",
@@ -156,11 +156,11 @@ class LoteControllerTest {
 
         mockMvc.perform(post("/api/lotes")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonCantidadNegativa))
+                        .content(jsonUnidadInvalida))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(header().doesNotExist("Location"))
                 .andExpect(jsonPath("$.status").value(422))
-                .andExpect(jsonPath("$.mensaje").value("La Cantidad no puede ser negativa: -100.0"));
+                .andExpect(jsonPath("$.mensaje").value("Unidad de Cantidad inválida: toneladas"));
 
         verify(registrarLote, never()).ejecutar(any(),any(),any(),any(),any(),any());
     }

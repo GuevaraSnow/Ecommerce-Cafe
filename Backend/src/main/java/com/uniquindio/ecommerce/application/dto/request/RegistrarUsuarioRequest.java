@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.valueobject.Rol;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
@@ -16,6 +17,7 @@ public record RegistrarUsuarioRequest(
         String email,
 
         @NotBlank(message = "La contraseña es obligatoria")
+        @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
         String contrasena,
 
         String telefono,

@@ -32,14 +32,6 @@ public record RegistrarLoteRequest(
         String variedad
 ) {
 
-    public record CantidadRequest(
-            @NotNull(message = "El valor de la cantidad es obligatorio")
-            Double valor,
-
-            @NotBlank(message = "La unidad de la cantidad es obligatoria")
-            String unidad
-    ) {}
-
     public record CosechaRequest(
             @NotNull(message = "El año de la cosecha es obligatorio")
             Integer anio,
