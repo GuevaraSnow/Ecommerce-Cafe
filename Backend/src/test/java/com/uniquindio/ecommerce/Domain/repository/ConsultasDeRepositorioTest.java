@@ -23,6 +23,20 @@ class ConsultasDeRepositorioTest {
     }
 
     @Test
+    void elFiltroRechazaUnaCalificacionMinimaFueraDeRango() {
+        assertThrows(ReglaDominioException.class,
+                () -> new FiltroDePresentaciones(null, null, null, null, null, 0.5));
+        assertThrows(ReglaDominioException.class,
+                () -> new FiltroDePresentaciones(null, null, null, null, null, 5.5));
+    }
+
+    @Test
+    void elFiltroAceptaLosExtremosDeLaCalificacionMinima() {
+        assertDoesNotThrow(() -> new FiltroDePresentaciones(null, null, null, null, null, 1.0));
+        assertDoesNotThrow(() -> new FiltroDePresentaciones(null, null, null, null, null, 5.0));
+    }
+
+    @Test
     void laPaginaCalculaCuantasPaginasHay() {
         assertEquals(0, new Pagina<String>(List.of(), 0, 10, 0).totalPaginas());
         assertEquals(1, new Pagina<>(List.of("a"), 0, 10, 10).totalPaginas());

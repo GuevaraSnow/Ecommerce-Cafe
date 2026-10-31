@@ -8,6 +8,7 @@ import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
+import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.*;
 import com.uniquindio.ecommerce.application.dto.response.*;
@@ -311,6 +312,17 @@ class PresentacionMapperTest {
 
     @Test
     void elFiltroConElPrecioMinimoMayorQueElMaximoPropagaReglaDominioException() {
-        assertThrows(ReglaDominioException.class, () -> mapper.toFiltro(null, null, null, 9000.0, 100.0));
+        assertThrows(ReglaDominioException.class, () -> mapper.toFiltro(null, null, null, 9000.0, 100.0, null));
+    }
+
+    @Test
+    void elFiltroConUnaCalificacionMinimaFueraDeRangoPropagaReglaDominioException() {
+        assertThrows(ReglaDominioException.class, () -> mapper.toFiltro(null, null, null, null, null, 6.0));
+    }
+
+    @Test
+    void elFiltroConservaTodosLosCriteriosRecibidos() {
+        assertEquals(new FiltroDePresentaciones("cafe", TipoDePresentacion.CAFE_VERDE, "vendedor-1", 100.0, 9000.0, 4.0),
+                mapper.toFiltro("cafe", TipoDePresentacion.CAFE_VERDE, "vendedor-1", 100.0, 9000.0, 4.0));
     }
 }

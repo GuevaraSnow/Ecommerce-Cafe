@@ -32,7 +32,7 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `QuitarDescuentoDePresentacion` | Vendedor | Quita el Descuento programado | `PresentacionRepositorio` |
 | `EliminarPresentacion` | Vendedor | Baja lógica; `ServicioDeBajaDePresentacion` la bloquea con compras activas | `PresentacionRepositorio`, `CompraRepositorio` |
 | `ConsultarPresentacion` | Cualquier visitante | Detalle de una Presentación con su galería, precio vigente y descuento (consulta, no modifica) | `PresentacionRepositorio` |
-| `BuscarPresentaciones` | Cualquier visitante | Lista por páginas las Presentaciones disponibles para la venta, con filtros por título, tipo, vendedor y rango de precio (consulta) | `PresentacionRepositorio` |
+| `BuscarPresentaciones` | Cualquier visitante | Lista por páginas las Presentaciones disponibles para la venta, con filtros por título, tipo, vendedor, rango de precio y calificación mínima (promedio de reseñas, calculado en la consulta) | `PresentacionRepositorio` |
 | `SugerirPresentaciones` | Cualquier visitante | Búsqueda predictiva por nombre: sugiere Presentaciones disponibles cuyo título contiene el texto (consulta) | `PresentacionRepositorio` |
 | `CrearCarrito` | Comprador | Abre un carrito vacío (Compra pendiente, sin Dirección de Envío) | `CompraRepositorio` |
 | `AgregarAlCarrito` | Comprador | Agrega una Presentación al carrito: `ServicioDeCompra` verifica que esté a la venta y que el stock alcance para el total del carrito, y congela el precio vigente; no descuenta stock | `CompraRepositorio`, `PresentacionRepositorio` |

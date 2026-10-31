@@ -4,17 +4,32 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.ResenaRepositorio;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.Predicate;
 
-/** Versión en memoria del puerto; ya no es un bean: el adaptador activo es PresentacionRepositorioJpa. Se conserva para las pruebas. */
+/**
+ * Versión en memoria del puerto; ya no es un bean: el adaptador activo es PresentacionRepositorioJpa. Se
+ * conserva para las pruebas. Para filtrar por calificación mínima necesita el repositorio de Reseñas
+ * (en la base de datos el promedio sale de una subconsulta); sin él, ese filtro no se puede aplicar.
+ */
 public class PresentacionRepositorioMemoria implements PresentacionRepositorio {
     private final Map<String, Presentacion> presentaciones = new HashMap<>();
+    private final ResenaRepositorio resenaRepositorio;
+
+    public PresentacionRepositorioMemoria() {
+        this(null);
+    }
+
+    public PresentacionRepositorioMemoria(ResenaRepositorio resenaRepositorio) {
+        this.resenaRepositorio = resenaRepositorio;
+    }
 
     @Override
     public Optional<Presentacion> buscarPorId(String id) {
@@ -55,7 +70,19 @@ public class PresentacionRepositorioMemoria implements PresentacionRepositorio {
                 .and(p -> filtro.tipo() == null || p.getTipoPresentacion() == filtro.tipo())
                 .and(p -> filtro.vendedorId() == null || p.getVendedorId().equals(filtro.vendedorId()))
                 .and(p -> filtro.precioMinimo() == null || p.getPrecio().monto() >= filtro.precioMinimo())
-                .and(p -> filtro.precioMaximo() == null || p.getPrecio().monto() <= filtro.precioMaximo());
+                .and(p -> filtro.precioMaximo() == null || p.getPrecio().monto() <= filtro.precioMaximo())
+                .and(p -> filtro.calificacionMinima() == null
+                        || promedioDeResenas(p.getId()).orElse(0) >= filtro.calificacionMinima());
+    }
+
+    /** El promedio de las Reseñas de la Presentación; vacío si no tiene ninguna. */
+    private OptionalDouble promedioDeResenas(String presentacionId) {
+        if (resenaRepositorio == null) {
+            throw new IllegalStateException("Filtrar por calificación mínima necesita un ResenaRepositorio");
+        }
+        return resenaRepositorio.buscarPorPresentacion(presentacionId).stream()
+                .mapToInt(resena -> resena.getCalificacion().valor())
+                .average();
     }
 
     private Predicate<Presentacion> contieneTitulo(String texto) {

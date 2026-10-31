@@ -108,6 +108,7 @@ class PresentacionConsultaControllerTest {
                         .param("vendedorId", "vendedor-1")
                         .param("precioMinimo", "10000")
                         .param("precioMaximo", "40000")
+                        .param("calificacionMinima", "4")
                         .param("pagina", "2")
                         .param("tamano", "5"))
                 .andExpect(status().isOk());
@@ -119,6 +120,16 @@ class PresentacionConsultaControllerTest {
         assertEquals("vendedor-1", filtro.getValue().vendedorId());
         assertEquals(10000.0, filtro.getValue().precioMinimo());
         assertEquals(40000.0, filtro.getValue().precioMaximo());
+        assertEquals(4.0, filtro.getValue().calificacionMinima());
+    }
+
+    @Test
+    void buscarConUnaCalificacionMinimaFueraDeRangoResponde400PorElDominio() throws Exception {
+        mockMvc.perform(get("/api/presentaciones").param("calificacionMinima", "6"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("La calificación mínima debe estar entre 1 y 5: 6.0"));
+
+        verify(buscarPresentaciones, never()).ejecutar(any(), anyInt(), anyInt());
     }
 
     @Test
