@@ -89,12 +89,12 @@ public class UsuarioController {
     @PostMapping("/restablecer-contrasena")
     @Operation(summary = "Restablecer contraseña usando código")
     @ApiResponse(responseCode = "200", description = "Contraseña restablecida correctamente")
-    @ApiResponse(responseCode = "400", description = "Código inválido o expirado")
+    @ApiResponse(responseCode = "400", description = "Código inválido o expirado, o la contraseña no es segura")
     public ResponseEntity<Void> restablecerContrasena(@Valid @RequestBody RestablecerContrasenaRequest request) {
         restablecerContrasena.ejecutar(
                 new Email(request.email()),
                 request.codigo(),
-                new Contrasena(request.nuevaContrasena())
+                new ContrasenaPlana(request.nuevaContrasena())
         );
         return ResponseEntity.ok().build();
     }

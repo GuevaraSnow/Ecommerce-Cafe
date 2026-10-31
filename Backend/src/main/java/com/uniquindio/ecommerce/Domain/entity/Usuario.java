@@ -93,21 +93,6 @@ public class Usuario {
         this.codigoRecuperacion = codigo;
     }
 
-    public void cambiarContrasena(CodigoDeRecuperacion codigoEnviado, Contrasena nuevaContrasena) {
-        if (this.codigoRecuperacion == null || !this.codigoRecuperacion.estaVigente()) {
-            throw new ReglaDominioException("El código de recuperación ha expirado o no ha sido solicitado.");
-        }
-        if (!this.codigoRecuperacion.equals(codigoEnviado)) {
-            throw new ReglaDominioException("El código de recuperación proporcionado no es válido.");
-        }
-        if (nuevaContrasena == null) {
-            throw new ReglaDominioException("La nueva contraseña no puede ser nula.");
-        }
-        this.contrasena = nuevaContrasena;
-        this.codigoRecuperacion = null;
-    }
-
-
     public String getId() { return id; }
     public String getNombre() { return nombre; }
     public Email getEmail() { return email; }
@@ -140,6 +125,10 @@ public class Usuario {
     }
 
 
+    /**
+     * Asigna la contraseña nueva (ya encriptada) si el código de recuperación está vigente y coincide, y
+     * descarta el código. La encriptación la coordina ServicioDeContrasena.
+     */
     public void cambiarContrasena(String codigoTexto, Contrasena nuevaContrasena) {
         if (this.codigoRecuperacion == null || !this.codigoRecuperacion.estaVigente()) {
             throw new ReglaDominioException("El código de recuperación ha expirado o no ha sido solicitado.");
