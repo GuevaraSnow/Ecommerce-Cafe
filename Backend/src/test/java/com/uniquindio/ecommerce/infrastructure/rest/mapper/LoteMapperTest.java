@@ -5,7 +5,7 @@ import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeLote;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest;
-import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest.CantidadRequest;
+import com.uniquindio.ecommerce.application.dto.request.CantidadRequest;
 import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest.CosechaRequest;
 import com.uniquindio.ecommerce.application.dto.response.LoteResponse;
 import com.uniquindio.ecommerce.application.usecase.RegistrarLote;

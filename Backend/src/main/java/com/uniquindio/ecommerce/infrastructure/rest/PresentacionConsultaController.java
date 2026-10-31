@@ -53,7 +53,8 @@ public class PresentacionConsultaController {
             description = "Filtros opcionales por título, tipo, vendedor, rango de precio normal y calificación "
                     + "mínima (promedio de reseñas, de 1 a 5); paginado y ordenado por título. "
                     + "La primera página es la 0.")
-    @ApiResponse(responseCode = "400", description = "Filtro o paginación inválidos")
+    @ApiResponse(responseCode = "400", description = "Paginación o parámetro con un valor no válido")
+    @ApiResponse(responseCode = "422", description = "Filtro que incumple una regla (precio mínimo mayor que el máximo o calificación fuera de 1 a 5)")
     public PaginaResponse<PresentacionResponse> buscar(
             @RequestParam(required = false) String titulo,
             @RequestParam(required = false) TipoDePresentacion tipo,

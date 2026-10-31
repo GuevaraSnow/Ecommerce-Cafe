@@ -5,6 +5,7 @@ import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
 import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeLote;
 import com.uniquindio.ecommerce.Domain.valueobject.Cosecha;
 import com.uniquindio.ecommerce.Domain.valueobject.VariedadDeCafe;
+import com.uniquindio.ecommerce.application.dto.request.CantidadRequest;
 import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest;
 import com.uniquindio.ecommerce.application.dto.response.LoteResponse;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class LoteMapper {
         return new CodigoDeLote(codigo);
     }
 
-    public Cantidad toCantidad(RegistrarLoteRequest.CantidadRequest cantidad) {
+    public Cantidad toCantidad(CantidadRequest cantidad) {
         return new Cantidad(cantidad.valor(), cantidad.unidad());
     }
 

@@ -43,6 +43,16 @@ class PresentacionTest {
     }
 
     @Test
+    void unCompradorNoPuedePublicarNingunaPresentacion() {
+        ReglaDominioException error = assertThrows(ReglaDominioException.class, () -> Presentacion.publicar(
+                "pres-1", "comprador-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
+                new Precio(15000, "COP"), new Cantidad(20, "unidad"), galeriaValida(), null,
+                Rol.COMPRADOR, null, "material", "descripcion"));
+
+        assertEquals("Un usuario con rol COMPRADOR no está autorizado para publicar presentaciones.", error.getMessage());
+    }
+
+    @Test
     void noSePuedePublicarSinTitulo() {
         assertThrows(ReglaDominioException.class, () -> Presentacion.publicar("pres-1", "vendedor-1", null, null,
                 " ", TipoDePresentacion.MERCHANDISING, new Precio(15000, "COP"), new Cantidad(20, "unidad"),

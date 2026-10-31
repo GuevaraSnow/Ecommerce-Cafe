@@ -110,12 +110,12 @@ class ResenaControllerTest {
     }
 
     @Test
-    void dejarSinHaberRecibidoLaPresentacionResponde400ConElMensajeDelDominio() throws Exception {
+    void dejarSinHaberRecibidoLaPresentacionResponde422ConElMensajeDelDominio() throws Exception {
         given(dejarResena.ejecutar(any(), any(), any(), any(), any())).willThrow(
                 new ReglaDominioException("Solo puede resenar quien recibio la Presentacion"));
 
         mockMvc.perform(post("/api/resenas").contentType(MediaType.APPLICATION_JSON).content(RESENA))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("Solo puede resenar quien recibio la Presentacion"));
     }
 
@@ -163,13 +163,13 @@ class ResenaControllerTest {
     }
 
     @Test
-    void responderUnaResenaYaRespondidaResponde400() throws Exception {
+    void responderUnaResenaYaRespondidaResponde422() throws Exception {
         given(responderResena.ejecutar(any(), any(), any()))
                 .willThrow(new ReglaDominioException("La resena ya fue respondida"));
 
         mockMvc.perform(put("/api/resenas/resena-1/respuesta").with(token("vendedor-1", "TOSTADOR"))
                         .contentType(MediaType.APPLICATION_JSON).content(RESPUESTA))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("La resena ya fue respondida"));
     }
 

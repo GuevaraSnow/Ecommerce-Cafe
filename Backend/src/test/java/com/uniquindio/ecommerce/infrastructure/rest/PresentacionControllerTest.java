@@ -178,7 +178,7 @@ class PresentacionControllerTest {
     }
 
     @Test
-    void siElDominioRechazaLaPublicacionResponde400ConSuMensaje() throws Exception {
+    void siElDominioRechazaLaPublicacionResponde422ConSuMensaje() throws Exception {
         given(publicarArticulo.ejecutar(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .willThrow(new ReglaDominioException("Solo un Vendedor de Derivados puede publicar un Artículo de Merchandising"));
 
@@ -186,7 +186,7 @@ class PresentacionControllerTest {
                         .with(token("vendedor-1", "TOSTADOR"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publicarMerchandisingBody()))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("Solo un Vendedor de Derivados puede publicar un Artículo de Merchandising"));
     }
 
@@ -256,13 +256,13 @@ class PresentacionControllerTest {
     }
 
     @Test
-    void retirarMasStockDelDisponibleResponde400() throws Exception {
+    void retirarMasStockDelDisponibleResponde422() throws Exception {
         given(retirarStock.ejecutar(eq("pres-1"), any())).willThrow(new ReglaDominioException("Stock insuficiente"));
 
         mockMvc.perform(post("/api/presentaciones/pres-1/retiros")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"cantidad\": " + CANTIDAD + "}"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("Stock insuficiente"));
     }
 
@@ -283,11 +283,11 @@ class PresentacionControllerTest {
     }
 
     @Test
-    void pausarUnaPresentacionQueNoEstaActivaResponde400() throws Exception {
+    void pausarUnaPresentacionQueNoEstaActivaResponde422() throws Exception {
         given(pausar.ejecutar("pres-1")).willThrow(new ReglaDominioException("Solo una Presentación Activa puede pausarse"));
 
         mockMvc.perform(post("/api/presentaciones/pres-1/pausa"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("Solo una Presentación Activa puede pausarse"));
     }
 
@@ -348,12 +348,12 @@ class PresentacionControllerTest {
     }
 
     @Test
-    void programarUnDescuentoFueraDeRangoResponde400PorElDominio() throws Exception {
+    void programarUnDescuentoFueraDeRangoResponde422PorElDominio() throws Exception {
         mockMvc.perform(put("/api/presentaciones/pres-1/descuento")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"porcentaje": 90, "fechaInicio": "2026-12-01", "fechaFin": "2026-12-31"}"""))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("El porcentaje de descuento debe estar entre 1 y 50"));
     }
 
@@ -381,11 +381,11 @@ class PresentacionControllerTest {
     }
 
     @Test
-    void darDeBajaUnaPresentacionConComprasActivasResponde400() throws Exception {
+    void darDeBajaUnaPresentacionConComprasActivasResponde422() throws Exception {
         given(eliminar.ejecutar("pres-1")).willThrow(new ReglaDominioException("Tiene compras activas"));
 
         mockMvc.perform(delete("/api/presentaciones/pres-1"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("Tiene compras activas"));
     }
 }

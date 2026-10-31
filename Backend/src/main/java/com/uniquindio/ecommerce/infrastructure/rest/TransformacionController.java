@@ -54,7 +54,8 @@ public class TransformacionController {
     @Operation(summary = "Registrar una Transformación",
             description = "Solo un Tostador: procesa un Lote de café aplicando merma y generando café tostado.")
     @ApiResponse(responseCode = "201", description = "Transformación registrada; el Location apunta a ella")
-    @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos o regla de dominio incumplida")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Regla de dominio incumplida")
     @ApiResponse(responseCode = "401", description = "Sin token o token inválido")
     @ApiResponse(responseCode = "403", description = "El usuario no es Tostador")
     @ApiResponse(responseCode = "404", description = "No existe el Lote")

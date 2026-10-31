@@ -1,11 +1,13 @@
 package com.uniquindio.ecommerce.infrastructure.rest.exception;
 
+import com.uniquindio.ecommerce.Domain.exception.CredencialesInvalidasException;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +33,52 @@ class GlobalExceptionHandlerTest {
             .build();
 
     @Test
-    void unaReglaDeDominioVioladaResponde400ConSuMensaje() throws Exception {
+    void unaReglaDeDominioVioladaResponde422ConSuMensaje() throws Exception {
         mockMvc.perform(get("/prueba/regla"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.status").value(422))
                 .andExpect(jsonPath("$.mensaje").value("La cantidad no puede ser negativa"))
                 .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void unErrorInesperadoResponde500ConUnMensajeGenericoSinExponerElDetalle() throws Exception {
+        mockMvc.perform(get("/prueba/inesperado"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.mensaje").value("Ocurrió un error inesperado. Intenta de nuevo más tarde."))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void lasCredencialesInvalidasResponden401() throws Exception {
+        mockMvc.perform(get("/prueba/credenciales"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.mensaje").value("Credenciales inválidas."));
+    }
+
+    @Test
+    void unAccesoDenegadoPorLaSeguridadDeMetodoResponde403NoLoTapaElErrorInesperado() throws Exception {
+        mockMvc.perform(get("/prueba/prohibido"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.mensaje").value(GlobalExceptionHandler.MENSAJE_SIN_PERMISO));
+    }
+
+    @Test
+    void unMetodoNoPermitidoResponde405() throws Exception {
+        mockMvc.perform(post("/prueba/regla"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(jsonPath("$.mensaje").value("El método POST no está permitido en esta ruta"));
+    }
+
+    @Test
+    void unTipoDeContenidoNoSoportadoResponde415() throws Exception {
+        mockMvc.perform(post("/prueba/validar").contentType(MediaType.TEXT_PLAIN).content("hola"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.status").value(415));
     }
 
     @Test
@@ -107,6 +149,21 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/no-existe")
         void noExiste() {
             throw new NoSuchElementException("No value present");
+        }
+
+        @GetMapping("/inesperado")
+        void inesperado() {
+            throw new IllegalStateException("detalle interno que no debe llegar al cliente");
+        }
+
+        @GetMapping("/credenciales")
+        void credenciales() {
+            throw new CredencialesInvalidasException();
+        }
+
+        @GetMapping("/prohibido")
+        void prohibido() {
+            throw new AccessDeniedException("sin permiso");
         }
 
         @GetMapping("/numero")

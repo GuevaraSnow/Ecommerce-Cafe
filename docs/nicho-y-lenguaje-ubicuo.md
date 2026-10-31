@@ -3,13 +3,11 @@
 Programación Avanzada · Universidad del Quindío · 2026-2
 Grupo: Santiago Guevara · Santiago Ramírez Bernal · Joseph Cortés
 
-> **Versión 2 del glosario.** Actualiza el glosario entregado al inicio del curso para que coincida con
-> el modelo V3 (merma por humedad, Presentación Trazable / Artículo de Merchandising) y con el código
-> actual. Cambios: se agregan **Porcentaje de Merma**, **Origen de Presentación**, **Artículo de
-> Merchandising**, las variantes de compra (**Compra Física**, **Compra Digital**, **Precio Congelado**)
-> y los términos de los cursos virtuales (**Curso**, **Lección**, **Inscripción**); se separan
-> **Nota de Cata** (la escribe el vendedor) y **Reseña** (la escribe el comprador); los ejemplos de
-> código usan los métodos reales del dominio.
+> **Versión 3 del glosario.** Actualiza el glosario para que coincida con el código de la Entrega 2.
+> Cambios respecto de la versión 2: se **eliminaron los cursos virtuales** (Curso, Lección, Inscripción,
+> Compra Digital y el rol Formador) por estar fuera del alcance; **Comprador y Vendedor se unificaron en un
+> solo Usuario con Rol**; la **Compra es única** (carrito, confirmación, envío y entrega); el código del
+> **Lote lo genera el servidor**; y los ejemplos usan los métodos reales del dominio.
 
 ## Nicho
 
@@ -26,7 +24,8 @@ del grano).
   sin tostar (verde o pergamino) o grandes volúmenes tostados, y necesita trazabilidad exacta
   (finca, cosecha, proceso) para controlar sus curvas de tueste.
 
-**Roles de vendedor** (`RolVendedor`)
+**Usuario y Rol** (`Usuario`, `Rol`): hay un solo tipo de cuenta, el Usuario, y su Rol dice qué puede hacer.
+El **Comprador** compra, reseña y pide reembolsos; los otros tres roles venden:
 
 - **Caficultor:** dueño de la Finca. Publica su café sin tostar como Presentación (desde su Lote) o
   su propio café tostado, siempre en Perfil Tradicional.
@@ -34,7 +33,6 @@ del grano).
   especializados (Claro, Medio, Oscuro).
 - **Vendedor de Derivados:** usa café de la plataforma para derivados consumibles (miel, licor,
   cosméticos) y publica Artículos de Merchandising no alimenticios.
-- **Formador:** publica cursos virtuales (contenido digital). No publica Presentaciones físicas.
 
 ## Cadena de trazabilidad
 
@@ -71,9 +69,11 @@ Cosecha cosecha = new Cosecha(2026, TemporadaDeCosecha.TRAVIESA);
 
 ### Lote
 **Definición:** Cantidad de café recolectada en una misma Finca, Cosecha y Proceso de Beneficio.
-Se identifica por su Código de Lote (`LOT-AAAA-NNN`). No se vende como Lote al comprador final.
+Se identifica por su Código de Lote (`LOT-AAAA-NNN`), que genera el servidor: el año de registro y el
+siguiente número de ese año. No se vende como Lote al comprador final.
 **Reglas:** solo puede registrarse en estado Verde o Pergamino, nunca Tostado; su cantidad inicial
-es mayor que cero; nunca se borra físicamente (solo eliminación lógica).
+es mayor que cero; su Cosecha es del año de registro o del anterior; nunca se borra físicamente (solo
+eliminación lógica, que hace el Caficultor dueño de su Finca).
 **Ejemplo:** "LOT-2026-045": 200 kg de pergamino, proceso Lavado.
 ```java
 Lote lote = Lote.registrar(new CodigoDeLote("LOT-2026-045"), new Cantidad(200, "kg"), fincaId,
@@ -89,13 +89,13 @@ ProcesoDeBeneficio proceso = lote.getProcesoDeBeneficio(); // ProcesoDeBeneficio
 ```
 
 ### Transformación
-**Definición:** Tueste de uno o varios Lotes. Registra la cantidad de entrada (que se descuenta del
-Lote), el Porcentaje de Merma y la cantidad resultante de café tostado.
+**Definición:** Tueste de un Lote. Registra la cantidad de entrada (que se descuenta del Lote), el
+Porcentaje de Merma y la cantidad resultante de café tostado.
 **Reglas:** no puede usar más café del que tiene el Lote (regla C); la suma de lo publicado desde
 ella no puede superar su cantidad resultante.
 **Ejemplo:** "Café del Valle" tuesta 50 kg del Lote LOT-2026-045 con 18 % de merma y obtiene 41 kg.
 ```java
-Transformacion tueste = Transformacion.registrar(id, List.of("LOT-2026-045"), new Cantidad(50, "kg"),
+Transformacion tueste = Transformacion.registrar(id, "LOT-2026-045", new Cantidad(50, "kg"),
         new PorcentajeDeMerma(0.18), tostadorId, LocalDate.now(), PerfilTueste.MEDIO);
 ```
 
@@ -126,7 +126,7 @@ el café tostado no se publica ni se vende pasados 30 días desde su Fecha de Tu
 ```java
 Presentacion presentacion = Presentacion.publicar(id, vendedorId, null, transformacionId, titulo,
         TipoDePresentacion.CAFE_TOSTADO, precio, new Cantidad(10, "kg"), galeria,
-        PerfilTueste.MEDIO, RolVendedor.TOSTADOR, new FechaDeTueste(fechaTueste), null, null);
+        PerfilTueste.MEDIO, Rol.TOSTADOR, new FechaDeTueste(fechaTueste), null, null);
 ```
 
 ### Origen de Presentación
@@ -146,7 +146,7 @@ Se cuenta en unidades.
 ```java
 ArticuloDeMerchandising manilla = publicarArticulo.ejecutar(id, vendedorId, "Manilla de café", precio,
         new Cantidad(25, "unidad"), galeria, "semilla de café e hilo encerado", descripcion,
-        RolVendedor.VENDEDOR_DERIVADOS);
+        Rol.VENDEDOR_DERIVADOS);
 ```
 
 ### Nota de Cata
@@ -210,58 +210,23 @@ Compra carrito = Compra.abrirCarrito(compraId, compradorId);
 carrito.agregarPresentacion(presentacionId, presentacion.precioVigente(hoy), new Cantidad(2, "kg"));
 ```
 
-### Compra Digital
-**Definición:** Compra de un Curso. No tiene envío; al confirmarse deja una Inscripción. Una vez
-confirmada no se cancela: solo se deshace por reembolso del Curso.
-**Ejemplo:** un Comprador compra el curso "Latte Art desde cero".
-```java
-CompraDigital compra = CompraDigital.iniciar(compradorId, cursoId, curso.getPrecio());
-```
-
 ### Precio Congelado
-**Definición:** Precio de la Presentación (o del Curso) copiado en el momento de la compra. No cambia
+**Definición:** Precio de la Presentación copiado en el momento de la compra. No cambia
 aunque el vendedor modifique el precio después. Vive en el Detalle de Compra.
 **Ejemplo:** se compró a $28.000; si mañana sube a $30.000, la compra sigue en $28.000.
 ```java
 Precio pagado = detalle.precioCongelado();
 ```
 
-## Glosario — Cursos virtuales
-
-### Curso
-**Definición:** Contenido digital que publica un Formador, compuesto por Lecciones. No maneja stock ni
-frescura. Solo se publica si tiene al menos una Lección.
-**Ejemplo:** "Catación para principiantes", nivel Básico, temática Catación.
-```java
-Curso curso = Curso.crear(id, formadorId, titulo, descripcion, precio,
-        NivelDelCurso.BASICO, TematicaDelCurso.CATACION);
-```
-
-### Lección
-**Definición:** Unidad de contenido dentro de un Curso, con su Archivo Digital (PDF, MP4, ZIP) y
-Duración. Se ubica por su número de orden; insertar una Lección renumera las siguientes.
-**Ejemplo:** Lección 1, "Qué es una cata", video de 12 minutos.
-```java
-curso.insertarLeccion(1, "Qué es una cata", archivoDigital, new Duracion(12));
-```
-
-### Inscripción
-**Definición:** Acceso de un Comprador a un Curso, originado por una Compra Digital. Registra el primer
-acceso; solo se reembolsa dentro de 48 horas y antes de acceder al contenido.
-**Ejemplo:** Ana compra el curso y lo puede pedir de vuelta mientras no abra ninguna Lección.
-```java
-boolean puedePedirReembolso = inscripcion.puedeReembolsarse();
-```
-
 ## Anti-patrones (términos a evitar)
 
 | No usar | Usar |
 | --- | --- |
-| "Producto" (genérico) | "Presentación" (o "Curso" si es contenido digital) |
-| "Vendedor" cuando el rol importa para la regla | "Caficultor", "Tostador", "Vendedor de Derivados" o "Formador" (`RolVendedor`) |
+| "Producto" (genérico) | "Presentación" |
+| "Vendedor" o "Comprador" como si fueran cuentas distintas | "Usuario" con un `Rol`; y cuando el rol importa para la regla, "Caficultor", "Tostador", "Vendedor de Derivados" o "Comprador" |
 | "Borrar Lote / Presentación" | "Eliminación lógica" / "dar de baja" |
 | "Nota de Cata" para la opinión del comprador | "Reseña" (calificación y comentario del Comprador); la Nota de Cata la escribe el vendedor |
 | "Trazabilidad" (como objeto) | "Ficha de Origen" |
 | "Producto sin trazabilidad" | "Artículo de Merchandising" |
-| "Cancelar un curso" ya confirmado | "Reembolso del Curso" (revoca la Inscripción); cancelar solo aplica a una Compra pendiente o no enviada |
+| "Cancelar" una Compra ya enviada | Solo se cancela una Compra pendiente o confirmada que no se haya enviado; después aplica el "Reembolso" |
 | `presentacion.setLote(lote)` | La Presentación *proviene de* un Lote: se expresa con `OrigenDePresentacion` |

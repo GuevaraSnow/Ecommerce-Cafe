@@ -19,10 +19,11 @@ La única forma de crear una Presentación es el factory `Presentacion.publicar(
 (identidad, vendedor, título, precio, cantidad, galería y rol) y delega en el `publicar(...)` de la
 subclase que corresponde según `TipoDePresentacion`, que valida sus propias reglas.
 
-**Sobre `rolVendedor`.** Los `publicar(...)` reciben `rolVendedor : RolVendedor` (CAFICULTOR, TOSTADOR,
-VENDEDOR_DERIVADOS, FORMADOR). No es un atributo de la Presentación: el rol pertenece al Vendedor, que está
-**fuera del agregado**, así que solo entra como dato de validación al publicar (reglas A, FORMADOR no
-publica y solo VENDEDOR_DERIVADOS publica Merchandising) y no se guarda.
+**Sobre `rolVendedor`.** Los `publicar(...)` reciben `rolVendedor : Rol` (COMPRADOR, CAFICULTOR, TOSTADOR,
+VENDEDOR_DERIVADOS). No es un atributo de la Presentación: el rol pertenece al Usuario, que está
+**fuera del agregado**, así que solo entra como dato de validación al publicar (regla A, un COMPRADOR no
+publica y solo VENDEDOR_DERIVADOS publica Merchandising) y no se guarda. Ese rol no lo dice el cliente:
+`ServicioDePublicacion` lo toma del Usuario real que publica.
 
 ## Invariantes
 
@@ -46,7 +47,7 @@ publica y solo VENDEDOR_DERIVADOS publica Merchandising) y no se guarda.
 
 4. **Los perfiles de tueste especializados (`CLARO`, `MEDIO`, `OSCURO`) solo puede publicarlos un
    `TOSTADOR`; cualquier otro rol que publique café tostado siempre lo hace en `TRADICIONAL`**
-   (regla A). El café sin tostar no lleva perfil. Un `FORMADOR` nunca puede publicar
+   (regla A). El café sin tostar no lleva perfil. Un `COMPRADOR` nunca puede publicar
    Presentaciones, y solo un `VENDEDOR_DERIVADOS` puede publicar un Artículo de Merchandising.
 
 5. **Un Artículo de Merchandising siempre se cuenta en `unidad` y siempre debe tener material y
@@ -95,7 +96,7 @@ para el negocio, y cualquier método posterior falla en `validarNoEliminada()`.
 
 | Entidad | Referencia |
 | --- | --- |
-| `Vendedor` | `vendedorId` |
+| `Usuario` (el vendedor) | `vendedorId` |
 | `Lote` | `origen.loteId` |
 | `Transformación` | `origen.transformacionId` |
 | `Compra` | la Compra guarda `presentacionId` en su `DetalleDeCompra` |
@@ -111,8 +112,8 @@ Cada método de negocio de la raíz se guarda en **una única transacción** y d
 Cuando una regla cruza agregados, la resuelve un **Domain Service** (`Domain/service`, sin anotaciones
 de Spring); el caso de uso solo lo llama y guarda, sin `if` de negocio.
 
-- **`ServicioDePublicacion`**: al publicar una Presentación Trazable busca su Origen y le descuenta la
-  cantidad publicada. Si es café sin tostar, verifica que el **Lote** exista y llama a
+- **`ServicioDePublicacion`**: al publicar busca al Usuario real para tomar su Rol y, si la Presentación es
+  Trazable, busca su Origen y le descuenta la cantidad publicada. Si es café sin tostar, verifica que el **Lote** exista y llama a
   `Lote.descontar()`; si es tostado o derivado, verifica que la **Transformación** exista, que el
   perfil de tueste coincida y llama a `Transformacion.asignarCantidad()`. Así nunca se publica más
   café del que tiene el origen, y si el origen no existe o no alcanza, la Presentación no se crea.

@@ -32,7 +32,7 @@ import java.util.UUID;
  * Operaciones que crean o modifican una Reseña: un endpoint por operación del dominio.
  *
  * <p>Quién actúa sale del token. Que el Comprador haya recibido la Presentación, que no la haya reseñado antes,
- * y que solo el vendedor dueño responda una sola vez, lo valida el dominio (responde 400 si no se cumple).
+ * y que solo el vendedor dueño responda una sola vez, lo valida el dominio (responde 422 si no se cumple).
  */
 @RestController
 @RequestMapping("/api/resenas")
@@ -53,7 +53,8 @@ public class ResenaController {
     @Operation(summary = "Dejar una reseña",
             description = "Calificación de 1 a 5 y comentario; solo si el Comprador recibió la Presentación y una sola vez.")
     @ApiResponse(responseCode = "201", description = "Reseña creada; el Location apunta a ella")
-    @ApiResponse(responseCode = "400", description = "Datos mal formados, sin compra entregada o ya reseñada")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Sin compra entregada o ya reseñada")
     @ApiResponse(responseCode = "404", description = "No existe la Presentación")
     public ResponseEntity<ResenaResponse> dejar(@AuthenticationPrincipal Jwt token,
                                                 @Valid @RequestBody DejarResenaRequest request) {
@@ -67,7 +68,7 @@ public class ResenaController {
     @PutMapping("/{id}/respuesta")
     @PreAuthorize(VENDEDOR)
     @Operation(summary = "Responder una reseña", description = "Solo el vendedor dueño de la Presentación, una sola vez.")
-    @ApiResponse(responseCode = "400", description = "Respuesta vacía, no es el vendedor dueño o ya se respondió")
+    @ApiResponse(responseCode = "422", description = "Respuesta vacía, no es el vendedor dueño o ya se respondió")
     @ApiResponse(responseCode = "404", description = "No existe la reseña")
     public ResenaResponse responder(@PathVariable String id, @AuthenticationPrincipal Jwt token,
                                     @Valid @RequestBody ResponderResenaRequest request) {

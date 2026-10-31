@@ -76,6 +76,9 @@ public abstract class Presentacion {
         if (rolVendedor == null) {
             throw new ReglaDominioException("La Presentación debe indicar el Rol del Vendedor que la publica");
         }
+        if (rolVendedor == Rol.COMPRADOR) {
+            throw new ReglaDominioException("Un usuario con rol COMPRADOR no está autorizado para publicar presentaciones.");
+        }
         if (tipoPresentacion == TipoDePresentacion.MERCHANDISING) {
             if (rolVendedor != Rol.VENDEDOR_DERIVADOS) {
                 throw new ReglaDominioException("Solo un Vendedor de Derivados puede publicar un Artículo de Merchandising");

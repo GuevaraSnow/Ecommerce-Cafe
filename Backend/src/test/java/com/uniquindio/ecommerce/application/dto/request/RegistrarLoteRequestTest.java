@@ -3,7 +3,6 @@ package com.uniquindio.ecommerce.application.dto.request;
 import com.uniquindio.ecommerce.Domain.valueobject.EstadoDelCafe;
 import com.uniquindio.ecommerce.Domain.valueobject.ProcesoDeBeneficio;
 import com.uniquindio.ecommerce.Domain.valueobject.TemporadaDeCosecha;
-import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest.CantidadRequest;
 import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest.CosechaRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -36,6 +35,15 @@ class RegistrarLoteRequestTest {
     @Test
     void unRequestCompletoNoTieneViolaciones() {
         assertTrue(camposInvalidos(requestValido()).isEmpty());
+    }
+
+    @Test
+    void laCantidadCompartidaExigeUnValorMayorQueCero() {
+        RegistrarLoteRequest conValorNegativo = new RegistrarLoteRequest(new CantidadRequest(-1.0, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new CosechaRequest(2026, TemporadaDeCosecha.TRAVIESA), "Caturra");
+
+        assertEquals(Set.of("cantidad.valor"), camposInvalidos(conValorNegativo));
     }
 
     @Test

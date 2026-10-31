@@ -51,7 +51,8 @@ public class FincaController {
     @PreAuthorize(CAFICULTOR)
     @Operation(summary = "Registrar una Finca", description = "Solo un Caficultor; la Finca queda a su nombre.")
     @ApiResponse(responseCode = "201", description = "Finca registrada; el Location apunta a su consulta")
-    @ApiResponse(responseCode = "400", description = "Datos de finca inválidos")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Datos de la finca que incumplen sus reglas")
     @ApiResponse(responseCode = "401", description = "Sin token o token inválido")
     @ApiResponse(responseCode = "403", description = "El usuario no es Caficultor")
     public ResponseEntity<FincaResponse> registrar(@AuthenticationPrincipal Jwt token,
