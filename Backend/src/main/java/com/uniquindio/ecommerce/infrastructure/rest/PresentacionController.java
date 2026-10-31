@@ -85,7 +85,8 @@ public class PresentacionController {
     @Operation(summary = "Publicar una Presentación trazable",
             description = "Café verde, tostado o derivado consumible, siempre con Origen (Lote o Transformación).")
     @ApiResponse(responseCode = "201", description = "Presentación publicada; el Location apunta a su detalle")
-    @ApiResponse(responseCode = "400", description = "Datos mal formados o regla de negocio violada")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Regla de negocio violada")
     public ResponseEntity<PresentacionResponse> publicar(
             @AuthenticationPrincipal Jwt token,
             @Valid @RequestBody PublicarPresentacionRequest request) {
@@ -102,7 +103,8 @@ public class PresentacionController {
     @Operation(summary = "Publicar un Artículo de Merchandising",
             description = "Solo el Vendedor de Derivados; sin Origen ni datos de tueste.")
     @ApiResponse(responseCode = "201", description = "Artículo publicado; el Location apunta a su detalle")
-    @ApiResponse(responseCode = "400", description = "Datos mal formados o regla de negocio violada")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Regla de negocio violada")
     public ResponseEntity<PresentacionResponse> publicarMerchandising(
             @AuthenticationPrincipal Jwt token,
             @Valid @RequestBody PublicarArticuloMerchandisingRequest request) {

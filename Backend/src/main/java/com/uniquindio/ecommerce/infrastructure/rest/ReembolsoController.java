@@ -33,7 +33,7 @@ import java.util.UUID;
  * recibe, valida la forma, delega en el caso de uso, mapea y responde.
  *
  * <p>Quién actúa sale del token. Que la Compra sea del Comprador, que esté entregada y dentro de 48 h, y que
- * solo el vendedor dueño de la Presentación resuelva, lo valida el dominio (responde 400 si no se cumple).
+ * solo el vendedor dueño de la Presentación resuelva, lo valida el dominio (responde 422 si no se cumple).
  */
 @RestController
 @RequestMapping("/api/reembolsos")
@@ -55,7 +55,8 @@ public class ReembolsoController {
     @Operation(summary = "Solicitar el reembolso de una Presentación",
             description = "Solo sobre una Compra propia, entregada y dentro de las 48 h siguientes a la entrega.")
     @ApiResponse(responseCode = "201", description = "Solicitud creada; el Location apunta a ella")
-    @ApiResponse(responseCode = "400", description = "Datos mal formados, fuera de plazo, compra ajena o ya solicitado")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Fuera de plazo, compra ajena o ya solicitado")
     @ApiResponse(responseCode = "404", description = "No existe la Compra o la Presentación")
     public ResponseEntity<ReembolsoResponse> solicitar(@AuthenticationPrincipal Jwt token,
                                                        @Valid @RequestBody SolicitarReembolsoRequest request) {
@@ -70,7 +71,7 @@ public class ReembolsoController {
     @PreAuthorize(VENDEDOR)
     @Operation(summary = "Aprobar una solicitud de reembolso",
             description = "Solo el vendedor dueño de la Presentación. Si se aprueban todas, la Compra queda REEMBOLSADA.")
-    @ApiResponse(responseCode = "400", description = "No es el vendedor dueño o la solicitud ya se resolvió")
+    @ApiResponse(responseCode = "422", description = "No es el vendedor dueño o la solicitud ya se resolvió")
     @ApiResponse(responseCode = "404", description = "No existe la solicitud")
     public ReembolsoResponse aprobar(@PathVariable String id, @AuthenticationPrincipal Jwt token) {
         return mapper.toResponse(aprobarReembolso.ejecutar(id, token.getSubject()));
@@ -79,7 +80,7 @@ public class ReembolsoController {
     @PutMapping("/{id}/rechazar")
     @PreAuthorize(VENDEDOR)
     @Operation(summary = "Rechazar una solicitud de reembolso", description = "Solo el vendedor dueño de la Presentación.")
-    @ApiResponse(responseCode = "400", description = "No es el vendedor dueño o la solicitud ya se resolvió")
+    @ApiResponse(responseCode = "422", description = "No es el vendedor dueño o la solicitud ya se resolvió")
     @ApiResponse(responseCode = "404", description = "No existe la solicitud")
     public ReembolsoResponse rechazar(@PathVariable String id, @AuthenticationPrincipal Jwt token) {
         return mapper.toResponse(rechazarReembolso.ejecutar(id, token.getSubject()));

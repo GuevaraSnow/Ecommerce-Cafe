@@ -125,9 +125,9 @@ class SeguridadLoteTest {
     }
 
     @Test
-    void darDeBajaConUnCodigoInvalidoResponde400() throws Exception {
+    void darDeBajaConUnCodigoInvalidoResponde422() throws Exception {
         mockMvc.perform(delete("/api/lotes/ABC")
                         .with(usuario("usr-caficultor", "CAFICULTOR")))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 }

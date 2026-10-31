@@ -192,12 +192,12 @@ class FlujoCompletoE2ETest {
         // Sin token: 401
         mockMvc.perform(post("/api/compras")).andExpect(status().isUnauthorized());
 
-        // Confirmar un carrito vacío rompe una regla del dominio: 400
+        // Confirmar un carrito vacío rompe una regla del dominio: 422
         mockMvc.perform(conToken(put("/api/compras/{id}/confirmar", compraId), comprador)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"ciudad": "Armenia", "direccion": "Cra 14 # 10-20", "destinatario": "Andres"}"""))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("No se puede confirmar una compra sin detalles"));
 
         // Agregar una Presentación que no existe: 404
@@ -207,12 +207,12 @@ class FlujoCompletoE2ETest {
                                 {"presentacionId": "pres-no-existe", "cantidad": {"valor": 1, "unidad": "unidad"}}"""))
                 .andExpect(status().isNotFound());
 
-        // Reseñar sin haber recibido la Presentación: 400
+        // Reseñar sin haber recibido la Presentación: 422
         mockMvc.perform(conToken(post("/api/resenas"), comprador)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"presentacionId": "pres-taza-1", "calificacion": 5, "texto": "Nunca la compre"}"""))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
 
         // Un comprador no puede marcar una compra como enviada: 403
         mockMvc.perform(conToken(put("/api/compras/{id}/enviar", compraId), comprador))

@@ -48,7 +48,7 @@ public class LoteController {
     @Operation(summary = "Consultar un Lote",
             description = "Busca un Lote por su código (formato LOT-AAAA-NNN).")
     @ApiResponse(responseCode = "200", description = "Lote encontrado")
-    @ApiResponse(responseCode = "400", description = "El código no tiene el formato LOT-AAAA-NNN")
+    @ApiResponse(responseCode = "422", description = "El código no tiene el formato LOT-AAAA-NNN")
     @ApiResponse(responseCode = "404", description = "No existe un Lote con ese código")
     public ResponseEntity<LoteResponse> consultarLote(@PathVariable String codigoDeLote) {
         Lote lote = consultarLote.ejecutar(loteMapper.toCodigoDeLote(codigoDeLote));
@@ -60,7 +60,8 @@ public class LoteController {
     @Operation(summary = "Registrar un Lote",
             description = "El servidor genera el código consecutivo del año (LOT-AAAA-NNN).")
     @ApiResponse(responseCode = "201", description = "Lote registrado; el Location apunta a su consulta")
-    @ApiResponse(responseCode = "400", description = "Datos mal formados o regla de negocio violada")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Regla de negocio violada")
     public ResponseEntity<LoteResponse> registrarLote(@Valid @RequestBody RegistrarLoteRequest request) {
         Lote lote = registrarLote.ejecutar(
                 loteMapper.toCantidad(request.cantidad()),
@@ -85,7 +86,7 @@ public class LoteController {
             description = "Baja lógica: el Lote sigue existiendo para la trazabilidad, pero ya no se puede usar. "
                     + "Solo el Caficultor dueño de su Finca.")
     @ApiResponse(responseCode = "204", description = "Lote dado de baja")
-    @ApiResponse(responseCode = "400", description = "El código no tiene el formato LOT-AAAA-NNN")
+    @ApiResponse(responseCode = "422", description = "El código no tiene el formato LOT-AAAA-NNN")
     @ApiResponse(responseCode = "403", description = "El Lote es de otro Caficultor")
     @ApiResponse(responseCode = "404", description = "No existe un Lote con ese código")
     public ResponseEntity<Void> eliminarLote(@PathVariable String codigoDeLote) {

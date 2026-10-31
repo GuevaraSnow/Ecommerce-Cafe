@@ -109,10 +109,10 @@ class LoteControllerTest {
     }
 
     @Test
-    void getCodigoInvalidoLoteDevuelve400() throws Exception {
+    void getCodigoInvalidoLoteDevuelve422() throws Exception {
         mockMvc.perform(get("/api/lotes/ABC"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.status").value(422))
                 .andExpect(jsonPath("$.mensaje").value("Código de Lote inválido: ABC"));
 
         verify(consultarLote, never()).ejecutar(any());
@@ -142,7 +142,7 @@ class LoteControllerTest {
     }
 
     @Test
-    void postUnCampoRompeUnaReglaDeNegocioDevuelve400() throws Exception {
+    void postUnCampoRompeUnaReglaDeNegocioDevuelve422() throws Exception {
         String jsonCantidadNegativa = """
                 {
                   "cantidad": { "valor": -100, "unidad": "kg" },
@@ -157,9 +157,9 @@ class LoteControllerTest {
         mockMvc.perform(post("/api/lotes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonCantidadNegativa))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(header().doesNotExist("Location"))
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.status").value(422))
                 .andExpect(jsonPath("$.mensaje").value("La Cantidad no puede ser negativa: -100.0"));
 
         verify(registrarLote, never()).ejecutar(any(),any(),any(),any(),any(),any());
@@ -187,10 +187,10 @@ class LoteControllerTest {
     }
 
     @Test
-    void deleteConUnCodigoInvalidoDevuelve400SinLlamarAlCasoDeUso() throws Exception {
+    void deleteConUnCodigoInvalidoDevuelve422SinLlamarAlCasoDeUso() throws Exception {
         mockMvc.perform(delete("/api/lotes/ABC"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.status").value(422))
                 .andExpect(jsonPath("$.mensaje").value("Código de Lote inválido: ABC"));
 
         verify(eliminarLote, never()).ejecutar(any());

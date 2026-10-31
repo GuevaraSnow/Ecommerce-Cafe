@@ -109,12 +109,12 @@ class ReembolsoControllerTest {
     }
 
     @Test
-    void solicitarFueraDelPlazoResponde400ConElMensajeDelDominio() throws Exception {
+    void solicitarFueraDelPlazoResponde422ConElMensajeDelDominio() throws Exception {
         given(solicitarReembolso.ejecutar(any(), any(), any(), any(), any()))
                 .willThrow(new ReglaDominioException("El plazo de 48 horas para pedir el reembolso ya vencio"));
 
         mockMvc.perform(post("/api/reembolsos").contentType(MediaType.APPLICATION_JSON).content(SOLICITUD))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("El plazo de 48 horas para pedir el reembolso ya vencio"));
     }
 
@@ -160,12 +160,12 @@ class ReembolsoControllerTest {
     }
 
     @Test
-    void otroVendedorNoPuedeAprobarYResponde400ConElMensajeDelDominio() throws Exception {
+    void otroVendedorNoPuedeAprobarYResponde422ConElMensajeDelDominio() throws Exception {
         given(aprobarReembolso.ejecutar("reembolso-1", "vendedor-2")).willThrow(
                 new ReglaDominioException("Solo el vendedor dueno de la presentacion puede resolver su reembolso"));
 
         mockMvc.perform(put("/api/reembolsos/reembolso-1/aprobar").with(token("vendedor-2", "CAFICULTOR")))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("Solo el vendedor dueno de la presentacion puede resolver su reembolso"));
     }
 
@@ -199,12 +199,12 @@ class ReembolsoControllerTest {
     }
 
     @Test
-    void rechazarUnaSolicitudYaResueltaResponde400() throws Exception {
+    void rechazarUnaSolicitudYaResueltaResponde422() throws Exception {
         given(rechazarReembolso.ejecutar("reembolso-1", "vendedor-1")).willThrow(
                 new ReglaDominioException("Solo se puede resolver una Solicitud de Reembolso que este SOLICITADA"));
 
         mockMvc.perform(put("/api/reembolsos/reembolso-1/rechazar").with(token("vendedor-1", "TOSTADOR")))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value(containsString("SOLICITADA")));
     }
 

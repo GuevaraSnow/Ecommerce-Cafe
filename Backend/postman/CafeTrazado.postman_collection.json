@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Café Trazado - Flujo de compra",
-    "description": "Flujo completo de Compra, Reseña y Reembolso, más casos de error 400/401/403/404. Correr en orden con el Runner de Postman, con el backend arriba en {{baseUrl}}. Cada corrida registra usuarios nuevos, así que se puede repetir.",
+    "description": "Flujo completo de Compra, Reseña y Reembolso, más casos de error 400/401/403/404/422 (400: datos mal formados; 422: regla de negocio violada). Correr en orden con el Runner de Postman, con el backend arriba en {{baseUrl}}. Cada corrida registra usuarios nuevos, así que se puede repetir.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -869,7 +869,7 @@
       ]
     },
     {
-      "name": "6. Errores (400, 401, 403, 404)",
+      "name": "6. Errores (400, 401, 403, 404, 422)",
       "item": [
         {
           "name": "400 - registro con email inválido",
@@ -972,14 +972,14 @@
           }
         },
         {
-          "name": "400 - reseñar dos veces la misma Presentación",
+          "name": "422 - reseñar dos veces la misma Presentación",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));"
+                  "pm.test(\"Responde 422\", () => pm.response.to.have.status(422));"
                 ]
               }
             }
@@ -1024,14 +1024,14 @@
           }
         },
         {
-          "name": "400 - pedir otra vez un reembolso aprobado",
+          "name": "422 - pedir otra vez un reembolso aprobado",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));"
+                  "pm.test(\"Responde 422\", () => pm.response.to.have.status(422));"
                 ]
               }
             }

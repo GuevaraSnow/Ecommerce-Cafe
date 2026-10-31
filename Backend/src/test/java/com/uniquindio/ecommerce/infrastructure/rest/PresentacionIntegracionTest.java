@@ -161,7 +161,7 @@ class PresentacionIntegracionTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"precio": {"monto": 20000, "moneda": "COP"}}"""))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("No se puede operar sobre una Presentación dada de baja"));
     }
 
@@ -182,12 +182,12 @@ class PresentacionIntegracionTest {
     }
 
     @Test
-    void publicarConUnRolQueNoPuedePublicarMerchandisingResponde400YNoGuardaNada() throws Exception {
+    void publicarConUnRolQueNoPuedePublicarMerchandisingResponde422YNoGuardaNada() throws Exception {
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .with(vendedor("usr-tostador", "TOSTADOR"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(ARTICULO))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
 
         mockMvc.perform(get("/api/presentaciones").param("titulo", "posavasos"))
                 .andExpect(jsonPath("$.totalElementos").value(0));

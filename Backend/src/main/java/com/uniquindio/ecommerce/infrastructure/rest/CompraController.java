@@ -75,7 +75,8 @@ public class CompraController {
     @PreAuthorize(COMPRADOR + " and " + ES_DEL_COMPRADOR)
     @Operation(summary = "Agregar una Presentación al carrito",
             description = "Congela el precio vigente; el stock se verifica pero se descuenta al confirmar.")
-    @ApiResponse(responseCode = "400", description = "Datos mal formados, stock insuficiente o la Compra ya no es un carrito")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Stock insuficiente o la Compra ya no es un carrito")
     @ApiResponse(responseCode = "404", description = "No existe la Compra o la Presentación")
     public CompraResponse agregarAlCarrito(@PathVariable String id,
                                            @Valid @RequestBody AgregarAlCarritoRequest request) {
@@ -87,7 +88,8 @@ public class CompraController {
     @PreAuthorize(COMPRADOR + " and " + ES_DEL_COMPRADOR)
     @Operation(summary = "Confirmar la Compra",
             description = "Fija la dirección de envío, descuenta el stock (todo o nada) y envía el correo de confirmación.")
-    @ApiResponse(responseCode = "400", description = "Dirección inválida, carrito vacío, stock insuficiente o ya confirmada")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Dirección inválida, carrito vacío, stock insuficiente o ya confirmada")
     @ApiResponse(responseCode = "404", description = "No existe la Compra")
     public CompraResponse confirmar(@PathVariable String id, @Valid @RequestBody DireccionDeEnvioRequest request) {
         return mapper.toResponse(confirmarCompra.ejecutar(id, mapper.toDireccionDeEnvio(request)));
@@ -96,7 +98,7 @@ public class CompraController {
     @PutMapping("/{id}/cancelar")
     @PreAuthorize(COMPRADOR + " and " + ES_DEL_COMPRADOR)
     @Operation(summary = "Cancelar la Compra", description = "Solo antes del envío; si ya estaba confirmada repone el stock.")
-    @ApiResponse(responseCode = "400", description = "La Compra ya fue enviada o cancelada")
+    @ApiResponse(responseCode = "422", description = "La Compra ya fue enviada o cancelada")
     @ApiResponse(responseCode = "404", description = "No existe la Compra")
     public CompraResponse cancelar(@PathVariable String id) {
         return mapper.toResponse(cancelarCompra.ejecutar(id));
@@ -105,7 +107,7 @@ public class CompraController {
     @PutMapping("/{id}/enviar")
     @PreAuthorize(ES_VENDEDOR)
     @Operation(summary = "Marcar la Compra como enviada", description = "Solo una Compra confirmada.")
-    @ApiResponse(responseCode = "400", description = "La Compra no está confirmada")
+    @ApiResponse(responseCode = "422", description = "La Compra no está confirmada")
     @ApiResponse(responseCode = "404", description = "No existe la Compra")
     public CompraResponse enviar(@PathVariable String id) {
         return mapper.toResponse(marcarEnviada.ejecutar(id));
@@ -115,7 +117,7 @@ public class CompraController {
     @PreAuthorize(ES_VENDEDOR)
     @Operation(summary = "Marcar la Compra como entregada",
             description = "Solo una Compra enviada; desde ese momento corren las 48 h para pedir reembolso.")
-    @ApiResponse(responseCode = "400", description = "La Compra no fue enviada")
+    @ApiResponse(responseCode = "422", description = "La Compra no fue enviada")
     @ApiResponse(responseCode = "404", description = "No existe la Compra")
     public CompraResponse entregar(@PathVariable String id) {
         return mapper.toResponse(marcarEntregada.ejecutar(id));

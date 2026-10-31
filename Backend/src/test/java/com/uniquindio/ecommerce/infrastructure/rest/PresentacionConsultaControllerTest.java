@@ -128,9 +128,9 @@ class PresentacionConsultaControllerTest {
     }
 
     @Test
-    void buscarConUnaCalificacionMinimaFueraDeRangoResponde400PorElDominio() throws Exception {
+    void buscarConUnaCalificacionMinimaFueraDeRangoResponde422PorElDominio() throws Exception {
         mockMvc.perform(get("/api/presentaciones").param("calificacionMinima", "6"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("La calificación mínima debe estar entre 1 y 5: 6.0"));
 
         verify(buscarPresentaciones, never()).ejecutar(any(), anyInt(), anyInt());
@@ -162,9 +162,9 @@ class PresentacionConsultaControllerTest {
     }
 
     @Test
-    void buscarConElPrecioMinimoMayorQueElMaximoResponde400PorElDominio() throws Exception {
+    void buscarConElPrecioMinimoMayorQueElMaximoResponde422PorElDominio() throws Exception {
         mockMvc.perform(get("/api/presentaciones").param("precioMinimo", "50000").param("precioMaximo", "1000"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("El precio mínimo no puede ser mayor que el máximo"));
     }
 
