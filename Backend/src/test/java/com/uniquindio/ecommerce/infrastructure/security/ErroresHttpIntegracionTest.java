@@ -32,8 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class ErroresHttpIntegracionTest {
 
-    private static final String LOTE_CON_CANTIDAD_NEGATIVA = """
-            {"cantidad": {"valor": -5, "unidad": "kg"}, "fincaId": "finca-001", "procesoDeBeneficio": "Lavado",
+    private static final String LOTE_CON_UNIDAD_INVALIDA = """
+            {"cantidad": {"valor": 5, "unidad": "toneladas"}, "fincaId": "finca-001", "procesoDeBeneficio": "Lavado",
              "estado": "PERGAMINO", "cosecha": {"anio": 2026, "temporada": "PRINCIPAL"}, "variedad": "Caturra"}""";
 
     @Autowired
@@ -73,7 +73,7 @@ class ErroresHttpIntegracionTest {
     @Test
     void unRolSinPermisoResponde403ConElCuerpoJsonDeError() throws Exception {
         mockMvc.perform(post("/api/lotes").with(usuario("usr-ana", "COMPRADOR"))
-                        .contentType(MediaType.APPLICATION_JSON).content(LOTE_CON_CANTIDAD_NEGATIVA))
+                        .contentType(MediaType.APPLICATION_JSON).content(LOTE_CON_UNIDAD_INVALIDA))
                 .andExpect(status().isForbidden())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(403))
@@ -83,10 +83,10 @@ class ErroresHttpIntegracionTest {
     @Test
     void unaReglaDeNegocioRotaResponde422ConSuMensaje() throws Exception {
         mockMvc.perform(post("/api/lotes").with(usuario("usr-caficultor", "CAFICULTOR"))
-                        .contentType(MediaType.APPLICATION_JSON).content(LOTE_CON_CANTIDAD_NEGATIVA))
+                        .contentType(MediaType.APPLICATION_JSON).content(LOTE_CON_UNIDAD_INVALIDA))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.status").value(422))
-                .andExpect(jsonPath("$.mensaje").value("La Cantidad no puede ser negativa: -5.0"));
+                .andExpect(jsonPath("$.mensaje").value("Unidad de Cantidad inválida: toneladas"));
     }
 
     @Test
