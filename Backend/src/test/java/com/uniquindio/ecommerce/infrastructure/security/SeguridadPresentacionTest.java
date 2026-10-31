@@ -172,7 +172,7 @@ class SeguridadPresentacionTest {
 
     @Test
     void unTokenRealEmitidoPorElServicioPermitePublicar() throws Exception {
-        String token = jwtService.generarToken("usr-derivados", Rol.VENDEDOR_DERIVADOS);
+        String token = jwtService.generarToken("usr-derivados", "valeria@derivados.com", Rol.VENDEDOR_DERIVADOS);
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -183,7 +183,7 @@ class SeguridadPresentacionTest {
 
     @Test
     void unTokenRealDeOtroVendedorNoPuedeModificarUnaPresentacionAjena() throws Exception {
-        String token = jwtService.generarToken("usr-tostador", Rol.TOSTADOR);
+        String token = jwtService.generarToken("usr-tostador", "teresa@tueste.com", Rol.TOSTADOR);
 
         mockMvc.perform(put("/api/presentaciones/pres-taza-1/precio")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -193,7 +193,7 @@ class SeguridadPresentacionTest {
 
     @Test
     void unTokenVencidoResponde401() throws Exception {
-        String vencido = jwtService.generarToken("usr-derivados", Rol.VENDEDOR_DERIVADOS,
+        String vencido = jwtService.generarToken("usr-derivados", "valeria@derivados.com", Rol.VENDEDOR_DERIVADOS,
                 Instant.now().minusSeconds(2 * 60 * 60));
 
         mockMvc.perform(post("/api/presentaciones/merchandising")
