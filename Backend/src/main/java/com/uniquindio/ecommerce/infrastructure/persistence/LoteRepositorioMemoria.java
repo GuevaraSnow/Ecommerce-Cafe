@@ -17,6 +17,11 @@ public class LoteRepositorioMemoria implements LoteRepositorio {
     }
 
     @Override
+    public Optional<Lote> buscarNoEliminadoPorCodigo(CodigoDeLote codigo) {
+        return buscarPorCodigo(codigo).filter(lote -> !lote.isEliminadoLogicamente());
+    }
+
+    @Override
     public void guardar(Lote lote) {
         lotes.put(lote.getCodigoDeLote().valor(), lote);
     }

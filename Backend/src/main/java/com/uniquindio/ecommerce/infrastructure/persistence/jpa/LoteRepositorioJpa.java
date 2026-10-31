@@ -26,6 +26,11 @@ public class LoteRepositorioJpa implements LoteRepositorio {
     }
 
     @Override
+    public Optional<Lote> buscarNoEliminadoPorCodigo(CodigoDeLote codigo) {
+        return dataRepository.findByCodigoDeLoteAndEliminadoLogicamenteFalse(codigo.valor()).map(mapper::toDomain);
+    }
+
+    @Override
     public void guardar(Lote lote) {
         dataRepository.save(mapper.toEntity(lote));
     }

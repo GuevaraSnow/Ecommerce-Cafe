@@ -9,6 +9,12 @@ public interface LoteRepositorio {
 
     Optional<Lote> buscarPorCodigo(CodigoDeLote codigo);
 
+    /**
+     * Como {@link #buscarPorCodigo}, pero sin los Lotes dados de baja: para la consulta pública, que no debe
+     * mostrarlos. La trazabilidad (la Ficha de Origen) y la baja siguen usando {@code buscarPorCodigo}.
+     */
+    Optional<Lote> buscarNoEliminadoPorCodigo(CodigoDeLote codigo);
+
     void guardar(Lote lote);
 
     /**

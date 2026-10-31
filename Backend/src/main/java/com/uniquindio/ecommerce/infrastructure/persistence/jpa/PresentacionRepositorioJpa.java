@@ -32,6 +32,11 @@ public class PresentacionRepositorioJpa implements PresentacionRepositorio {
     }
 
     @Override
+    public Optional<Presentacion> buscarNoEliminadaPorId(String id) {
+        return dataRepository.findByIdAndEliminadaFalse(id).map(mapper::toDomain);
+    }
+
+    @Override
     public void guardar(Presentacion presentacion) {
         dataRepository.save(mapper.toEntity(presentacion));
     }

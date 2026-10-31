@@ -73,7 +73,7 @@ public class UsuarioController {
                 new Contrasena(request.contrasena())
         );
 
-        String token = jwtService.generarToken(usuario.getId(), usuario.getRol());
+        String token = jwtService.generarToken(usuario.getId(), usuario.getEmail().email(), usuario.getRol());
 
         return ResponseEntity.ok(new LoginResponse(token, mapper.toResponse(usuario)));
     }

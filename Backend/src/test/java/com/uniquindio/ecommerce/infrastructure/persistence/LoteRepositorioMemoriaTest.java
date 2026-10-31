@@ -21,6 +21,19 @@ class LoteRepositorioMemoriaTest {
     }
 
     @Test
+    void buscarNoEliminadoNoDevuelveUnLoteDadoDeBaja(){
+        Lote vigente = loteConCodigo("LOT-2090-001");
+        Lote dadoDeBaja = loteConCodigo("LOT-2090-002");
+        dadoDeBaja.eliminarLogicamente();
+        repositorioMemoria.guardar(vigente);
+        repositorioMemoria.guardar(dadoDeBaja);
+
+        assertTrue(repositorioMemoria.buscarNoEliminadoPorCodigo(vigente.getCodigoDeLote()).isPresent());
+        assertTrue(repositorioMemoria.buscarNoEliminadoPorCodigo(dadoDeBaja.getCodigoDeLote()).isEmpty());
+        assertTrue(repositorioMemoria.buscarPorCodigo(dadoDeBaja.getCodigoDeLote()).isPresent());
+    }
+
+    @Test
     void devuelve0CuandoNoHayLotes(){
         assertEquals(0,repositorioMemoria.obtenerNumeroMasAlto(2025));
     }

@@ -139,14 +139,30 @@ class PresentacionIntegracionTest {
     }
 
     @Test
-    void darDeBajaUnaPresentacionLaSacaDelCatalogoPeroSigueExistiendoPorId() throws Exception {
+    void darDeBajaUnaPresentacionLaSacaDelCatalogoYSuDetalleResponde404() throws Exception {
         mockMvc.perform(delete("/api/presentaciones/pres-taza-1").with(duenoDeLaTaza())).andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/presentaciones").param("titulo", "taza"))
                 .andExpect(jsonPath("$.totalElementos").value(0));
         mockMvc.perform(get("/api/presentaciones/pres-taza-1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.eliminada").value(true));
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void elDetalleDeLaPresentacionEliminadaDeLosDatosDeEjemploResponde404() throws Exception {
+        mockMvc.perform(get("/api/presentaciones/pres-eliminada"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void unaEscrituraSobreUnaPresentacionDadaDeBajaSigueCargandolaYSeRechazaPorLaReglaDeNegocio() throws Exception {
+        mockMvc.perform(put("/api/presentaciones/pres-eliminada/precio")
+                        .with(duenoDeLaTaza())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"precio": {"monto": 20000, "moneda": "COP"}}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("No se puede operar sobre una Presentación dada de baja"));
     }
 
     @Test

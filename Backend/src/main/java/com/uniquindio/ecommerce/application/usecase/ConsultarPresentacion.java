@@ -8,7 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Caso de uso: ConsultarPresentacion.
- * (Actor: cualquier visitante) — devuelve el detalle de una Presentación; no modifica nada.
+ * (Actor: cualquier visitante) — devuelve el detalle de una Presentación; no modifica nada. Una Presentación
+ * dada de baja no existe para quien consulta: responde no encontrado.
  */
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,6 @@ public class ConsultarPresentacion {
 
     @Transactional(readOnly = true)
     public Presentacion ejecutar(String presentacionId) {
-        return repositorio.buscarPorId(presentacionId).orElseThrow();
+        return repositorio.buscarNoEliminadaPorId(presentacionId).orElseThrow();
     }
 }

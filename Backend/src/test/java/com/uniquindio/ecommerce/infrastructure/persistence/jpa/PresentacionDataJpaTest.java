@@ -51,6 +51,13 @@ class PresentacionDataJpaTest {
     }
 
     @Test
+    void buscarNoEliminadaNoDevuelveLaPresentacionDadaDeBajaPeroBuscarPorIdSi() {
+        assertTrue(repositorio.buscarNoEliminadaPorId("pres-eliminada").isEmpty());
+        assertTrue(repositorio.buscarPorId("pres-eliminada").isPresent());
+        assertTrue(repositorio.buscarNoEliminadaPorId("pres-taza-1").isPresent());
+    }
+
+    @Test
     void laPresentacionEliminadaDeLosDatosDeEjemploNuncaApareceEnLosResultados() {
         Pagina<Presentacion> todas = repositorio.buscarDisponibles(
                 new FiltroDePresentaciones(null, null, null, null, null), 0, 50);

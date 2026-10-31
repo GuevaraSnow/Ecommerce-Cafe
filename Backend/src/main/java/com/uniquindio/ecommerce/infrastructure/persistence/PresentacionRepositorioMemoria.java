@@ -38,6 +38,11 @@ public class PresentacionRepositorioMemoria implements PresentacionRepositorio {
     }
 
     @Override
+    public Optional<Presentacion> buscarNoEliminadaPorId(String id) {
+        return buscarPorId(id).filter(presentacion -> !presentacion.isEliminada());
+    }
+
+    @Override
     public void guardar(Presentacion presentacion) {
         presentaciones.put(presentacion.getId(), presentacion);
     }

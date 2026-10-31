@@ -13,8 +13,12 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 interface PresentacionJpaDataRepository extends JpaRepository<PresentacionEntity, String> {
+
+    /** Una Presentación por su id, sin las dadas de baja. */
+    Optional<PresentacionEntity> findByIdAndEliminadaFalse(String id);
 
     /**
      * Presentaciones disponibles para la venta: activas, no dadas de baja y, si son trazables, con

@@ -39,7 +39,7 @@ class ConsultasDePresentacionTest {
     @Test
     void consultarDevuelveLaPresentacion() {
         Presentacion presentacion = merchandising("pres-1");
-        when(repositorio.buscarPorId("pres-1")).thenReturn(Optional.of(presentacion));
+        when(repositorio.buscarNoEliminadaPorId("pres-1")).thenReturn(Optional.of(presentacion));
 
         assertSame(presentacion, consultar.ejecutar("pres-1"));
         verify(repositorio, never()).guardar(any());
@@ -47,9 +47,18 @@ class ConsultasDePresentacionTest {
 
     @Test
     void consultarUnaPresentacionInexistenteLanzaNoEncontrado() {
-        when(repositorio.buscarPorId("no-existe")).thenReturn(Optional.empty());
+        when(repositorio.buscarNoEliminadaPorId("no-existe")).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> consultar.ejecutar("no-existe"));
+    }
+
+    @Test
+    void consultarUnaPresentacionDadaDeBajaLanzaNoEncontradoSinBuscarlaConLaVariantePlana() {
+        when(repositorio.buscarNoEliminadaPorId("pres-baja")).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> consultar.ejecutar("pres-baja"));
+
+        verify(repositorio, never()).buscarPorId(any());
     }
 
     @Test

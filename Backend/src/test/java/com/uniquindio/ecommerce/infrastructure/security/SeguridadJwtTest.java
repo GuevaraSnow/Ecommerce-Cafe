@@ -62,7 +62,7 @@ class SeguridadJwtTest {
     @Test
     void peticionConTokenVencidoResponde401Unauthorized() throws Exception {
         Instant tiempoPasado = Instant.now().minusSeconds(3600);
-        String tokenExpirado = jwtService.generarToken("usr-test", Rol.CAFICULTOR, tiempoPasado);
+        String tokenExpirado = jwtService.generarToken("usr-test", "test@correo.com", Rol.CAFICULTOR, tiempoPasado);
 
         mockMvc.perform(put("/api/usuarios/perfil")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenExpirado)
