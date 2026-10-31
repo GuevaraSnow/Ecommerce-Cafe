@@ -4,7 +4,6 @@ import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.CredencialesInvalidasException;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
-import com.uniquindio.ecommerce.application.dto.request.EditarPerfilRequest;
 import com.uniquindio.ecommerce.application.usecase.*;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.UsuarioMapper;
 import com.uniquindio.ecommerce.infrastructure.security.JwtService;
@@ -157,7 +156,7 @@ class UsuarioControllerTest {
 
     @Test
     void editarPerfilResponde200ConEncabezado() throws Exception {
-        given(editarPerfil.ejecutar(eq("usr-123"), any(EditarPerfilRequest.class)))
+        given(editarPerfil.ejecutar("usr-123", "Joseph Cortes Editado", new Telefono("3119876543")))
                 .willReturn(usuarioPrueba());
 
         String jsonBody = """
@@ -173,6 +172,33 @@ class UsuarioControllerTest {
                         .content(jsonBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("usr-123"));
+    }
+
+    @Test
+    void editarPerfilSinTelefonoOConTelefonoEnBlancoLoQuita() throws Exception {
+        given(editarPerfil.ejecutar(eq("usr-123"), any(), any())).willReturn(usuarioPrueba());
+
+        mockMvc.perform(put("/api/usuarios/perfil")
+                        .with(jwt().jwt(j -> j.subject("usr-123")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombre": "Joseph Cortes", "telefono": "  "}"""))
+                .andExpect(status().isOk());
+
+        verify(editarPerfil).ejecutar("usr-123", "Joseph Cortes", null);
+    }
+
+    @Test
+    void editarPerfilConUnTelefonoInvalidoResponde400SinLlamarAlCasoDeUso() throws Exception {
+        mockMvc.perform(put("/api/usuarios/perfil")
+                        .with(jwt().jwt(j -> j.subject("usr-123")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombre": "Joseph Cortes", "telefono": "abc"}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("El campo debe ser de 10 digitos"));
+
+        verify(editarPerfil, never()).ejecutar(any(), any(), any());
     }
 
     @Test
