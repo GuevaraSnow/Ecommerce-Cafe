@@ -2,7 +2,6 @@ package com.uniquindio.ecommerce.infrastructure.rest;
 
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.valueobject.FichaDeOrigen;
-import com.uniquindio.ecommerce.Domain.valueobject.PorcentajeDeMerma;
 import com.uniquindio.ecommerce.application.dto.request.RegistrarTransformacionRequest;
 import com.uniquindio.ecommerce.application.dto.response.FichaDeOrigenResponse;
 import com.uniquindio.ecommerce.application.dto.response.TransformacionResponse;
@@ -11,37 +10,62 @@ import com.uniquindio.ecommerce.application.usecase.RegistrarTransformacion;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.TransformacionMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
 
+/**
+ * Registro de Transformaciones y consulta de la Ficha de Origen. El controlador solo recibe, valida la forma,
+ * delega en el caso de uso, mapea y responde; no captura excepciones (las traduce {@code GlobalExceptionHandler}).
+ *
+ * <p>El Tostador sale del token JWT de la petición, nunca del cuerpo. Registrar exige ser Tostador; consultar
+ * la Ficha de Origen, solo estar autenticado.
+ */
 @RestController
 @RequestMapping("/api/transformaciones")
 @RequiredArgsConstructor
 @Tag(name = "Transformaciones", description = "Registro de Transformaciones y consulta de Ficha de Origen")
+@SecurityRequirement(name = "bearerAuth")
 public class TransformacionController {
+
+    private static final String TOSTADOR = "hasAuthority('TOSTADOR')";
 
     private final RegistrarTransformacion registrarTransformacion;
     private final ConsultarFichaOrigen consultarFichaOrigen;
     private final TransformacionMapper mapper;
 
     @PostMapping
-    @Operation(summary = "Registrar una Transformación", description = "Procesa un Lote de café aplicando merma y generando café tostado.")
-    @ApiResponse(responseCode = "201", description = "Transformación registrada con éxito")
+    @PreAuthorize(TOSTADOR)
+    @Operation(summary = "Registrar una Transformación",
+            description = "Solo un Tostador: procesa un Lote de café aplicando merma y generando café tostado.")
+    @ApiResponse(responseCode = "201", description = "Transformación registrada; el Location apunta a ella")
     @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos o regla de dominio incumplida")
-    public ResponseEntity<TransformacionResponse> registrar(@Valid @RequestBody RegistrarTransformacionRequest request) {
+    @ApiResponse(responseCode = "401", description = "Sin token o token inválido")
+    @ApiResponse(responseCode = "403", description = "El usuario no es Tostador")
+    @ApiResponse(responseCode = "404", description = "No existe el Lote")
+    public ResponseEntity<TransformacionResponse> registrar(@AuthenticationPrincipal Jwt token,
+                                                            @Valid @RequestBody RegistrarTransformacionRequest request) {
         Transformacion transformacion = registrarTransformacion.ejecutar(
                 UUID.randomUUID().toString(),
-                request.loteCodigo(),
+                mapper.toCodigoDeLote(request.loteCodigo()),
                 mapper.toCantidad(request.cantidadEntrada()),
-                new PorcentajeDeMerma(request.merma()),
-                request.tostadorId(),
+                mapper.toMerma(request.merma()),
+                token.getSubject(),
                 request.fecha(),
                 request.perfilTuesteResultante()
         );
@@ -57,7 +81,8 @@ public class TransformacionController {
     @GetMapping("/{id}/ficha-origen")
     @Operation(summary = "Consultar Ficha de Origen", description = "Consolida la trazabilidad real (Finca, Cosecha, Lote y Transformación).")
     @ApiResponse(responseCode = "200", description = "Ficha de origen encontrada")
-    @ApiResponse(responseCode = "404", description = "No se encontró la transformación")
+    @ApiResponse(responseCode = "401", description = "Sin token o token inválido")
+    @ApiResponse(responseCode = "404", description = "No se encontró la transformación, su Lote o su Finca")
     public ResponseEntity<FichaDeOrigenResponse> consultarFichaOrigen(@PathVariable String id) {
         FichaDeOrigen ficha = consultarFichaOrigen.ejecutar(id);
         return ResponseEntity.ok(mapper.toFichaResponse(ficha));

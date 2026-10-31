@@ -16,9 +16,6 @@ public record RegistrarTransformacionRequest(
         @NotNull(message = "El porcentaje de merma es obligatorio")
         Double merma,
 
-        @NotBlank(message = "El identificador del tostador es obligatorio")
-        String tostadorId,
-
         @NotNull(message = "La fecha de transformación es obligatoria")
         LocalDate fecha,
 

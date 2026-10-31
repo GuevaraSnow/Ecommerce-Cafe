@@ -2,7 +2,9 @@ package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 
 import com.uniquindio.ecommerce.Domain.entity.Transformacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
+import com.uniquindio.ecommerce.Domain.valueobject.CodigoDeLote;
 import com.uniquindio.ecommerce.Domain.valueobject.FichaDeOrigen;
+import com.uniquindio.ecommerce.Domain.valueobject.PorcentajeDeMerma;
 import com.uniquindio.ecommerce.application.dto.request.CantidadRequest;
 import com.uniquindio.ecommerce.application.dto.response.CantidadResponse;
 import com.uniquindio.ecommerce.application.dto.response.FichaDeOrigenResponse;
@@ -14,6 +16,14 @@ import java.util.List;
 
 @Component
 public class TransformacionMapper {
+
+    public CodigoDeLote toCodigoDeLote(String codigo) {
+        return new CodigoDeLote(codigo);
+    }
+
+    public PorcentajeDeMerma toMerma(Double merma) {
+        return new PorcentajeDeMerma(merma);
+    }
 
     public Cantidad toCantidad(CantidadRequest request) {
         if (request == null) return null;
@@ -55,7 +65,7 @@ public class TransformacionMapper {
 
         return new FichaDeOrigenResponse(
                 ficha.fincaNombre(),
-                ficha.cosechaInfo(),
+                "Año: " + ficha.cosecha().anio() + " - Temporada: " + ficha.cosecha().temporada(),
                 lotesResponse,
                 ficha.transformacionId(),
                 ficha.tostadorId(),

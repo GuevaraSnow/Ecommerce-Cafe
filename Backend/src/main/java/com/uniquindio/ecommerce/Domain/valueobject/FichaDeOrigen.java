@@ -11,7 +11,7 @@ import java.util.List;
  */
 public record FichaDeOrigen(
         String fincaNombre,
-        String cosechaInfo,
+        Cosecha cosecha,
         List<Lote> lotesOrigen,
         String transformacionId,
         String tostadorId,
