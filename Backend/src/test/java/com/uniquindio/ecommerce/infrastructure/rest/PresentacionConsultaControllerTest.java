@@ -3,8 +3,10 @@ package com.uniquindio.ecommerce.infrastructure.rest;
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
+import com.uniquindio.ecommerce.Domain.repository.PresentacionVendida;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.usecase.BuscarPresentaciones;
+import com.uniquindio.ecommerce.application.usecase.ConsultarMasVendidas;
 import com.uniquindio.ecommerce.application.usecase.ConsultarPresentacion;
 import com.uniquindio.ecommerce.application.usecase.SugerirPresentaciones;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.PresentacionMapper;
@@ -46,6 +48,8 @@ class PresentacionConsultaControllerTest {
     private BuscarPresentaciones buscarPresentaciones;
     @MockitoBean
     private SugerirPresentaciones sugerirPresentaciones;
+    @MockitoBean
+    private ConsultarMasVendidas consultarMasVendidas;
 
     private Presentacion manilla() {
         return Presentacion.publicar("pres-1", "vendedor-1", null, null, "Manilla", TipoDePresentacion.MERCHANDISING,
@@ -162,6 +166,45 @@ class PresentacionConsultaControllerTest {
         mockMvc.perform(get("/api/presentaciones").param("precioMinimo", "50000").param("precioMaximo", "1000"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje").value("El precio mínimo no puede ser mayor que el máximo"));
+    }
+
+    // ----- ranking de ventas -----
+
+    @Test
+    void lasMasVendidasDevuelvenElRankingConSusComprasEIngresos() throws Exception {
+        given(consultarMasVendidas.ejecutar(5)).willReturn(List.of(
+                new PresentacionVendida("pres-1", "Manilla", 3, 45000.0),
+                new PresentacionVendida("pres-2", "Taza", 1, 15000.0)));
+
+        mockMvc.perform(get("/api/presentaciones/mas-vendidas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].presentacionId").value("pres-1"))
+                .andExpect(jsonPath("$[0].titulo").value("Manilla"))
+                .andExpect(jsonPath("$[0].compras").value(3))
+                .andExpect(jsonPath("$[0].ingresos").value(45000.0))
+                .andExpect(jsonPath("$[1].presentacionId").value("pres-2"));
+    }
+
+    @Test
+    void lasMasVendidasPasanElLimiteAlCasoDeUso() throws Exception {
+        given(consultarMasVendidas.ejecutar(3)).willReturn(List.of());
+
+        mockMvc.perform(get("/api/presentaciones/mas-vendidas").param("limite", "3"))
+                .andExpect(status().isOk());
+
+        verify(consultarMasVendidas).ejecutar(3);
+    }
+
+    @Test
+    void lasMasVendidasConUnLimiteFueraDeRangoResponden400() throws Exception {
+        mockMvc.perform(get("/api/presentaciones/mas-vendidas").param("limite", "0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("El límite debe ser al menos 1"));
+        mockMvc.perform(get("/api/presentaciones/mas-vendidas").param("limite", "21"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("El límite no puede superar 20"));
+
+        verify(consultarMasVendidas, never()).ejecutar(anyInt());
     }
 
     // ----- búsqueda predictiva -----

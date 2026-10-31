@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.repository.PresentacionVendida;
 import com.uniquindio.ecommerce.Domain.repository.ResenaRepositorio;
 
 import java.util.Comparator;
@@ -63,6 +64,12 @@ public class PresentacionRepositorioMemoria implements PresentacionRepositorio {
                 .sorted(porTitulo())
                 .limit(limite)
                 .toList();
+    }
+
+    /** El ranking sale de las Compras, que este repositorio no tiene: se calcula en el adaptador JPA. */
+    @Override
+    public List<PresentacionVendida> masVendidas(int limite) {
+        throw new UnsupportedOperationException("El ranking de ventas necesita las Compras: usa PresentacionRepositorioJpa");
     }
 
     private Predicate<Presentacion> cumple(FiltroDePresentaciones filtro) {

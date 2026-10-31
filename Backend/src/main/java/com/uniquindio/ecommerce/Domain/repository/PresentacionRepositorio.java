@@ -21,4 +21,11 @@ public interface PresentacionRepositorio {
      * mayúsculas, ordenadas por título y limitadas a {@code limite}. Alimenta la búsqueda predictiva.
      */
     List<Presentacion> sugerirDisponiblesPorTitulo(String texto, int limite);
+
+    /**
+     * Las Presentaciones más vendidas: solo cuentan las Compras que son venta
+     * ({@code EstadoDeCompra.VENTAS}); ordenadas por número de Compras y, si empatan, por ingresos; limitadas
+     * a {@code limite}.
+     */
+    List<PresentacionVendida> masVendidas(int limite);
 }
