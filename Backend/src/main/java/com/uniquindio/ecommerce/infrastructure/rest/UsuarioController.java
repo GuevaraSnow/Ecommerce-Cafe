@@ -65,7 +65,8 @@ public class UsuarioController {
     @PostMapping("/login")
     @Operation(summary = "Iniciar sesión y obtener token JWT")
     @ApiResponse(responseCode = "200", description = "Login exitoso con token")
-    @ApiResponse(responseCode = "400", description = "Credenciales inválidas")
+    @ApiResponse(responseCode = "401",
+            description = "Credenciales inválidas: el correo no existe, la contraseña no coincide o el usuario está dado de baja (mismo mensaje en los tres casos)")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         Usuario usuario = iniciarSesion.ejecutar(
                 new Email(request.email()),
@@ -89,12 +90,12 @@ public class UsuarioController {
     @PostMapping("/restablecer-contrasena")
     @Operation(summary = "Restablecer contraseña usando código")
     @ApiResponse(responseCode = "200", description = "Contraseña restablecida correctamente")
-    @ApiResponse(responseCode = "400", description = "Código inválido o expirado")
+    @ApiResponse(responseCode = "400", description = "Código inválido o expirado, o la contraseña no es segura")
     public ResponseEntity<Void> restablecerContrasena(@Valid @RequestBody RestablecerContrasenaRequest request) {
         restablecerContrasena.ejecutar(
                 new Email(request.email()),
                 request.codigo(),
-                new Contrasena(request.nuevaContrasena())
+                new ContrasenaPlana(request.nuevaContrasena())
         );
         return ResponseEntity.ok().build();
     }

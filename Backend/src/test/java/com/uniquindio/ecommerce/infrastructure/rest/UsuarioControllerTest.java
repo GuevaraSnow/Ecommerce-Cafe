@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.infrastructure.rest;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
+import com.uniquindio.ecommerce.Domain.exception.CredencialesInvalidasException;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.EditarPerfilRequest;
@@ -24,6 +25,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -140,6 +143,19 @@ class UsuarioControllerTest {
     }
 
     @Test
+    void loginConCredencialesInvalidasResponde401ConUnMensajeGenerico() throws Exception {
+        given(iniciarSesion.ejecutar(any(), any())).willThrow(new CredencialesInvalidasException());
+
+        mockMvc.perform(post("/api/usuarios/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "joseph@uniquindio.edu.co", "contrasena": "Equivocada123"}"""))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.mensaje").value("Credenciales inválidas."));
+    }
+
+    @Test
     void editarPerfilResponde200ConEncabezado() throws Exception {
         given(editarPerfil.ejecutar(eq("usr-123"), any(EditarPerfilRequest.class)))
                 .willReturn(usuarioPrueba());
@@ -195,5 +211,29 @@ class UsuarioControllerTest {
                         .content(jsonBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje").value("La contraseña actual es incorrecta."));
+    }
+
+    @Test
+    void restablecerContrasenaResponde200YPasaLaContrasenaPlanaAlCasoDeUso() throws Exception {
+        mockMvc.perform(post("/api/usuarios/restablecer-contrasena")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "joseph@uniquindio.edu.co", "codigo": "123456", "nuevaContrasena": "ClaveNueva123"}"""))
+                .andExpect(status().isOk());
+
+        verify(restablecerContrasena).ejecutar(new Email("joseph@uniquindio.edu.co"), "123456",
+                new ContrasenaPlana("ClaveNueva123"));
+    }
+
+    @Test
+    void restablecerContrasenaConUnaContrasenaInsegura400SinLlamarAlCasoDeUso() throws Exception {
+        mockMvc.perform(post("/api/usuarios/restablecer-contrasena")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "joseph@uniquindio.edu.co", "codigo": "123456", "nuevaContrasena": "debil"}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("La contraseña debe tener al menos 8 caracteres."));
+
+        verify(restablecerContrasena, never()).ejecutar(any(), any(), any());
     }
 }

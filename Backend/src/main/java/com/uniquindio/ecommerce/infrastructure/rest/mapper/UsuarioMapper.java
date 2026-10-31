@@ -1,7 +1,6 @@
 package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
-import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.ContrasenaPlana;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
 import com.uniquindio.ecommerce.application.dto.request.RecuperarContrasenaRequest;
@@ -44,12 +43,5 @@ public class UsuarioMapper {
             return null;
         }
         return new ContrasenaPlana(clavePlanaTexto);
-    }
-
-    public Contrasena toContrasena(RestablecerContrasenaRequest request) {
-        if (request == null || request.nuevaContrasena() == null) {
-            return null;
-        }
-        return new Contrasena(request.nuevaContrasena());
     }
 }
