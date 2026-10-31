@@ -11,6 +11,7 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | Caso de uso | Actor | Descripción | Repository(s) |
 | --- | --- | --- | --- |
 | `RegistrarLote` | Caficultor | Crea un Lote de una Cosecha con Variedad y Proceso | `LoteRepositorio` |
+| `EliminarLote` | Caficultor | Da de baja lógica un Lote (solo el dueño de su Finca); el Lote se conserva para la trazabilidad | `LoteRepositorio` |
 | `RegistrarTransformacion` | Tostador | Descuenta la cantidad de entrada de los Lotes, aplica la merma y calcula la cantidad resultante | `TransformacionRepositorio`, `LoteRepositorio` |
 | `ConsultarFichaOrigen` | Comprador / Sistema | Arma la Ficha de Origen a partir del id de una Transformación y sus Lotes (la Finca y la Cosecha aún no se leen de datos reales) | `TransformacionRepositorio`, `LoteRepositorio` |
 

@@ -14,9 +14,11 @@ import java.time.Year;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -79,5 +81,54 @@ class SeguridadLoteTest {
                 .andExpect(status().isCreated());
     }
 
+    // ----- baja: solo el Caficultor dueño de la Finca del Lote (LOT-2026-001 es de finca-001, de usr-caficultor-01) -----
 
+    @Test
+    void darDeBajaSinTokenResponde401() throws Exception {
+        mockMvc.perform(delete("/api/lotes/LOT-2026-001")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void darDeBajaConUnRolQueNoEsCaficultorResponde403() throws Exception {
+        mockMvc.perform(delete("/api/lotes/LOT-2026-001")
+                        .with(usuario("usr-tostador-01", "TOSTADOR")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void darDeBajaUnLoteDeOtroCaficultorResponde403() throws Exception {
+        mockMvc.perform(delete("/api/lotes/LOT-2026-001")
+                        .with(usuario("usr-otro-caficultor", "CAFICULTOR")))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/lotes/LOT-2026-001")
+                        .with(usuario("usr-otro-caficultor", "CAFICULTOR")))
+                .andExpect(jsonPath("$.eliminadoLogicamente").value(false));
+    }
+
+    @Test
+    void elCaficultorDuenoDaDeBajaSuLoteYQuedaEliminadoLogicamente() throws Exception {
+        mockMvc.perform(delete("/api/lotes/LOT-2026-001")
+                        .with(usuario("usr-caficultor-01", "CAFICULTOR")))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/lotes/LOT-2026-001")
+                        .with(usuario("usr-comprador", "COMPRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.eliminadoLogicamente").value(true));
+    }
+
+    @Test
+    void darDeBajaUnLoteInexistenteResponde404() throws Exception {
+        mockMvc.perform(delete("/api/lotes/LOT-2026-999")
+                        .with(usuario("usr-caficultor-01", "CAFICULTOR")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void darDeBajaConUnCodigoInvalidoResponde400() throws Exception {
+        mockMvc.perform(delete("/api/lotes/ABC")
+                        .with(usuario("usr-caficultor-01", "CAFICULTOR")))
+                .andExpect(status().isBadRequest());
+    }
 }
