@@ -10,7 +10,8 @@ import java.time.Year;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ServicioDeLoteTest {
+/** El servicio genera el código consecutivo del año y exige que la Cosecha sea del año de registro o del anterior. */
+class ServicioDeLoteTest {
     private final LoteRepositorioMemoria loteRepositorioMemoria = new LoteRepositorioMemoria();
     private final ServicioDeLote servicioDeLote = new ServicioDeLote(loteRepositorioMemoria);
 

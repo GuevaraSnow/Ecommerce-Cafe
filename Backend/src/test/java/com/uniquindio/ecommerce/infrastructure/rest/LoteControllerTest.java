@@ -28,9 +28,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/** Capa web de Lote: los casos de uso están simulados; el mapper y el manejador de errores son los reales. */
 @WebMvcTest(LoteController.class)
 @Import(LoteMapper.class)
-public class LoteControllerTest {
+class LoteControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

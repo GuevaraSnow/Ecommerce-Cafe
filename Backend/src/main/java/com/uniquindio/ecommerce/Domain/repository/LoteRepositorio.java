@@ -11,7 +11,9 @@ public interface LoteRepositorio {
 
     void guardar(Lote lote);
 
-    /** Obtiene el numero mas alto de ese año para asignarselo al nuevo lote a registrar,
-     si no hay lotes ese año devuelve 0 */
+    /**
+     * El número más alto ya usado en los códigos de Lote de ese año, para asignar el siguiente al Lote
+     * que se va a registrar. Si no hay Lotes ese año, devuelve 0.
+     */
     int obtenerNumeroMasAlto(int anio);
 }

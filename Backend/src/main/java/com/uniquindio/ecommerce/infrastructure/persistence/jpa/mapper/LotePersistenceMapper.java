@@ -7,6 +7,11 @@ import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.CosechaEmb
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.LoteEntity;
 import org.springframework.stereotype.Component;
 
+/**
+ * Traduce entre el Lote del dominio y su LoteEntity. Al leer, reconstruye el Lote con
+ * {@code Lote.reconstruir}, que no repite las validaciones de creación (así se pueden leer Lotes de
+ * Cosechas antiguas).
+ */
 @Component
 public class LotePersistenceMapper {
 

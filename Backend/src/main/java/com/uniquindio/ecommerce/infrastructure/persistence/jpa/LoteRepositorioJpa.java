@@ -9,13 +9,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Adaptador JPA del repositorio de Lotes: guarda y recupera Lotes en la tabla tbl_lotes y calcula el número
+ * más alto del año con una consulta a la base, sin traer los Lotes a memoria.
+ */
 @Repository
 @RequiredArgsConstructor
 public class LoteRepositorioJpa implements LoteRepositorio {
 
     private final LoteJpaDataRepository dataRepository;
     private final LotePersistenceMapper mapper;
-
 
     @Override
     public Optional<Lote> buscarPorCodigo(CodigoDeLote codigo) {

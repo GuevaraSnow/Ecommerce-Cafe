@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** Columnas del Value Object Cosecha. */
 @Embeddable
 @Getter
 @Setter
