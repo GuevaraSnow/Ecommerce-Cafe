@@ -78,4 +78,29 @@ class LoteTest {
         assertThrows(ReglaDominioException.class, () -> lote.descontar(new Cantidad(10, "kg")));
         assertEquals(new Cantidad(100, "kg"), lote.getCantidadDisponible());
     }
+
+    @Test
+    void reconstruirCreaUnLoteConUnaCosechaConUnaFechaAntigua(){
+        assertDoesNotThrow(() -> Lote.reconstruir(new CodigoDeLote("LOT-2024-050"),
+                new Cantidad(100, "kg"), " ", ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
+                new Cosecha(Year.now().getValue() - 2, TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Castillo"), false));
+    }
+
+    @Test
+    void reconstruirNoValidaLosDatosDeCreacion(){
+        Lote lote1 = Lote.reconstruir(new CodigoDeLote("LOT-2024-050"),
+                new Cantidad(100, "kg"), " ", ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
+                new Cosecha(Year.now().getValue() - 2, TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Castillo"), false);
+
+        Lote lote2 = Lote.reconstruir(new CodigoDeLote("LOT-2024-050"),
+                new Cantidad(100, "kg"), " ", ProcesoDeBeneficio.Lavado, EstadoDelCafe.VERDE,
+                new Cosecha(Year.now().getValue() - 2, TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Castillo"), true);
+
+        assertFalse(lote1.isEliminadoLogicamente());
+        assertTrue(lote2.isEliminadoLogicamente());
+
+    }
 }
