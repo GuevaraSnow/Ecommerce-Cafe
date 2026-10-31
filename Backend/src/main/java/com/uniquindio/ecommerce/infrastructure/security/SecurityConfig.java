@@ -41,7 +41,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/usuarios/registro", "/api/usuarios/login",
                                 "/api/usuarios/recuperar-contrasena", "/api/usuarios/restablecer-contrasena").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/h2-console/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/presentaciones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/resenas").permitAll()
                         .anyRequest().authenticated())
