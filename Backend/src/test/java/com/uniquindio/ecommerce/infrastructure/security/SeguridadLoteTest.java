@@ -107,15 +107,14 @@ class SeguridadLoteTest {
     }
 
     @Test
-    void elCaficultorDuenoDaDeBajaSuLoteYQuedaEliminadoLogicamente() throws Exception {
+    void elCaficultorDuenoDaDeBajaSuLoteYYaNoSePuedeConsultar() throws Exception {
         mockMvc.perform(delete("/api/lotes/LOT-2026-001")
                         .with(usuario("usr-caficultor", "CAFICULTOR")))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/lotes/LOT-2026-001")
                         .with(usuario("usr-comprador", "COMPRADOR")))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.eliminadoLogicamente").value(true));
+                .andExpect(status().isNotFound());
     }
 
     @Test

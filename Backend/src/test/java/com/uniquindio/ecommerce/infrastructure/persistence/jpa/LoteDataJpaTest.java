@@ -112,6 +112,19 @@ class LoteDataJpaTest {
     }
 
     @Test
+    void buscarNoEliminadoNoDevuelveUnLoteDadoDeBajaPeroBuscarPorCodigoSi(){
+        Lote vigente = loteConCodigo("LOT-2090-030");
+        Lote dadoDeBaja = loteConCodigo("LOT-2090-031");
+        dadoDeBaja.eliminarLogicamente();
+        loteRepositorio.guardar(vigente);
+        loteRepositorio.guardar(dadoDeBaja);
+
+        assertTrue(loteRepositorio.buscarNoEliminadoPorCodigo(vigente.getCodigoDeLote()).isPresent());
+        assertTrue(loteRepositorio.buscarNoEliminadoPorCodigo(dadoDeBaja.getCodigoDeLote()).isEmpty());
+        assertTrue(loteRepositorio.buscarPorCodigo(dadoDeBaja.getCodigoDeLote()).isPresent());
+    }
+
+    @Test
     void buscarUnCodigoQueNoExisteDevuelveVacio(){
         assertTrue(loteRepositorio.buscarPorCodigo(new CodigoDeLote("LOT-2090-999")).isEmpty());
     }
