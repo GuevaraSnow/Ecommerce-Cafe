@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 "/api/usuarios/recuperar-contrasena", "/api/usuarios/restablecer-contrasena").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/presentaciones/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/resenas").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(servidor -> servidor
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(convertidorDeAutoridades())));
