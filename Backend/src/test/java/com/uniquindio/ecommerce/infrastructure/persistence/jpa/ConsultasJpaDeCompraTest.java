@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -81,5 +83,13 @@ class ConsultasJpaDeCompraTest {
         assertEquals(2, compra.getDetalles().size());
         assertTrue(compra.getFechaEntrega().isPresent());
         assertTrue(compraRepositorio.buscarPorId("compra-no-existe").isEmpty());
+    }
+
+    @Test
+    void buscarPorCompradorTraeSuHistorialDeLaMasRecienteALaMasAntigua() {
+        List<Compra> historial = compraRepositorio.buscarPorComprador("usr-ana");
+
+        assertEquals(List.of("compra-002", "compra-001"), historial.stream().map(Compra::getId).toList());
+        assertTrue(compraRepositorio.buscarPorComprador("usr-sin-compras").isEmpty());
     }
 }

@@ -6,6 +6,7 @@ import com.uniquindio.ecommerce.Domain.valueobject.TextoDeResena;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,5 +42,26 @@ class ResenaRepositorioMemoriaTest {
         repositorio.guardar(resena("resena-2", "comprador-1", "pres-2"));
 
         assertFalse(repositorio.existeResenaDe("comprador-1", "pres-1"));
+    }
+
+    private Resena resenaDelDia(String id, String compradorId, String presentacionId, LocalDateTime fecha) {
+        return Resena.dejar(id, compradorId, presentacionId, "vendedor-1", new Calificacion(4),
+                new TextoDeResena("Muy buen cafe"), fecha);
+    }
+
+    @Test
+    void buscarPorPresentacionDevuelveSoloSusResenasDeLaMasRecienteALaMasAntigua() {
+        repositorio.guardar(resenaDelDia("resena-vieja", "comprador-1", "pres-1", LocalDateTime.of(2026, 10, 1, 9, 0)));
+        repositorio.guardar(resenaDelDia("resena-nueva", "comprador-2", "pres-1", LocalDateTime.of(2026, 10, 20, 9, 0)));
+        repositorio.guardar(resenaDelDia("resena-otra", "comprador-1", "pres-2", LocalDateTime.of(2026, 10, 15, 9, 0)));
+
+        List<Resena> resenas = repositorio.buscarPorPresentacion("pres-1");
+
+        assertEquals(List.of("resena-nueva", "resena-vieja"), resenas.stream().map(Resena::getId).toList());
+    }
+
+    @Test
+    void unaPresentacionSinResenasDevuelveUnaListaVacia() {
+        assertTrue(repositorio.buscarPorPresentacion("pres-sin-resenas").isEmpty());
     }
 }

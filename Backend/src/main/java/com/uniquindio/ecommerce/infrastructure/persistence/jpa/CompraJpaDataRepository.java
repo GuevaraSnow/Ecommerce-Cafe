@@ -5,12 +5,15 @@ import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.CompraEnti
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Consultas derivadas sobre compras. "Detalles_PresentacionId" navega dentro de la tabla
  * detalles_compra: busca compras que tengan un detalle con esa Presentación.
  */
 interface CompraJpaDataRepository extends JpaRepository<CompraEntity, String> {
+
+    List<CompraEntity> findByCompradorIdOrderByFechaCompraDesc(String compradorId);
 
     boolean existsByEstadoInAndDetalles_PresentacionId(Collection<EstadoDeCompra> estados, String presentacionId);
 

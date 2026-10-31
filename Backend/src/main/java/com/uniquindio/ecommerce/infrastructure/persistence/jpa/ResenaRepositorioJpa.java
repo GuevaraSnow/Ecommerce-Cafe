@@ -6,6 +6,7 @@ import com.uniquindio.ecommerce.infrastructure.persistence.jpa.mapper.ResenaPers
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,6 +24,13 @@ public class ResenaRepositorioJpa implements ResenaRepositorio {
     @Override
     public void guardar(Resena resena) {
         dataRepository.save(mapper.toEntity(resena));
+    }
+
+    @Override
+    public List<Resena> buscarPorPresentacion(String presentacionId) {
+        return dataRepository.findByPresentacionIdOrderByFechaDesc(presentacionId).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override

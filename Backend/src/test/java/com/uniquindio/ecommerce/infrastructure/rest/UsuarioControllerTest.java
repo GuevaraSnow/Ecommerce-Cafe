@@ -6,12 +6,14 @@ import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.EditarPerfilRequest;
 import com.uniquindio.ecommerce.application.usecase.*;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.UsuarioMapper;
+import com.uniquindio.ecommerce.infrastructure.security.JwtService;
+import com.uniquindio.ecommerce.infrastructure.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,13 +24,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UsuarioController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@Import(UsuarioMapper.class)
+@Import({SecurityConfig.class, JwtService.class, UsuarioMapper.class})
+@TestPropertySource(properties = {
+        "app.jwt.secret=12345678901234567890123456789012",
+        "app.jwt.duracion-minutos=15"
+})
 class UsuarioControllerTest {
 
     @Autowired
@@ -87,7 +93,7 @@ class UsuarioControllerTest {
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.id").value("usr-123"))
                 .andExpect(jsonPath("$.email").value("joseph@uniquindio.edu.co"))
-                .andExpect(jsonPath("$.contrasena").doesNotExist()); // Invariante: Nunca se expone la contraseña
+                .andExpect(jsonPath("$.contrasena").doesNotExist());
     }
 
     @Test
@@ -128,8 +134,9 @@ class UsuarioControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("usr-123"))
-                .andExpect(jsonPath("$.contrasena").doesNotExist());
+                .andExpect(jsonPath("$.token").exists())
+                .andExpect(jsonPath("$.usuario.id").value("usr-123"))
+                .andExpect(jsonPath("$.usuario.contrasena").doesNotExist());
     }
 
     @Test
@@ -145,7 +152,7 @@ class UsuarioControllerTest {
                 """;
 
         mockMvc.perform(put("/api/usuarios/perfil")
-                        .header("X-Usuario-Id", "usr-123")
+                        .with(jwt().jwt(j -> j.subject("usr-123")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk())
@@ -164,7 +171,7 @@ class UsuarioControllerTest {
                 """;
 
         mockMvc.perform(put("/api/usuarios/perfil/contrasena")
-                        .header("X-Usuario-Id", "usr-123")
+                        .with(jwt().jwt(j -> j.subject("usr-123")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isOk());
@@ -183,7 +190,7 @@ class UsuarioControllerTest {
                 """;
 
         mockMvc.perform(put("/api/usuarios/perfil/contrasena")
-                        .header("X-Usuario-Id", "usr-123")
+                        .with(jwt().jwt(j -> j.subject("usr-123")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
                 .andExpect(status().isBadRequest())
