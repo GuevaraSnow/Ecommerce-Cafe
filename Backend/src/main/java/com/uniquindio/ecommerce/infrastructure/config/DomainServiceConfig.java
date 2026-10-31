@@ -21,6 +21,12 @@ public class DomainServiceConfig {
     }
 
     @Bean
+    public ServicioDeAutenticacion servicioDeAutenticacion(UsuarioRepositorio usuarioRepositorio,
+                                                           EncriptadorContrasenaRepositorio encriptador) {
+        return new ServicioDeAutenticacion(usuarioRepositorio, encriptador);
+    }
+
+    @Bean
     public ServicioDeContrasena servicioDeContrasena(EncriptadorContrasenaRepositorio encriptador) {
         return new ServicioDeContrasena(encriptador);
     }

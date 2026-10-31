@@ -1,35 +1,26 @@
 package com.uniquindio.ecommerce.application.usecase;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
-import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
-import com.uniquindio.ecommerce.Domain.repository.EncriptadorContrasenaRepositorio;
-import com.uniquindio.ecommerce.Domain.repository.UsuarioRepositorio;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeAutenticacion;
 import com.uniquindio.ecommerce.Domain.valueobject.Contrasena;
 import com.uniquindio.ecommerce.Domain.valueobject.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso: IniciarSesion.
+ * (Actor: cualquier usuario) — devuelve al usuario si las credenciales son correctas. No tiene lógica: la
+ * regla la aplica el Domain Service {@link ServicioDeAutenticacion}.
+ */
 @Service
 @RequiredArgsConstructor
 public class IniciarSesion {
 
-    private final UsuarioRepositorio usuarioRepositorio;
-    private final EncriptadorContrasenaRepositorio encriptadorContrasenaRepositorio;
+    private final ServicioDeAutenticacion servicioDeAutenticacion;
 
     @Transactional(readOnly = true)
     public Usuario ejecutar(Email email, Contrasena contrasena) {
-        Usuario usuario = usuarioRepositorio.buscarPorEmail(email)
-                .orElseThrow();
-
-        if (usuario.isEliminado()) {
-            throw new ReglaDominioException("El usuario se encuentra dado de baja.");
-        }
-
-        if (!encriptadorContrasenaRepositorio.coinciden(contrasena.contrasena(), usuario.getContrasena().contrasena())) {
-            throw new ReglaDominioException("Credenciales inválidas.");
-        }
-
-        return usuario;
+        return servicioDeAutenticacion.autenticar(email, contrasena);
     }
 }

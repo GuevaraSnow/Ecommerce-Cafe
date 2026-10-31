@@ -3,6 +3,7 @@ package com.uniquindio.ecommerce.application.usecase;
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeAutenticacion;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeContrasena;
 import com.uniquindio.ecommerce.infrastructure.persistence.EncriptadorBCryptMemoria;
 import com.uniquindio.ecommerce.infrastructure.persistence.NotificadorCorreoMemoria;
@@ -82,7 +83,8 @@ class RestablecerContrasenaTest {
     private final RecuperarContrasena recuperar = new RecuperarContrasena(repositorio, new NotificadorCorreoMemoria());
     private final RestablecerContrasena restablecer =
             new RestablecerContrasena(repositorio, new ServicioDeContrasena(encriptador));
-    private final IniciarSesion iniciarSesion = new IniciarSesion(repositorio, encriptador);
+    private final IniciarSesion iniciarSesion =
+            new IniciarSesion(new ServicioDeAutenticacion(repositorio, encriptador));
 
     /** Registra al usuario como lo deja el registro real: con la contraseña ya encriptada. */
     private void registrarConContrasena(String contrasenaPlana) {
