@@ -34,6 +34,7 @@ sola vez por entidad y lo reutilizan todos los casos que lo necesitan.
 | `ConsultarPresentacion` | Cualquier visitante | Detalle de una Presentación con su galería, precio vigente y descuento (consulta, no modifica) | `PresentacionRepositorio` |
 | `BuscarPresentaciones` | Cualquier visitante | Lista por páginas las Presentaciones disponibles para la venta, con filtros por título, tipo, vendedor, rango de precio y calificación mínima (promedio de reseñas, calculado en la consulta) | `PresentacionRepositorio` |
 | `SugerirPresentaciones` | Cualquier visitante | Búsqueda predictiva por nombre: sugiere Presentaciones disponibles cuyo título contiene el texto (consulta) | `PresentacionRepositorio` |
+| `ConsultarMasVendidas` | Cualquier visitante | Ranking de las Presentaciones más vendidas por número de Compras e ingresos; la consulta une Compras y Presentaciones y agrupa en la base (consulta) | `PresentacionRepositorio` |
 | `CrearCarrito` | Comprador | Abre un carrito vacío (Compra pendiente, sin Dirección de Envío) | `CompraRepositorio` |
 | `AgregarAlCarrito` | Comprador | Agrega una Presentación al carrito: `ServicioDeCompra` verifica que esté a la venta y que el stock alcance para el total del carrito, y congela el precio vigente; no descuenta stock | `CompraRepositorio`, `PresentacionRepositorio` |
 | `ConfirmarCompra` | Comprador | Confirma el carrito con la Dirección de Envío; `ServicioDeCompra` vuelve a verificar el stock de todos los ítems y lo descuenta (todo o nada) | `CompraRepositorio`, `PresentacionRepositorio` |

@@ -8,6 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EstadoDeCompraTest {
 
+    @Test
+    void soloLasComprasConfirmadasEnviadasYEntregadasCuentanComoVenta() {
+        assertEquals(java.util.Set.of(EstadoDeCompra.CONFIRMADA, EstadoDeCompra.ENVIADA, EstadoDeCompra.ENTREGADA),
+                EstadoDeCompra.VENTAS);
+    }
+
     private void assertSoloPuedePasarA(EstadoDeCompra origen, EstadoDeCompra... permitidos) {
         List<EstadoDeCompra> lista = List.of(permitidos);
         for (EstadoDeCompra destino : EstadoDeCompra.values()) {

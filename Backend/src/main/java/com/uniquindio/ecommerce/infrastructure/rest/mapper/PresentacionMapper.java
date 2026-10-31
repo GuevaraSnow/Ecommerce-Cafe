@@ -5,6 +5,7 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.entity.PresentacionTrazable;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
+import com.uniquindio.ecommerce.Domain.repository.PresentacionVendida;
 import com.uniquindio.ecommerce.Domain.valueobject.Cantidad;
 import com.uniquindio.ecommerce.Domain.valueobject.Descuento;
 import com.uniquindio.ecommerce.Domain.valueobject.FechaDeTueste;
@@ -26,6 +27,7 @@ import com.uniquindio.ecommerce.application.dto.response.PaginaResponse;
 import com.uniquindio.ecommerce.application.dto.response.PrecioResponse;
 import com.uniquindio.ecommerce.application.dto.response.PresentacionResponse;
 import com.uniquindio.ecommerce.application.dto.response.PresentacionTrazableResponse;
+import com.uniquindio.ecommerce.application.dto.response.PresentacionMasVendidaResponse;
 import com.uniquindio.ecommerce.application.dto.response.SugerenciaResponse;
 import org.springframework.stereotype.Component;
 
@@ -79,6 +81,11 @@ public class PresentacionMapper {
     public PaginaResponse<PresentacionResponse> toPaginaResponse(Pagina<Presentacion> pagina) {
         return new PaginaResponse<>(pagina.contenido().stream().map(this::toResponse).toList(),
                 pagina.pagina(), pagina.tamano(), pagina.totalElementos(), pagina.totalPaginas());
+    }
+
+    public PresentacionMasVendidaResponse toMasVendidaResponse(PresentacionVendida vendida) {
+        return new PresentacionMasVendidaResponse(vendida.presentacionId(), vendida.titulo(), vendida.compras(),
+                vendida.ingresos());
     }
 
     public SugerenciaResponse toSugerencia(Presentacion presentacion) {

@@ -1,5 +1,7 @@
 package com.uniquindio.ecommerce.infrastructure.persistence.jpa;
 
+import com.uniquindio.ecommerce.Domain.repository.PresentacionVendida;
+import com.uniquindio.ecommerce.Domain.valueobject.EstadoDeCompra;
 import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
 import com.uniquindio.ecommerce.infrastructure.persistence.jpa.entity.PresentacionEntity;
 import org.springframework.data.domain.Page;
@@ -9,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 interface PresentacionJpaDataRepository extends JpaRepository<PresentacionEntity, String> {
 
@@ -43,4 +47,20 @@ interface PresentacionJpaDataRepository extends JpaRepository<PresentacionEntity
                                                @Param("calificacionMinima") Double calificacionMinima,
                                                @Param("fechaMinimaDeTueste") LocalDate fechaMinimaDeTueste,
                                                Pageable pageable);
+
+    /**
+     * El ranking de ventas: une cada Compra con los detalles que tiene y con la Presentación de cada
+     * detalle, agrupa por Presentación y cuenta las Compras distintas (una Compra con la misma Presentación
+     * dos veces cuenta una). Los ingresos son precio congelado por cantidad. Solo cuentan las Compras en
+     * {@code estados}; la paginación solo limita cuántas filas se traen.
+     */
+    @Query("""
+            select new com.uniquindio.ecommerce.Domain.repository.PresentacionVendida(
+                       p.id, p.titulo, count(distinct c.id), sum(d.precioCongelado.monto * d.cantidad.valor))
+            from CompraEntity c join c.detalles d, PresentacionEntity p
+            where p.id = d.presentacionId and c.estado in :estados
+            group by p.id, p.titulo
+            order by count(distinct c.id) desc, sum(d.precioCongelado.monto * d.cantidad.valor) desc, p.titulo
+            """)
+    List<PresentacionVendida> masVendidas(@Param("estados") Collection<EstadoDeCompra> estados, Pageable pageable);
 }

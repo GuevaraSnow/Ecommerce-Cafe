@@ -1,5 +1,8 @@
 package com.uniquindio.ecommerce.Domain.valueobject;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 public enum EstadoDeCompra {
     PENDIENTE,
     CONFIRMADA,
@@ -7,6 +10,9 @@ public enum EstadoDeCompra {
     ENTREGADA,
     CANCELADA,
     REEMBOLSADA;
+
+    /** Los estados en que una Compra cuenta como venta: ya se confirmó y no se canceló ni se reembolsó. */
+    public static final Set<EstadoDeCompra> VENTAS = EnumSet.of(CONFIRMADA, ENVIADA, ENTREGADA);
 
     public boolean puedeTransicionarA(EstadoDeCompra destino) {
         return switch (this) {
