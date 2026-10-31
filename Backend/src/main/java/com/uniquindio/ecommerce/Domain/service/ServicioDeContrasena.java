@@ -29,4 +29,20 @@ public class ServicioDeContrasena {
         String nuevaEncriptada = encriptador.encriptar(nuevaContrasenaPlana.valor());
         usuario.cambiarContrasenaDirecta(new Contrasena(nuevaEncriptada));
     }
+
+    /**
+     * Restablece la contraseña con el código de recuperación que se le envió al usuario. La contraseña nueva
+     * se encripta antes de asignarla, igual que al registrarse o al cambiarla, para que después pueda iniciar
+     * sesión con ella. Si el código no es válido o ya expiró, el usuario no cambia.
+     */
+    public void restablecerContrasena(Usuario usuario, String codigoTexto, ContrasenaPlana nuevaContrasenaPlana) {
+        if (usuario == null) {
+            throw new ReglaDominioException("El usuario es obligatorio.");
+        }
+        if (nuevaContrasenaPlana == null) {
+            throw new ReglaDominioException("La nueva contraseña es obligatoria.");
+        }
+        String nuevaEncriptada = encriptador.encriptar(nuevaContrasenaPlana.valor());
+        usuario.cambiarContrasena(codigoTexto, new Contrasena(nuevaEncriptada));
+    }
 }

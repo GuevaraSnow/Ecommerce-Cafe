@@ -24,6 +24,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -195,5 +197,29 @@ class UsuarioControllerTest {
                         .content(jsonBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje").value("La contraseña actual es incorrecta."));
+    }
+
+    @Test
+    void restablecerContrasenaResponde200YPasaLaContrasenaPlanaAlCasoDeUso() throws Exception {
+        mockMvc.perform(post("/api/usuarios/restablecer-contrasena")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "joseph@uniquindio.edu.co", "codigo": "123456", "nuevaContrasena": "ClaveNueva123"}"""))
+                .andExpect(status().isOk());
+
+        verify(restablecerContrasena).ejecutar(new Email("joseph@uniquindio.edu.co"), "123456",
+                new ContrasenaPlana("ClaveNueva123"));
+    }
+
+    @Test
+    void restablecerContrasenaConUnaContrasenaInsegura400SinLlamarAlCasoDeUso() throws Exception {
+        mockMvc.perform(post("/api/usuarios/restablecer-contrasena")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "joseph@uniquindio.edu.co", "codigo": "123456", "nuevaContrasena": "debil"}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value("La contraseña debe tener al menos 8 caracteres."));
+
+        verify(restablecerContrasena, never()).ejecutar(any(), any(), any());
     }
 }
