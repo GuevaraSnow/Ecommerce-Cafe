@@ -1,12 +1,14 @@
 package com.uniquindio.ecommerce.infrastructure.persistence;
 
 import com.uniquindio.ecommerce.Domain.entity.Presentacion;
+import com.uniquindio.ecommerce.Domain.entity.Resena;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +18,8 @@ class PresentacionRepositorioMemoriaTest {
 
     private static final FiltroDePresentaciones SIN_FILTROS = new FiltroDePresentaciones(null, null, null, null, null);
 
-    private final PresentacionRepositorioMemoria repositorio = new PresentacionRepositorioMemoria();
+    private final ResenaRepositorioMemoria resenas = new ResenaRepositorioMemoria();
+    private final PresentacionRepositorioMemoria repositorio = new PresentacionRepositorioMemoria(resenas);
 
     private Presentacion merchandising(String id, String vendedorId, String titulo, double precio) {
         return Presentacion.publicar(id, vendedorId, null, null, titulo, TipoDePresentacion.MERCHANDISING,
@@ -30,6 +33,11 @@ class PresentacionRepositorioMemoriaTest {
                 new Precio(precio, "COP"), new Cantidad(10, "kg"),
                 new Galeria(List.of(new ImagenDePresentacion("http://img/1.png", true))), null,
                 Rol.CAFICULTOR, null, null, null);
+    }
+
+    private Resena resena(String id, String presentacionId, int calificacion) {
+        return Resena.dejar(id, "comprador-" + id, presentacionId, "vendedor-1", new Calificacion(calificacion),
+                new TextoDeResena("Opinion"), LocalDateTime.of(2026, 10, 20, 9, 0));
     }
 
     private List<String> ids(Pagina<Presentacion> pagina) {
@@ -72,6 +80,26 @@ class PresentacionRepositorioMemoriaTest {
         FiltroDePresentaciones filtro = new FiltroDePresentaciones(null, null, null, 15000.0, 28000.0);
 
         assertEquals(List.of("p-cafe", "p-manilla"), ids(repositorio.buscarDisponibles(filtro, 0, 10)));
+    }
+
+    @Test
+    void filtraPorCalificacionMinimaConElPromedioDeLasResenas() {
+        resenas.guardar(resena("r1", "p-manilla", 5));
+        resenas.guardar(resena("r2", "p-manilla", 3));   // promedio 4
+        resenas.guardar(resena("r3", "p-taza", 2));      // promedio 2; p-cafe no tiene reseñas
+
+        assertEquals(List.of("p-manilla"), ids(repositorio.buscarDisponibles(
+                new FiltroDePresentaciones(null, null, null, null, null, 4.0), 0, 10)));
+        assertEquals(List.of("p-manilla", "p-taza"), ids(repositorio.buscarDisponibles(
+                new FiltroDePresentaciones(null, null, null, null, null, 2.0), 0, 10)));
+        assertTrue(repositorio.buscarDisponibles(
+                new FiltroDePresentaciones(null, null, null, null, null, 4.5), 0, 10).contenido().isEmpty());
+    }
+
+    @Test
+    void conUnaCalificacionMinimaNoApareceUnaPresentacionSinResenas() {
+        assertTrue(repositorio.buscarDisponibles(
+                new FiltroDePresentaciones(null, null, null, null, null, 1.0), 0, 10).contenido().isEmpty());
     }
 
     @Test

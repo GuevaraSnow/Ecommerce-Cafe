@@ -8,7 +8,8 @@ import java.time.Year;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LoteRepositorioMemoriaTest {
+/** El repositorio en memoria guarda Lotes por código y calcula el número más alto de cada año. */
+class LoteRepositorioMemoriaTest {
 
     private final LoteRepositorioMemoria repositorioMemoria = new LoteRepositorioMemoria();
 

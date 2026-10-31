@@ -47,8 +47,9 @@ public class PresentacionConsultaController {
 
     @GetMapping
     @Operation(summary = "Buscar Presentaciones disponibles",
-            description = "Filtros opcionales por título, tipo, vendedor y rango de precio normal; "
-                    + "paginado y ordenado por título. La primera página es la 0.")
+            description = "Filtros opcionales por título, tipo, vendedor, rango de precio normal y calificación "
+                    + "mínima (promedio de reseñas, de 1 a 5); paginado y ordenado por título. "
+                    + "La primera página es la 0.")
     @ApiResponse(responseCode = "400", description = "Filtro o paginación inválidos")
     public PaginaResponse<PresentacionResponse> buscar(
             @RequestParam(required = false) String titulo,
@@ -56,12 +57,13 @@ public class PresentacionConsultaController {
             @RequestParam(required = false) String vendedorId,
             @RequestParam(required = false) Double precioMinimo,
             @RequestParam(required = false) Double precioMaximo,
+            @RequestParam(required = false) Double calificacionMinima,
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "La página no puede ser negativa") int pagina,
             @RequestParam(defaultValue = "10")
             @Min(value = 1, message = "El tamaño de página debe ser al menos 1")
             @Max(value = 50, message = "El tamaño de página no puede superar 50") int tamano) {
         return mapper.toPaginaResponse(buscarPresentaciones.ejecutar(
-                mapper.toFiltro(titulo, tipo, vendedorId, precioMinimo, precioMaximo), pagina, tamano));
+                mapper.toFiltro(titulo, tipo, vendedorId, precioMinimo, precioMaximo, calificacionMinima), pagina, tamano));
     }
 
     @GetMapping("/sugerencias")

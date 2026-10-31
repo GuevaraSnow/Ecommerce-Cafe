@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Tabla tbl_lotes. El código del Lote (LOT-AAAA-NNN) es la clave primaria; la Cosecha y la Cantidad
+ * disponible van incrustadas en la misma tabla. Separada del dominio: solo la usa el adaptador JPA a
+ * través de LotePersistenceMapper.
+ */
 @Entity
 @Table(name = "tbl_lotes")
 @NoArgsConstructor

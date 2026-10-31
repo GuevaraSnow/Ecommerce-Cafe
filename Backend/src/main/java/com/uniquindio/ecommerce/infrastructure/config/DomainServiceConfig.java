@@ -6,28 +6,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Registra los Domain Services como beans de Spring. Los servicios del dominio
- * no llevan anotaciones (el dominio es Java puro): esta clase es la frontera
- * entre Spring y el dominio, y el único lugar donde se hace {@code new} de uno.
- * Cada servicio nuevo agrega aquí su método {@code @Bean}.
+ * Registra como beans los Domain Services que no pertenecen a un vertical con su propia clase de
+ * configuración (Usuario y Lote). Los servicios del dominio no llevan anotaciones (el dominio es Java
+ * puro): las clases {@code Config*} son la frontera entre Spring y el dominio, y el único lugar donde se
+ * hace {@code new} de un servicio. Presentación, Compra y Transformación tienen la suya
+ * ({@link ConfigPresentacion}, {@link ConfigCompra}, {@link ConfigTransformacion}).
  */
 @Configuration
 public class DomainServiceConfig {
 
     @Bean
-    public ServicioDePublicacion servicioDePublicacion(LoteRepositorio loteRepositorio,
-                                                       TransformacionRepositorio transformacionRepositorio, UsuarioRepositorio usuarioRepositorio) {
-        return new ServicioDePublicacion(loteRepositorio, transformacionRepositorio, usuarioRepositorio);
-    }
-
-    @Bean
     public VerificadorDeEmail verificadorDeEmail(UsuarioRepositorio usuarioRepositorio) {
         return new VerificadorDeEmail(usuarioRepositorio);
-    }
-    @Bean
-    public ServicioDeReposicion servicioDeReposicion(LoteRepositorio loteRepositorio,
-                                                     TransformacionRepositorio transformacionRepositorio) {
-        return new ServicioDeReposicion(loteRepositorio, transformacionRepositorio);
     }
 
     @Bean
@@ -36,12 +26,7 @@ public class DomainServiceConfig {
     }
 
     @Bean
-    public ServicioDeBajaDePresentacion servicioDeBajaDePresentacion(CompraRepositorio compraRepositorio) {
-        return new ServicioDeBajaDePresentacion(compraRepositorio);
-    }
-
-    @Bean
-    public ServicioDeLote servicioDeLote(LoteRepositorio loteRepositorio){
+    public ServicioDeLote servicioDeLote(LoteRepositorio loteRepositorio) {
         return new ServicioDeLote(loteRepositorio);
     }
 }
