@@ -8,10 +8,12 @@ import com.uniquindio.ecommerce.application.usecase.RegistrarLote;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.LoteMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -26,7 +28,10 @@ import java.net.URI;
 @RequestMapping("/api/lotes")
 @RequiredArgsConstructor
 @Tag(name = "Lotes", description = "Registro y consulta de Lotes de café")
+@SecurityRequirement(name = "bearerAuth")
 public class LoteController {
+
+    private static final String CAFICULTOR= "hasAuthority('CAFICULTOR')";
 
     private final ConsultarLote consultarLote;
     private final RegistrarLote registrarLote;
@@ -44,6 +49,7 @@ public class LoteController {
     }
 
     @PostMapping
+    @PreAuthorize(CAFICULTOR)
     @Operation(summary = "Registrar un Lote",
             description = "El servidor genera el código consecutivo del año (LOT-AAAA-NNN).")
     @ApiResponse(responseCode = "201", description = "Lote registrado; el Location apunta a su consulta")
