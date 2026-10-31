@@ -1,36 +1,31 @@
 package com.uniquindio.ecommerce.infrastructure.config;
 
-import com.uniquindio.ecommerce.Domain.service.ServicioDeBajaDePresentacion;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeContrasena;
 import com.uniquindio.ecommerce.Domain.service.ServicioDeLote;
-import com.uniquindio.ecommerce.Domain.service.ServicioDePublicacion;
-import com.uniquindio.ecommerce.Domain.service.ServicioDeReposicion;
+import com.uniquindio.ecommerce.Domain.service.VerificadorDeEmail;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/** Comprueba que Spring arma los Domain Services con los repositorios que necesitan. */
+/** Comprueba que Spring arma los Domain Services de Usuario y Lote con los repositorios que necesitan. */
 @SpringBootTest
 class DomainServiceConfigTest {
 
     @Autowired
-    private ServicioDePublicacion servicioDePublicacion;
+    private VerificadorDeEmail verificadorDeEmail;
 
     @Autowired
-    private ServicioDeReposicion servicioDeReposicion;
-
-    @Autowired
-    private ServicioDeBajaDePresentacion servicioDeBajaDePresentacion;
+    private ServicioDeContrasena servicioDeContrasena;
 
     @Autowired
     private ServicioDeLote servicioDeLote;
 
     @Test
     void springRegistraLosDomainServicesComoBeans() {
-        assertNotNull(servicioDePublicacion);
-        assertNotNull(servicioDeReposicion);
-        assertNotNull(servicioDeBajaDePresentacion);
+        assertNotNull(verificadorDeEmail);
+        assertNotNull(servicioDeContrasena);
         assertNotNull(servicioDeLote);
     }
 }
