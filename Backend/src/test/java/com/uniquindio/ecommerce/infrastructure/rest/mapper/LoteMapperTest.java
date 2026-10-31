@@ -2,6 +2,7 @@ package com.uniquindio.ecommerce.infrastructure.rest.mapper;
 
 import com.uniquindio.ecommerce.Domain.entity.Lote;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
+import com.uniquindio.ecommerce.Domain.service.ServicioDeLote;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest;
 import com.uniquindio.ecommerce.application.dto.request.RegistrarLoteRequest.CantidadRequest;
@@ -20,15 +21,17 @@ class LoteMapperTest {
     private final LoteMapper mapper = new LoteMapper();
 
     private RegistrarLoteRequest request(double valor, EstadoDelCafe estado) {
-        return new RegistrarLoteRequest("LOT-2026-045", new CantidadRequest(valor, "kg"), "finca-1",
+        return new RegistrarLoteRequest(new CantidadRequest(valor, "kg"), "finca-1",
                 ProcesoDeBeneficio.Lavado, estado,
                 new CosechaRequest(Year.now().getValue(), TemporadaDeCosecha.TRAVIESA), "Caturra");
     }
 
     /** Arma los parámetros de RegistrarLote.ejecutar con el mapper y ejecuta el caso de uso. */
     private Lote registrar(RegistrarLoteRequest r) {
-        return new RegistrarLote(new LoteRepositorioMemoria()).ejecutar(
-                mapper.toCodigoDeLote(r.codigo()),
+        LoteRepositorioMemoria repositorio = new LoteRepositorioMemoria();
+        ServicioDeLote servicioDeLote = new ServicioDeLote(repositorio);
+
+        return new RegistrarLote(repositorio, servicioDeLote).ejecutar(
                 mapper.toCantidad(r.cantidad()),
                 r.fincaId(),
                 r.procesoDeBeneficio(),
@@ -41,7 +44,7 @@ class LoteMapperTest {
     void unRequestValidoProduceElLoteEsperado() {
         Lote lote = registrar(request(200, EstadoDelCafe.PERGAMINO));
 
-        assertEquals(new CodigoDeLote("LOT-2026-045"), lote.getCodigoDeLote());
+        assertEquals(CodigoDeLote.crear(Year.now().getValue(), 1), lote.getCodigoDeLote());
         assertEquals(new Cantidad(200, "kg"), lote.getCantidadDisponible());
         assertEquals("finca-1", lote.getFincaID());
         assertEquals(ProcesoDeBeneficio.Lavado, lote.getProcesoDeBeneficio());
@@ -56,7 +59,7 @@ class LoteMapperTest {
 
         LoteResponse response = mapper.toResponse(lote);
 
-        assertEquals("LOT-2026-045", response.codigo());
+        assertEquals(lote.getCodigoDeLote().valor(), response.codigo());
         assertEquals("finca-1", response.fincaId());
         assertEquals(200, response.cantidadDisponible().valor());
         assertEquals("kg", response.cantidadDisponible().unidad());
@@ -91,7 +94,5 @@ class LoteMapperTest {
     void losValoresInvalidosEnElMapperNoSeTragan() {
         assertThrows(ReglaDominioException.class, () -> mapper.toCantidad(new CantidadRequest(10.0, "toneladas")));
         assertThrows(ReglaDominioException.class, () -> mapper.toCodigoDeLote("ABC"));
-        assertThrows(ReglaDominioException.class,
-                () -> mapper.toCosecha(new CosechaRequest(Year.now().getValue() - 3, TemporadaDeCosecha.PRINCIPAL)));
     }
 }

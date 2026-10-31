@@ -10,4 +10,8 @@ public interface LoteRepositorio {
     Optional<Lote> buscarPorCodigo(CodigoDeLote codigo);
 
     void guardar(Lote lote);
+
+    /** Obtiene el numero mas alto de ese año para asignarselo al nuevo lote a registrar,
+     si no hay lotes ese año devuelve 0 */
+    int obtenerNumeroMasAlto(int anio);
 }
