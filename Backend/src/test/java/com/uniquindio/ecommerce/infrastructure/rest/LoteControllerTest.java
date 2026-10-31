@@ -3,6 +3,7 @@ package com.uniquindio.ecommerce.infrastructure.rest;
 import com.uniquindio.ecommerce.Domain.entity.Lote;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.usecase.ConsultarLote;
+import com.uniquindio.ecommerce.application.usecase.EliminarLote;
 import com.uniquindio.ecommerce.application.usecase.RegistrarLote;
 import com.uniquindio.ecommerce.infrastructure.rest.mapper.LoteMapper;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -38,6 +40,9 @@ public class LoteControllerTest {
 
     @MockitoBean
     private RegistrarLote registrarLote;
+
+    @MockitoBean
+    private EliminarLote eliminarLote;
 
     private Lote loteDePrueba(CodigoDeLote codigo) {
         return Lote.registrar(
@@ -157,5 +162,36 @@ public class LoteControllerTest {
                 .andExpect(jsonPath("$.mensaje").value("La Cantidad no puede ser negativa: -100.0"));
 
         verify(registrarLote, never()).ejecutar(any(),any(),any(),any(),any(),any());
+    }
+
+    @Test
+    void deleteDaDeBajaElLoteYResponde204() throws Exception {
+        CodigoDeLote codigoDeLote = CodigoDeLote.crear(Year.now().getValue(), 1);
+
+        mockMvc.perform(delete("/api/lotes/" + codigoDeLote.valor()))
+                .andExpect(status().isNoContent());
+
+        verify(eliminarLote).ejecutar(codigoDeLote);
+    }
+
+    @Test
+    void deleteDeUnLoteInexistenteDevuelve404() throws Exception {
+        CodigoDeLote codigoDeLote = CodigoDeLote.crear(Year.now().getValue(), 1);
+        given(eliminarLote.ejecutar(codigoDeLote)).willThrow(new NoSuchElementException());
+
+        mockMvc.perform(delete("/api/lotes/" + codigoDeLote.valor()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.mensaje").value("El recurso solicitado no existe"));
+    }
+
+    @Test
+    void deleteConUnCodigoInvalidoDevuelve400SinLlamarAlCasoDeUso() throws Exception {
+        mockMvc.perform(delete("/api/lotes/ABC"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.mensaje").value("Código de Lote inválido: ABC"));
+
+        verify(eliminarLote, never()).ejecutar(any());
     }
 }
