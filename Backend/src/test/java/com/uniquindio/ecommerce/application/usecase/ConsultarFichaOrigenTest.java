@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,10 +78,38 @@ class ConsultarFichaOrigenTest {
         // ASSERT
         assertNotNull(ficha);
         assertEquals("Hacienda El Paraíso", ficha.fincaNombre());
-        assertTrue(ficha.cosechaInfo().contains("PRINCIPAL"));
+        assertEquals(TemporadaDeCosecha.PRINCIPAL, ficha.cosecha().temporada());
+        assertEquals(Year.now().getValue(), ficha.cosecha().anio());
         assertEquals(1, ficha.lotesOrigen().size());
         assertEquals("LOT-2026-999", ficha.lotesOrigen().get(0).getCodigoDeLote().valor());
         assertEquals("TRANS-999", ficha.transformacionId());
         assertEquals(PerfilTueste.MEDIO, ficha.perfilTuesteResultante());
+    }
+
+    @Test
+    void unaTransformacionInexistenteLanzaNoEncontrado() {
+        assertThrows(NoSuchElementException.class, () -> consultarFichaOrigen.ejecutar("no-existe"));
+    }
+
+    @Test
+    void siElLoteDeLaTransformacionNoExisteLanzaNoEncontrado() {
+        transformacionRepositorio.guardar(transformacionDelLote("LOT-2026-888"));
+
+        assertThrows(NoSuchElementException.class, () -> consultarFichaOrigen.ejecutar("TRANS-888"));
+    }
+
+    @Test
+    void siLaFincaDelLoteNoExisteLanzaNoEncontrado() {
+        loteRepositorio.guardar(Lote.registrar(new CodigoDeLote("LOT-2026-888"), new Cantidad(10.0, "kg"),
+                "finca-fantasma", ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL), new VariedadDeCafe("Geisha")));
+        transformacionRepositorio.guardar(transformacionDelLote("LOT-2026-888"));
+
+        assertThrows(NoSuchElementException.class, () -> consultarFichaOrigen.ejecutar("TRANS-888"));
+    }
+
+    private Transformacion transformacionDelLote(String loteCodigo) {
+        return Transformacion.registrar("TRANS-888", loteCodigo, new Cantidad(5.0, "kg"), new PorcentajeDeMerma(0.18),
+                "tostador-1", LocalDate.now(), PerfilTueste.MEDIO);
     }
 }
