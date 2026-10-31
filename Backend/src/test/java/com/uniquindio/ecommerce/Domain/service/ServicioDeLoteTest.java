@@ -55,13 +55,13 @@ public class ServicioDeLoteTest {
     }
 
     @Test
-    void cadaAnioSeReinciaElNumero(){
-        Lote lote1 = servicioDeLote.registrar(2077, new Cantidad(200, "kg"), "finca-1",
+    void cadaAnioSeReiniciaElNumero(){
+        Lote lote1 = servicioDeLote.registrar(Year.now().getValue(), new Cantidad(200, "kg"), "finca-1",
                 ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
                 new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
                 new VariedadDeCafe("Caturra"));
         loteRepositorioMemoria.guardar(lote1);
-        Lote  lote2 = servicioDeLote.registrar(2027, new Cantidad(200, "kg"), "finca-1",
+        Lote  lote2 = servicioDeLote.registrar(Year.now().getValue() + 1, new Cantidad(200, "kg"), "finca-1",
                 ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
                 new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
                 new VariedadDeCafe("Caturra"));
@@ -79,6 +79,26 @@ public class ServicioDeLoteTest {
                 ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
                 new Cosecha(Year.now().getValue(), TemporadaDeCosecha.PRINCIPAL),
                 new VariedadDeCafe("Caturra")));
+    }
+
+    @Test
+    void noRegistraUnLoteConCosechaDeHaceDosAniosOMas(){
+        assertThrows(ReglaDominioException.class, () -> servicioDeLote.registrar(Year.now().getValue(),
+                new Cantidad(200, "kg"), "finca-1",
+                ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                new Cosecha(Year.now().getValue() - 2, TemporadaDeCosecha.PRINCIPAL),
+                new VariedadDeCafe("Caturra")));
+    }
+
+    @Test
+    void registraUnLoteConCosechaDelAnioAnterior(){
+        assertDoesNotThrow(() ->
+                servicioDeLote.registrar(Year.now().getValue(),
+                        new Cantidad(200, "kg"), "finca-1",
+                        ProcesoDeBeneficio.Lavado, EstadoDelCafe.PERGAMINO,
+                        new Cosecha(Year.now().getValue()-1, TemporadaDeCosecha.PRINCIPAL),
+                        new VariedadDeCafe("Caturra"))
+        );
     }
 
 }

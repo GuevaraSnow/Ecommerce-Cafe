@@ -16,13 +16,13 @@ public record Cosecha(int anio, TemporadaDeCosecha temporada) {
         if (anio > anioActual) {
             throw new ReglaDominioException("La Cosecha no puede ser de un año futuro: " + anio);
         }
-        if (anio < anioActual - 1) {
-            throw new ReglaDominioException(
-                    "Solo se registran Cosechas del año en curso o del anterior: " + anio);
-        }
         if (temporada == null) {
             throw new ReglaDominioException("La Cosecha debe tener una temporada.");
         }
+    }
+
+    public boolean esRegistrable(int anioDeRegistro) {
+        return anio >= anioDeRegistro - 1;
     }
 
     @Override

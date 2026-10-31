@@ -94,7 +94,5 @@ class LoteMapperTest {
     void losValoresInvalidosEnElMapperNoSeTragan() {
         assertThrows(ReglaDominioException.class, () -> mapper.toCantidad(new CantidadRequest(10.0, "toneladas")));
         assertThrows(ReglaDominioException.class, () -> mapper.toCodigoDeLote("ABC"));
-        assertThrows(ReglaDominioException.class,
-                () -> mapper.toCosecha(new CosechaRequest(Year.now().getValue() - 3, TemporadaDeCosecha.PRINCIPAL)));
     }
 }

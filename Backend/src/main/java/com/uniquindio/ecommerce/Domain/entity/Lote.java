@@ -126,4 +126,16 @@ public class Lote {
     public int hashCode() {
         return Objects.hashCode(codigoDeLote);
     }
+
+    /**
+     * Reconstruye una entidad Lote desde la persistencia sin ejecutar validaciones de creación.
+     */
+    public static Lote reconstruir(CodigoDeLote codigoDeLote, Cantidad cantidadDisponible, String fincaID, ProcesoDeBeneficio
+            procesoDeBeneficio, EstadoDelCafe estado, Cosecha cosecha, VariedadDeCafe variedad, boolean eliminadoLogicamente) {
+        Lote lote = new Lote(codigoDeLote, cantidadDisponible, fincaID,
+                procesoDeBeneficio, estado, cosecha, variedad);
+        lote.eliminadoLogicamente = eliminadoLogicamente;
+
+        return lote;
+    }
 }

@@ -32,12 +32,25 @@ class CosechaTest {
     }
 
     @Test
-    void noSeAceptaUnaCosechaDeHaceDosAniosOMas() {
-        assertThrows(ReglaDominioException.class, () -> new Cosecha(anioActual - 2, TemporadaDeCosecha.PRINCIPAL));
-    }
-
-    @Test
     void noSeAceptaUnaCosechaSinTemporada() {
         assertThrows(ReglaDominioException.class, () -> new Cosecha(anioActual, null));
     }
+
+    @Test
+    void unaCosechaDelAnioDeRegistroEsRegistrable(){
+        Cosecha c1 = new Cosecha(anioActual, TemporadaDeCosecha.TRAVIESA);
+        assertTrue(c1.esRegistrable(anioActual));
+    }
+
+    @Test
+    void seConstruyeUnaCosechaDeHaceVariosAniosParaPoderReconstruirla(){
+        assertDoesNotThrow(() -> new Cosecha(anioActual - 5, TemporadaDeCosecha.TRAVIESA));
+    }
+
+    @Test
+    void unaCosechaDeHaceDosAniosNoEsRegistrable(){
+        Cosecha c1 = new Cosecha(anioActual - 2, TemporadaDeCosecha.TRAVIESA);
+        assertFalse(c1.esRegistrable(anioActual));
+    }
+
 }
