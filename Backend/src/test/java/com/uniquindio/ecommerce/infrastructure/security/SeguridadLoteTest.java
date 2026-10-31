@@ -81,7 +81,7 @@ class SeguridadLoteTest {
                 .andExpect(status().isCreated());
     }
 
-    // ----- baja: solo el Caficultor dueño de la Finca del Lote (LOT-2026-001 es de finca-001, de usr-caficultor-01) -----
+    // ----- baja: solo el Caficultor dueño de la Finca del Lote (LOT-2026-001 es de finca-001, de usr-caficultor) -----
 
     @Test
     void darDeBajaSinTokenResponde401() throws Exception {
@@ -91,7 +91,7 @@ class SeguridadLoteTest {
     @Test
     void darDeBajaConUnRolQueNoEsCaficultorResponde403() throws Exception {
         mockMvc.perform(delete("/api/lotes/LOT-2026-001")
-                        .with(usuario("usr-tostador-01", "TOSTADOR")))
+                        .with(usuario("usr-tostador", "TOSTADOR")))
                 .andExpect(status().isForbidden());
     }
 
@@ -109,7 +109,7 @@ class SeguridadLoteTest {
     @Test
     void elCaficultorDuenoDaDeBajaSuLoteYQuedaEliminadoLogicamente() throws Exception {
         mockMvc.perform(delete("/api/lotes/LOT-2026-001")
-                        .with(usuario("usr-caficultor-01", "CAFICULTOR")))
+                        .with(usuario("usr-caficultor", "CAFICULTOR")))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/lotes/LOT-2026-001")
@@ -121,14 +121,14 @@ class SeguridadLoteTest {
     @Test
     void darDeBajaUnLoteInexistenteResponde404() throws Exception {
         mockMvc.perform(delete("/api/lotes/LOT-2026-999")
-                        .with(usuario("usr-caficultor-01", "CAFICULTOR")))
+                        .with(usuario("usr-caficultor", "CAFICULTOR")))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void darDeBajaConUnCodigoInvalidoResponde400() throws Exception {
         mockMvc.perform(delete("/api/lotes/ABC")
-                        .with(usuario("usr-caficultor-01", "CAFICULTOR")))
+                        .with(usuario("usr-caficultor", "CAFICULTOR")))
                 .andExpect(status().isBadRequest());
     }
 }
