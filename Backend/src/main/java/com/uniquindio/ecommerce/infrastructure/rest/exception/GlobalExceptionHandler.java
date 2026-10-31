@@ -1,5 +1,6 @@
 package com.uniquindio.ecommerce.infrastructure.rest.exception;
 
+import com.uniquindio.ecommerce.Domain.exception.CredencialesInvalidasException;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ReglaDominioException.class)
     public ResponseEntity<ErrorResponse> manejarReglaDominio(ReglaDominioException ex) {
         return construirRespuesta(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ErrorResponse> manejarCredencialesInvalidas(CredencialesInvalidasException ex) {
+        return construirRespuesta(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler(NoSuchElementException.class)

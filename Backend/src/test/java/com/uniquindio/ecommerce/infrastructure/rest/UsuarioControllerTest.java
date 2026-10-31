@@ -1,6 +1,7 @@
 package com.uniquindio.ecommerce.infrastructure.rest;
 
 import com.uniquindio.ecommerce.Domain.entity.Usuario;
+import com.uniquindio.ecommerce.Domain.exception.CredencialesInvalidasException;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.valueobject.*;
 import com.uniquindio.ecommerce.application.dto.request.EditarPerfilRequest;
@@ -139,6 +140,19 @@ class UsuarioControllerTest {
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.usuario.id").value("usr-123"))
                 .andExpect(jsonPath("$.usuario.contrasena").doesNotExist());
+    }
+
+    @Test
+    void loginConCredencialesInvalidasResponde401ConUnMensajeGenerico() throws Exception {
+        given(iniciarSesion.ejecutar(any(), any())).willThrow(new CredencialesInvalidasException());
+
+        mockMvc.perform(post("/api/usuarios/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "joseph@uniquindio.edu.co", "contrasena": "Equivocada123"}"""))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.mensaje").value("Credenciales inválidas."));
     }
 
     @Test
