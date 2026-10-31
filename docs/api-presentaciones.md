@@ -61,10 +61,14 @@ Todo error trae `{ timestamp, status, mensaje }`.
 
 | Situación | Estado |
 | --- | --- |
-| Regla de negocio violada (`ReglaDominioException`) | 400 con el mensaje de la regla |
+| Regla de negocio violada (`ReglaDominioException`) | 422 con el mensaje de la regla |
 | Cuerpo con campos inválidos o que no es JSON | 400 con el campo y su mensaje |
 | Parámetro o encabezado faltante, de tipo inválido o fuera de rango | 400 |
-| La Presentación no existe (`NoSuchElementException`) | 404 |
+| Sin token, token inválido o vencido, o credenciales inválidas al iniciar sesión | 401 |
+| Autenticado pero sin el rol o sin ser el dueño | 403 |
+| La Presentación no existe (`NoSuchElementException`) o la ruta no existe | 404 |
+| Método HTTP o tipo de contenido no admitidos | 405 y 415 |
+| Error inesperado | 500 con un mensaje genérico (el detalle solo queda en el registro) |
 
 ## Persistencia
 

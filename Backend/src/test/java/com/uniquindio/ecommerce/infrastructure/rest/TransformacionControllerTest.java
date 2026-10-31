@@ -151,11 +151,11 @@ class TransformacionControllerTest {
     }
 
     @Test
-    void registrarConUnaMermaFueraDeRangoResponde400PorElDominio() throws Exception {
+    void registrarConUnaMermaFueraDeRangoResponde422PorElDominio() throws Exception {
         mockMvc.perform(post("/api/transformaciones").with(token("tostador-1", "TOSTADOR"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(TRANSFORMACION.replace("0.18", "0.50")))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
 
         verify(registrarTransformacion, never()).ejecutar(any(), any(), any(), any(), any(), any(), any());
     }

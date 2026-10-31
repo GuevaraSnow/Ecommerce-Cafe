@@ -157,12 +157,12 @@ class CompraControllerTest {
     }
 
     @Test
-    void agregarSinStockSuficienteResponde400ConElMensajeDelDominio() throws Exception {
+    void agregarSinStockSuficienteResponde422ConElMensajeDelDominio() throws Exception {
         given(agregarAlCarrito.ejecutar(any(), any(), any())).willThrow(new ReglaDominioException("Stock insuficiente"));
 
         mockMvc.perform(post("/api/compras/compra-1/presentaciones")
                         .contentType(MediaType.APPLICATION_JSON).content(AGREGAR))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("Stock insuficiente"));
     }
 
@@ -212,13 +212,13 @@ class CompraControllerTest {
     }
 
     @Test
-    void confirmarUnCarritoVacioResponde400() throws Exception {
+    void confirmarUnCarritoVacioResponde422() throws Exception {
         given(confirmarCompra.ejecutar(any(), any()))
                 .willThrow(new ReglaDominioException("No se puede confirmar una compra sin detalles"));
 
         mockMvc.perform(put("/api/compras/compra-1/confirmar")
                         .contentType(MediaType.APPLICATION_JSON).content(DIRECCION))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("No se puede confirmar una compra sin detalles"));
     }
 
@@ -245,12 +245,12 @@ class CompraControllerTest {
     }
 
     @Test
-    void cancelarUnaCompraEnviadaResponde400() throws Exception {
+    void cancelarUnaCompraEnviadaResponde422() throws Exception {
         given(cancelarCompra.ejecutar("compra-1"))
                 .willThrow(new ReglaDominioException("No se puede cancelar una compra en estado ENVIADA"));
 
         mockMvc.perform(put("/api/compras/compra-1/cancelar"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("No se puede cancelar una compra en estado ENVIADA"));
     }
 
@@ -304,12 +304,12 @@ class CompraControllerTest {
     }
 
     @Test
-    void entregarUnaCompraNoEnviadaResponde400() throws Exception {
+    void entregarUnaCompraNoEnviadaResponde422() throws Exception {
         given(marcarEntregada.ejecutar("compra-1"))
                 .willThrow(new ReglaDominioException("Solo se puede entregar una compra enviada (estado actual: CONFIRMADA)"));
 
         mockMvc.perform(put("/api/compras/compra-1/entregar").with(token("vendedor-1", "TOSTADOR")))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value(containsString("Solo se puede entregar una compra enviada")));
     }
 }

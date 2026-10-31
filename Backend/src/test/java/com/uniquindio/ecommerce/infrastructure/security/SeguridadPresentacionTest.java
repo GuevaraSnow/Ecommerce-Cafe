@@ -157,7 +157,7 @@ class SeguridadPresentacionTest {
         mockMvc.perform(post("/api/presentaciones/merchandising")
                         .with(usuario("usr-tostador", "TOSTADOR"))
                         .contentType(MediaType.APPLICATION_JSON).content(ARTICULO))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test

@@ -99,7 +99,7 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void registroConEmailDuplicadoResponde400() throws Exception {
+    void registroConEmailDuplicadoResponde422() throws Exception {
         given(registrarUsuario.ejecutar(any(), any(), any(), any(), any(), any()))
                 .willThrow(new ReglaDominioException("El email ya se encuentra registrado."));
 
@@ -116,7 +116,7 @@ class UsuarioControllerTest {
         mockMvc.perform(post("/api/usuarios/registro")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("El email ya se encuentra registrado."));
     }
 
@@ -189,13 +189,13 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void editarPerfilConUnTelefonoInvalidoResponde400SinLlamarAlCasoDeUso() throws Exception {
+    void editarPerfilConUnTelefonoInvalidoResponde422SinLlamarAlCasoDeUso() throws Exception {
         mockMvc.perform(put("/api/usuarios/perfil")
                         .with(jwt().jwt(j -> j.subject("usr-123")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"nombre": "Joseph Cortes", "telefono": "abc"}"""))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("El campo debe ser de 10 digitos"));
 
         verify(editarPerfil, never()).ejecutar(any(), any(), any());
@@ -220,7 +220,7 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void cambiarContrasenaIncorrectaResponde400() throws Exception {
+    void cambiarContrasenaIncorrectaResponde422() throws Exception {
         doThrow(new ReglaDominioException("La contraseña actual es incorrecta."))
                 .when(cambiarContrasena).ejecutar(eq("usr-123"), any(), any());
 
@@ -235,7 +235,7 @@ class UsuarioControllerTest {
                         .with(jwt().jwt(j -> j.subject("usr-123")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("La contraseña actual es incorrecta."));
     }
 
@@ -252,12 +252,12 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void restablecerContrasenaConUnaContrasenaInsegura400SinLlamarAlCasoDeUso() throws Exception {
+    void restablecerContrasenaConUnaContrasenaInsegura422SinLlamarAlCasoDeUso() throws Exception {
         mockMvc.perform(post("/api/usuarios/restablecer-contrasena")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "joseph@uniquindio.edu.co", "codigo": "123456", "nuevaContrasena": "debil"}"""))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("La contraseña debe tener al menos 8 caracteres."));
 
         verify(restablecerContrasena, never()).ejecutar(any(), any(), any());

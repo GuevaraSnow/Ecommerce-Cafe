@@ -39,7 +39,8 @@ public class UsuarioController {
     @PostMapping("/registro")
     @Operation(summary = "Registrar un usuario")
     @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente")
-    @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya registrado")
+    @ApiResponse(responseCode = "400", description = "Datos mal formados")
+    @ApiResponse(responseCode = "422", description = "Datos que incumplen las reglas del usuario o email ya registrado")
     public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody RegistrarUsuarioRequest request) {
         Usuario usuario = registrarUsuario.ejecutar(
                 request.nombre(),
@@ -86,7 +87,7 @@ public class UsuarioController {
     @PostMapping("/restablecer-contrasena")
     @Operation(summary = "Restablecer contraseña usando código")
     @ApiResponse(responseCode = "200", description = "Contraseña restablecida correctamente")
-    @ApiResponse(responseCode = "400", description = "Código inválido o expirado, o la contraseña no es segura")
+    @ApiResponse(responseCode = "422", description = "Código inválido o expirado, o la contraseña no es segura")
     public ResponseEntity<Void> restablecerContrasena(@Valid @RequestBody RestablecerContrasenaRequest request) {
         restablecerContrasena.ejecutar(
                 mapper.toEmail(request.email()),

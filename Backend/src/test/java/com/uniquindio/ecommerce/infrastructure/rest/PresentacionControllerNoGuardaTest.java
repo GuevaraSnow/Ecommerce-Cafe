@@ -87,7 +87,7 @@ class PresentacionControllerNoGuardaTest {
     }
 
     @Test
-    void cambiarElPrecioDeUnaPresentacionDadaDeBajaResponde400YNoGuardaNada() throws Exception {
+    void cambiarElPrecioDeUnaPresentacionDadaDeBajaResponde422YNoGuardaNada() throws Exception {
         Presentacion dadaDeBaja = manilla();
         dadaDeBaja.darDeBaja();
         when(repositorio.buscarPorId("pres-1")).thenReturn(Optional.of(dadaDeBaja));
@@ -95,7 +95,7 @@ class PresentacionControllerNoGuardaTest {
         mockMvc.perform(put("/api/presentaciones/pres-1/precio")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(NUEVO_PRECIO))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.mensaje").value("No se puede operar sobre una Presentación dada de baja"));
 
         verify(repositorio, never()).guardar(any());
