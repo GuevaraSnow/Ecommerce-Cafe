@@ -4,6 +4,7 @@ import com.uniquindio.ecommerce.Domain.entity.Presentacion;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.valueobject.TipoDePresentacion;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -59,6 +60,42 @@ class ConsultasDePresentacionTest {
 
         assertSame(pagina, buscar.ejecutar(filtro, 1, 10));
         verify(repositorio, never()).guardar(any());
+    }
+
+    @Test
+    void buscarConTodosLosFiltrosCombinadosSeLosPasaTalCualAlRepositorio() {
+        FiltroDePresentaciones filtro = new FiltroDePresentaciones("cafe", TipoDePresentacion.CAFE_TOSTADO,
+                "vendedor-1", 10000.0, 40000.0, 4.0);
+        Pagina<Presentacion> pagina = new Pagina<>(List.of(merchandising("pres-1")), 0, 10, 1);
+        when(repositorio.buscarDisponibles(filtro, 0, 10)).thenReturn(pagina);
+
+        assertSame(pagina, buscar.ejecutar(filtro, 0, 10));
+        verify(repositorio).buscarDisponibles(filtro, 0, 10);
+        verify(repositorio, never()).guardar(any());
+    }
+
+    @Test
+    void buscarSinCoincidenciasDevuelveUnaPaginaVacia() {
+        FiltroDePresentaciones filtro = new FiltroDePresentaciones("inexistente", null, null, null, null);
+        when(repositorio.buscarDisponibles(filtro, 0, 10)).thenReturn(new Pagina<>(List.of(), 0, 10, 0));
+
+        Pagina<Presentacion> resultado = buscar.ejecutar(filtro, 0, 10);
+
+        assertTrue(resultado.contenido().isEmpty());
+        assertEquals(0, resultado.totalElementos());
+        assertEquals(0, resultado.totalPaginas());
+    }
+
+    @Test
+    void buscarUnaPaginaFueraDeRangoDevuelveContenidoVacioYConservaElTotal() {
+        FiltroDePresentaciones sinFiltros = new FiltroDePresentaciones(null, null, null, null, null);
+        when(repositorio.buscarDisponibles(sinFiltros, 9, 10)).thenReturn(new Pagina<>(List.of(), 9, 10, 11));
+
+        Pagina<Presentacion> resultado = buscar.ejecutar(sinFiltros, 9, 10);
+
+        assertTrue(resultado.contenido().isEmpty());
+        assertEquals(11, resultado.totalElementos());
+        assertEquals(2, resultado.totalPaginas());
     }
 
     @Test
