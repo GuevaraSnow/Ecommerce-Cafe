@@ -26,10 +26,10 @@ public class VerificadorDeCompra {
      */
     public void verificarQuePuedeResenar(String compradorId, String presentacionId) {
         if (!compraRepositorio.existeCompraEntregada(compradorId, presentacionId)) {
-            throw new ReglaDominioException("Solo puede resenar una presentacion quien la adquirio (compra entregada)");
+            throw new ReglaDominioException("Solo puede reseñar una presentacion quien la adquirio (compra entregada)");
         }
         if (resenaRepositorio.existeResenaDe(compradorId, presentacionId)) {
-            throw new ReglaDominioException("El comprador ya reseno esta presentacion");
+            throw new ReglaDominioException("El comprador ya reseño esta presentacion");
         }
     }
 }
