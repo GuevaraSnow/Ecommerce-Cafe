@@ -2,7 +2,12 @@
   <p>Bienvenido a {{ title() }}</p>
   <ul>
     <li><a routerLink="/">Inicio</a></li>
-    <li><a routerLink="/login">Login</a></li>
+    @if (auth.isAuthenticated()){
+    <li>Hola, {{ auth.nombreUsuario() }}</li>
+    <li><button type="button" (click)="auth.logout()">Cerrar sesión</button></li>
+    } @else {
+        <li><a routerLink="/login">Login</a></li>
+    }
     <li><a routerLink="/catalogo">Catalogo</a></li>
     <li><a routerLink="/registro">Registro</a></li>
   </ul>
