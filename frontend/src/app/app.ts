@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { AuthService } from './services/auth';
 
 @Component({
   imports: [RouterOutlet, RouterLink],
@@ -10,4 +11,5 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 export class App {
   title = signal('Cafe de Origen');
   footer = signal('Universidad del Quindío');
+  auth = inject(AuthService);
 }
