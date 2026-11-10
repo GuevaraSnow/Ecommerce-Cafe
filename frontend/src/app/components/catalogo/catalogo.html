@@ -1,1 +1,69 @@
-<p>catalogo works!</p>
+<section>
+  <h2>Catálogo</h2>
+
+  <form (submit)="$event.preventDefault(); buscar(titulo.value, tipo.value)">
+    <input #titulo type="search" placeholder="Buscar por nombre" />
+    <select #tipo (change)="buscar(titulo.value, tipo.value)">
+      <option value="">Todos los tipos</option>
+      @for (t of tipos; track t.valor) {
+        <option [value]="t.valor">{{ t.etiqueta }}</option>
+      }
+    </select>
+    <button type="submit">Buscar</button>
+  </form>
+
+  @if (cargando()) {
+    <p>Cargando catálogo...</p>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+  } @else if (pagina(); as pag) {
+    @if (pag.contenido.length === 0) {
+      <p>No hay presentaciones que coincidan con la búsqueda.</p>
+    } @else {
+      <ul class="catalogo">
+        @for (p of pag.contenido; track p.id) {
+          <li>
+            <h3>{{ p.titulo }}</h3>
+            <p>{{ etiquetaDelTipo(p.tipo) }}</p>
+            @if (tieneDescuento(p)) {
+              <p>
+                <s>{{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}</s>
+                <strong>
+                  {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+                </strong>
+                ({{ p.descuento?.porcentaje }}% de descuento)
+              </p>
+            } @else {
+              <p>
+                <strong>
+                  {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+                </strong>
+              </p>
+            }
+            <p>Disponible: {{ p.cantidadDisponible.valor }} {{ p.cantidadDisponible.unidad }}</p>
+            @if (p.notaCata?.length) {
+              <p>Notas de cata: {{ p.notaCata?.join(', ') }}</p>
+            }
+            @if (p.perfilTueste) {
+              <p>Tueste: {{ p.perfilTueste }}</p>
+            }
+          </li>
+        }
+      </ul>
+
+      <nav>
+        <button type="button" [disabled]="pag.pagina === 0" (click)="cambiarPagina(pag.pagina - 1)">
+          Anterior
+        </button>
+        <span>Página {{ pag.pagina + 1 }} de {{ pag.totalPaginas }}</span>
+        <button
+          type="button"
+          [disabled]="pag.pagina + 1 >= pag.totalPaginas"
+          (click)="cambiarPagina(pag.pagina + 1)"
+        >
+          Siguiente
+        </button>
+      </nav>
+    }
+  }
+</section>

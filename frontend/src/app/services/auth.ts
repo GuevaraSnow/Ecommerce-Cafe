@@ -1,11 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { API_URL } from '../api';
 import { LoginRequest, LoginResponse } from '../models/auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  private url = 'http://localhost:8080/api/usuarios';
+  private url = `${API_URL}/usuarios`;
 
   isAuthenticated = signal(!!localStorage.getItem('token'));
   nombreUsuario = signal(localStorage.getItem('nombre') || '');
