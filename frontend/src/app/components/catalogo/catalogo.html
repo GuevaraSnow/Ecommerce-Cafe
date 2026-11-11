@@ -47,6 +47,9 @@
             @if (p.perfilTueste) {
               <p>Tueste: {{ p.perfilTueste }}</p>
             }
+            @if (auth.isAuthenticated()) {
+              <a [routerLink]="['/comprar', p.id]">Comprar</a>
+            }
           </li>
         }
       </ul>
