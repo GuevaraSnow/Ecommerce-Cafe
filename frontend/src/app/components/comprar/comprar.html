@@ -1,0 +1,71 @@
+<section>
+  <h2>Comprar</h2>
+
+  @if (cargando()) {
+    <p>Cargando presentación...</p>
+  } @else if (compra(); as c) {
+    <div class="confirmacion">
+      <h3>¡Compra confirmada!</h3>
+      <p>Número de compra: {{ c.id }}</p>
+      <p>Estado: {{ c.estado }}</p>
+      <p>
+        Total:
+        <strong>{{ total() | currency: c.detalles[0].precioCongelado.moneda : 'symbol-narrow' : '1.0-0' }}</strong>
+      </p>
+      @if (c.direccionEnvio; as d) {
+        <p>Envío a {{ d.destinatario }}, {{ d.direccion }} ({{ d.ciudad }})</p>
+      }
+      <a routerLink="/catalogo">Volver al catálogo</a>
+    </div>
+  } @else if (presentacion(); as p) {
+    <h3>{{ p.titulo }}</h3>
+    <p>
+      Precio:
+      <strong>{{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}</strong>
+      por {{ p.cantidadDisponible.unidad }} · Disponible: {{ p.cantidadDisponible.valor }}
+      {{ p.cantidadDisponible.unidad }}
+    </p>
+
+    <form [formGroup]="compraForm" (ngSubmit)="onSubmit()">
+      <div>
+        <label for="cantidad">Cantidad ({{ p.cantidadDisponible.unidad }}):</label>
+        <input id="cantidad" type="number" step="any" formControlName="cantidad" />
+        @if (compraForm.controls.cantidad.invalid && compraForm.controls.cantidad.touched) {
+          <div class="error">Ingresa una cantidad mayor que cero.</div>
+        }
+      </div>
+
+      <div>
+        <label for="destinatario">Destinatario:</label>
+        <input id="destinatario" type="text" formControlName="destinatario" />
+        @if (compraForm.controls.destinatario.invalid && compraForm.controls.destinatario.touched) {
+          <div class="error">Ingresa el nombre de quien recibe (máximo 100 caracteres).</div>
+        }
+      </div>
+
+      <div>
+        <label for="ciudad">Ciudad:</label>
+        <input id="ciudad" type="text" formControlName="ciudad" />
+        @if (compraForm.controls.ciudad.invalid && compraForm.controls.ciudad.touched) {
+          <div class="error">Ingresa la ciudad (máximo 80 caracteres).</div>
+        }
+      </div>
+
+      <div>
+        <label for="direccion">Dirección:</label>
+        <input id="direccion" type="text" formControlName="direccion" />
+        @if (compraForm.controls.direccion.invalid && compraForm.controls.direccion.touched) {
+          <div class="error">Ingresa la dirección (máximo 150 caracteres).</div>
+        }
+      </div>
+
+      <button type="submit" [disabled]="!canSubmit()">
+        @if (isLoading()) { Procesando... } @else { Confirmar compra }
+      </button>
+    </form>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+</section>

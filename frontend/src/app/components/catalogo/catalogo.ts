@@ -1,13 +1,15 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth';
 import { Pagina, Presentacion, TipoDePresentacion } from '../../models/catalogo';
 import { PresentacionesService } from '../../services/presentaciones';
 
 const TAMANO_PAGINA = 8;
 
 @Component({
-  imports: [CurrencyPipe],
+  imports: [CurrencyPipe, RouterLink],
   selector: 'app-catalogo',
   styleUrl: './catalogo.css',
   templateUrl: './catalogo.html',
@@ -15,6 +17,7 @@ const TAMANO_PAGINA = 8;
 export class Catalogo {
   private servicio = inject(PresentacionesService);
   private destroyRef = inject(DestroyRef);
+  protected auth = inject(AuthService);
 
   readonly tipos: { valor: TipoDePresentacion; etiqueta: string }[] = [
     { valor: 'CAFE_VERDE', etiqueta: 'Café verde' },
