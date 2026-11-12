@@ -17,10 +17,11 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('muestra el encabezado y el pie de página', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('p')?.textContent).toContain('Cafe de Origen');
+    expect(compiled.querySelector('nav')?.textContent).toContain('Café de Origen');
+    expect(compiled.querySelector('footer')?.textContent).toContain('Universidad del Quindío');
   });
 });
