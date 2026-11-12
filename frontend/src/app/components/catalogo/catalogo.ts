@@ -51,6 +51,17 @@ export class Catalogo {
     return this.tipos.find((t) => t.valor === tipo)?.etiqueta ?? tipo;
   }
 
+  // Cada tipo de presentación tiene su color de etiqueta (clases de Bootstrap)
+  badgeTipo(tipo: TipoDePresentacion): string {
+    const colores: Record<string, string> = {
+      CAFE_VERDE: 'bg-success',
+      CAFE_TOSTADO: 'bg-warning text-dark',
+      DERIVADO_CONSUMIBLE: 'bg-info text-dark',
+      MERCHANDISING: 'bg-secondary',
+    };
+    return colores[tipo] ?? 'bg-secondary';
+  }
+
   tieneDescuento(p: Presentacion): boolean {
     return p.precioVigente.monto < p.precio.monto;
   }

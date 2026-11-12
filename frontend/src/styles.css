@@ -1,1 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Campos del formulario: rojo si son inválidos y verde si son válidos, solo después de tocarlos */
+.ng-invalid.ng-touched:not(form) {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.ng-valid.ng-touched:not(form) {
+  border-color: #198754;
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
