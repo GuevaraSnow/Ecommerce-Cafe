@@ -1,0 +1,58 @@
+<nav class="navbar navbar-expand-md bg-body-tertiary shadow-sm">
+  <div class="container">
+    <a routerLink="/" class="navbar-brand d-flex align-items-center gap-2">
+      <i class="fa-solid fa-mug-hot"></i>
+      <span>Café de Origen</span>
+    </a>
+
+    <!-- Botón de hamburguesa: solo se ve en el celular -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navMenu"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-link"
+          >
+            <i class="fa-solid fa-house me-1"></i>Inicio
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/catalogo" routerLinkActive="active" class="nav-link">
+            <i class="fa-solid fa-store me-1"></i>Catálogo
+          </a>
+        </li>
+        @if (!isLoggedIn()) {
+          <li class="nav-item">
+            <a routerLink="/registro" routerLinkActive="active" class="nav-link">
+              <i class="fa-solid fa-user-plus me-1"></i>Registro
+            </a>
+          </li>
+        }
+      </ul>
+
+      <div class="d-flex align-items-center gap-2">
+        @if (isLoggedIn()) {
+          <span class="navbar-text">Hola, {{ nombreUsuario() }}</span>
+          <button class="btn btn-outline-danger btn-sm" (click)="cerrarSesion()">
+            <i class="fa-solid fa-right-from-bracket me-1"></i>Cerrar sesión
+          </button>
+        } @else {
+          <a routerLink="/login" class="btn btn-outline-primary btn-sm">
+            <i class="fa-solid fa-right-to-bracket me-1"></i>Ingresar
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+</nav>

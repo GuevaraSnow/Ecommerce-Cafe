@@ -1,72 +1,118 @@
-<section>
-  <h2>Catálogo</h2>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 id="titulo-catalogo" class="h3 mb-0"><i class="fa-solid fa-store me-2"></i>Catálogo</h1>
+  </div>
 
-  <form (submit)="$event.preventDefault(); buscar(titulo.value, tipo.value)">
-    <input #titulo type="search" placeholder="Buscar por nombre" />
-    <select #tipo (change)="buscar(titulo.value, tipo.value)">
-      <option value="">Todos los tipos</option>
-      @for (t of tipos; track t.valor) {
-        <option [value]="t.valor">{{ t.etiqueta }}</option>
-      }
-    </select>
-    <button type="submit">Buscar</button>
+  <form class="row g-2 mb-4" (submit)="$event.preventDefault(); buscar(titulo.value, tipo.value)">
+    <div class="col-md-6">
+      <input #titulo type="search" class="form-control" placeholder="Buscar por nombre" />
+    </div>
+    <div class="col-md-4">
+      <select #tipo class="form-select" (change)="buscar(titulo.value, tipo.value)">
+        <option value="">Todos los tipos</option>
+        @for (t of tipos; track t.valor) {
+          <option [value]="t.valor">{{ t.etiqueta }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button type="submit" class="btn btn-primary">
+        <i class="fa-solid fa-magnifying-glass me-1"></i>Buscar
+      </button>
+    </div>
   </form>
 
   @if (cargando()) {
-    <p>Cargando catálogo...</p>
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border mb-3"></div>
+      <p>Cargando catálogo...</p>
+    </div>
   } @else if (error()) {
-    <p class="error">{{ error() }}</p>
+    <div class="alert alert-danger">{{ error() }}</div>
   } @else if (pagina(); as pag) {
     @if (pag.contenido.length === 0) {
-      <p>No hay presentaciones que coincidan con la búsqueda.</p>
+      <!-- Cuando no hay resultados -->
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-box-open fa-3x mb-3"></i>
+        <p class="h5">No hay presentaciones que coincidan con la búsqueda.</p>
+      </div>
     } @else {
-      <ul class="catalogo">
+      <!-- Una tarjeta por presentación -->
+      <div class="row g-3">
         @for (p of pag.contenido; track p.id) {
-          <li>
-            <h3>{{ p.titulo }}</h3>
-            <p>{{ etiquetaDelTipo(p.tipo) }}</p>
-            @if (tieneDescuento(p)) {
-              <p>
-                <s>{{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}</s>
-                <strong>
-                  {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
-                </strong>
-                ({{ p.descuento?.porcentaje }}% de descuento)
-              </p>
-            } @else {
-              <p>
-                <strong>
-                  {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
-                </strong>
-              </p>
-            }
-            <p>Disponible: {{ p.cantidadDisponible.valor }} {{ p.cantidadDisponible.unidad }}</p>
-            @if (p.notaCata?.length) {
-              <p>Notas de cata: {{ p.notaCata?.join(', ') }}</p>
-            }
-            @if (p.perfilTueste) {
-              <p>Tueste: {{ p.perfilTueste }}</p>
-            }
-            @if (auth.isAuthenticated()) {
-              <a [routerLink]="['/comprar', p.id]">Comprar</a>
-            }
-          </li>
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">{{ p.titulo }}</span>
+                <span class="badge {{ badgeTipo(p.tipo) }}">{{ etiquetaDelTipo(p.tipo) }}</span>
+              </div>
+              <div class="card-body">
+                <p class="mb-2">
+                  <i class="fa-solid fa-tag me-1"></i>
+                  @if (tieneDescuento(p)) {
+                    <s class="text-muted">
+                      {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+                    </s>
+                    <strong>
+                      {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+                    </strong>
+                    <span class="badge bg-danger ms-1">-{{ p.descuento?.porcentaje }}%</span>
+                  } @else {
+                    <strong>
+                      {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+                    </strong>
+                  }
+                </p>
+                <p class="text-muted small mb-1">
+                  <i class="fa-solid fa-boxes-stacked me-1"></i>Disponible:
+                  {{ p.cantidadDisponible.valor }} {{ p.cantidadDisponible.unidad }}
+                </p>
+                @if (p.perfilTueste) {
+                  <p class="text-muted small mb-1">
+                    <i class="fa-solid fa-fire me-1"></i>Tueste: {{ p.perfilTueste }}
+                  </p>
+                }
+                @if (p.notaCata?.length) {
+                  <p class="text-muted small mb-0">
+                    <i class="fa-solid fa-mug-hot me-1"></i>Notas de cata: {{ p.notaCata?.join(', ') }}
+                  </p>
+                }
+              </div>
+              <div class="card-footer text-end">
+                @if (auth.isAuthenticated()) {
+                  <a [routerLink]="['/comprar', p.id]" class="btn btn-sm btn-primary">
+                    <i class="fa-solid fa-cart-shopping me-1"></i>Comprar
+                  </a>
+                } @else {
+                  <a routerLink="/login" class="btn btn-sm btn-outline-secondary">
+                    Inicia sesión para comprar
+                  </a>
+                }
+              </div>
+            </div>
+          </div>
         }
-      </ul>
+      </div>
 
-      <nav>
-        <button type="button" [disabled]="pag.pagina === 0" (click)="cambiarPagina(pag.pagina - 1)">
-          Anterior
+      <nav class="d-flex justify-content-center align-items-center gap-3 mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          [disabled]="pag.pagina === 0"
+          (click)="cambiarPagina(pag.pagina - 1)"
+        >
+          <i class="fa-solid fa-chevron-left me-1"></i>Anterior
         </button>
         <span>Página {{ pag.pagina + 1 }} de {{ pag.totalPaginas }}</span>
         <button
           type="button"
+          class="btn btn-outline-secondary btn-sm"
           [disabled]="pag.pagina + 1 >= pag.totalPaginas"
           (click)="cambiarPagina(pag.pagina + 1)"
         >
-          Siguiente
+          Siguiente<i class="fa-solid fa-chevron-right ms-1"></i>
         </button>
       </nav>
     }
   }
-</section>
+</div>

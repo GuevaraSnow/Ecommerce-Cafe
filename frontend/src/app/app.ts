@@ -1,15 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { AuthService } from './services/auth';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Footer } from './components/footer/footer';
+import { Header } from './components/header/header';
 
 @Component({
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, Header, Footer],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
-export class App {
-  title = signal('Cafe de Origen');
-  footer = signal('Universidad del Quindío');
-  auth = inject(AuthService);
-}
+export class App {}

@@ -1,71 +1,106 @@
-<section>
-  <h2>Comprar</h2>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      @if (cargando()) {
+        <div class="text-center py-5 text-muted">
+          <div class="spinner-border mb-3"></div>
+          <p>Cargando presentación...</p>
+        </div>
+      } @else if (compra(); as c) {
+        <div class="card shadow-sm border-success">
+          <div class="card-header bg-success text-white text-center py-3">
+            <h5 class="mb-0"><i class="fa-solid fa-circle-check me-2"></i>¡Compra confirmada!</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-1">Número de compra: <strong>{{ c.id }}</strong></p>
+            <p class="mb-1">Estado: <span class="badge bg-success">{{ c.estado }}</span></p>
+            <p class="mb-1">
+              Total:
+              <strong>
+                {{ total() | currency: c.detalles[0].precioCongelado.moneda : 'symbol-narrow' : '1.0-0' }}
+              </strong>
+            </p>
+            @if (c.direccionEnvio; as d) {
+              <p class="text-muted small mb-0">
+                <i class="fa-solid fa-truck me-1"></i>Envío a {{ d.destinatario }}, {{ d.direccion }}
+                ({{ d.ciudad }})
+              </p>
+            }
+          </div>
+          <div class="card-footer text-end">
+            <a routerLink="/catalogo" class="btn btn-sm btn-primary">
+              <i class="fa-solid fa-store me-1"></i>Volver al catálogo
+            </a>
+          </div>
+        </div>
+      } @else if (presentacion(); as p) {
+        <div class="card shadow-sm">
+          <div class="card-header text-center py-3">
+            <h5 class="mb-0"><i class="fa-solid fa-cart-shopping me-2"></i>Comprar</h5>
+          </div>
+          <div class="card-body">
+            <h6 class="mb-1">{{ p.titulo }}</h6>
+            <p class="text-muted small mb-3">
+              Precio:
+              <strong>
+                {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+              </strong>
+              por {{ p.cantidadDisponible.unidad }} · Disponible: {{ p.cantidadDisponible.valor }}
+              {{ p.cantidadDisponible.unidad }}
+            </p>
 
-  @if (cargando()) {
-    <p>Cargando presentación...</p>
-  } @else if (compra(); as c) {
-    <div class="confirmacion">
-      <h3>¡Compra confirmada!</h3>
-      <p>Número de compra: {{ c.id }}</p>
-      <p>Estado: {{ c.estado }}</p>
-      <p>
-        Total:
-        <strong>{{ total() | currency: c.detalles[0].precioCongelado.moneda : 'symbol-narrow' : '1.0-0' }}</strong>
-      </p>
-      @if (c.direccionEnvio; as d) {
-        <p>Envío a {{ d.destinatario }}, {{ d.direccion }} ({{ d.ciudad }})</p>
+            <form [formGroup]="compraForm" (ngSubmit)="onSubmit()">
+              <div class="mb-3">
+                <label for="cantidad" class="form-label">Cantidad ({{ p.cantidadDisponible.unidad }})</label>
+                <input id="cantidad" type="number" step="any" formControlName="cantidad" class="form-control" />
+                @if (compraForm.controls.cantidad.invalid && compraForm.controls.cantidad.touched) {
+                  <div class="text-danger small mt-1">Ingresa una cantidad mayor que cero.</div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="destinatario" class="form-label">Destinatario</label>
+                <input id="destinatario" type="text" formControlName="destinatario" class="form-control" />
+                @if (compraForm.controls.destinatario.invalid && compraForm.controls.destinatario.touched) {
+                  <div class="text-danger small mt-1">
+                    Ingresa el nombre de quien recibe (máximo 100 caracteres).
+                  </div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="ciudad" class="form-label">Ciudad</label>
+                <input id="ciudad" type="text" formControlName="ciudad" class="form-control" />
+                @if (compraForm.controls.ciudad.invalid && compraForm.controls.ciudad.touched) {
+                  <div class="text-danger small mt-1">Ingresa la ciudad (máximo 80 caracteres).</div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="direccion" class="form-label">Dirección</label>
+                <input id="direccion" type="text" formControlName="direccion" class="form-control" />
+                @if (compraForm.controls.direccion.invalid && compraForm.controls.direccion.touched) {
+                  <div class="text-danger small mt-1">Ingresa la dirección (máximo 150 caracteres).</div>
+                }
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary" [disabled]="!canSubmit()">
+                  @if (isLoading()) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>Procesando...
+                  } @else {
+                    <i class="fa-solid fa-check me-2"></i>Confirmar compra
+                  }
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       }
-      <a routerLink="/catalogo">Volver al catálogo</a>
+
+      @if (error()) {
+        <div class="alert alert-danger mt-3">{{ error() }}</div>
+      }
     </div>
-  } @else if (presentacion(); as p) {
-    <h3>{{ p.titulo }}</h3>
-    <p>
-      Precio:
-      <strong>{{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}</strong>
-      por {{ p.cantidadDisponible.unidad }} · Disponible: {{ p.cantidadDisponible.valor }}
-      {{ p.cantidadDisponible.unidad }}
-    </p>
-
-    <form [formGroup]="compraForm" (ngSubmit)="onSubmit()">
-      <div>
-        <label for="cantidad">Cantidad ({{ p.cantidadDisponible.unidad }}):</label>
-        <input id="cantidad" type="number" step="any" formControlName="cantidad" />
-        @if (compraForm.controls.cantidad.invalid && compraForm.controls.cantidad.touched) {
-          <div class="error">Ingresa una cantidad mayor que cero.</div>
-        }
-      </div>
-
-      <div>
-        <label for="destinatario">Destinatario:</label>
-        <input id="destinatario" type="text" formControlName="destinatario" />
-        @if (compraForm.controls.destinatario.invalid && compraForm.controls.destinatario.touched) {
-          <div class="error">Ingresa el nombre de quien recibe (máximo 100 caracteres).</div>
-        }
-      </div>
-
-      <div>
-        <label for="ciudad">Ciudad:</label>
-        <input id="ciudad" type="text" formControlName="ciudad" />
-        @if (compraForm.controls.ciudad.invalid && compraForm.controls.ciudad.touched) {
-          <div class="error">Ingresa la ciudad (máximo 80 caracteres).</div>
-        }
-      </div>
-
-      <div>
-        <label for="direccion">Dirección:</label>
-        <input id="direccion" type="text" formControlName="direccion" />
-        @if (compraForm.controls.direccion.invalid && compraForm.controls.direccion.touched) {
-          <div class="error">Ingresa la dirección (máximo 150 caracteres).</div>
-        }
-      </div>
-
-      <button type="submit" [disabled]="!canSubmit()">
-        @if (isLoading()) { Procesando... } @else { Confirmar compra }
-      </button>
-    </form>
-  }
-
-  @if (error()) {
-    <p class="error">{{ error() }}</p>
-  }
-</section>
+  </div>
+</div>
