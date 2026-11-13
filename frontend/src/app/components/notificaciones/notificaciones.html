@@ -1,0 +1,16 @@
+<!-- Arriba a la derecha y por encima de todo (z-index alto) -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  @for (aviso of notificaciones.avisos(); track aviso.id) {
+    <div
+      class="alert shadow mb-2"
+      [class.alert-success]="aviso.tipo === 'exito'"
+      [class.alert-danger]="aviso.tipo === 'error'"
+      [class.alert-info]="aviso.tipo === 'info'"
+      role="alert"
+      style="cursor: pointer"
+      (click)="notificaciones.quitar(aviso.id)"
+    >
+      {{ aviso.texto }}
+    </div>
+  }
+</div>
