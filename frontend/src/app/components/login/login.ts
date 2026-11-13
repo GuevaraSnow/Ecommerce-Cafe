@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { LoginRequest } from '../../models/auth';
+import { NotificacionesService } from '../../services/notificaciones';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -14,6 +15,7 @@ import { LoginRequest } from '../../models/auth';
 export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private avisos = inject(NotificacionesService);
   private destroyRef = inject(DestroyRef);
 
   loginForm = inject(FormBuilder).group({
@@ -22,7 +24,6 @@ export class Login {
   });
 
   isLoading = signal(false);
-  result = signal('');
 
   formStatus = toSignal (this.loginForm.statusChanges, { initialValue: 'INVALID' as const });
   canSubmit = computed(() => this.formStatus() === 'VALID' && !this.isLoading());
@@ -37,12 +38,12 @@ export class Login {
     .subscribe({
       next: (respuesta) => {
         this.authService.guardarSesion(respuesta);
-        this.result.set('Sesión iniciada correctamente');
+        this.avisos.exito('Sesión iniciada correctamente');
         this.router.navigate(['/']);
       },
       error: () => {
         this.isLoading.set(false);
-        this.result.set('Error al iniciar sesión');
+        this.avisos.error('Correo o contraseña incorrectos.');
       }
     });
   }
