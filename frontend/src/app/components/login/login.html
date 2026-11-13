@@ -47,16 +47,6 @@
                 }
               </button>
             </div>
-
-            @if (result()) {
-              <div
-                class="alert mt-3"
-                [class.alert-success]="result().includes('correctamente')"
-                [class.alert-danger]="!result().includes('correctamente')"
-              >
-                {{ result() }}
-              </div>
-            }
           </form>
         </div>
       </div>
