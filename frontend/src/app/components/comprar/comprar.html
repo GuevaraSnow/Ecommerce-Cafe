@@ -96,10 +96,8 @@
             </form>
           </div>
         </div>
-      }
-
-      @if (error()) {
-        <div class="alert alert-danger mt-3">{{ error() }}</div>
+      } @else {
+        <p class="text-center text-muted py-5">No se encontró la presentación.</p>
       }
     </div>
   </div>

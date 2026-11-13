@@ -7,6 +7,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Presentacion } from '../../models/catalogo';
 import { Compra } from '../../models/compra';
 import { ComprasService } from '../../services/compras';
+import { NotificacionesService } from '../../services/notificaciones';
 import { PresentacionesService } from '../../services/presentaciones';
 
 @Component({
@@ -18,6 +19,7 @@ import { PresentacionesService } from '../../services/presentaciones';
 export class Comprar {
   private comprasServicio = inject(ComprasService);
   private presentacionesServicio = inject(PresentacionesService);
+  private avisos = inject(NotificacionesService);
   private destroyRef = inject(DestroyRef);
   private presentacionId = inject(ActivatedRoute).snapshot.paramMap.get('id') ?? '';
 
@@ -33,7 +35,6 @@ export class Comprar {
   presentacion = signal<Presentacion | null>(null);
   cargando = signal(true);
   isLoading = signal(false);
-  error = signal('');
   compra = signal<Compra | null>(null);
 
   // Igual que en el login: el estado del formulario como señal y un computed para el botón
@@ -57,7 +58,7 @@ export class Comprar {
           this.cargando.set(false);
         },
         error: () => {
-          this.error.set('No se encontró la presentación que quieres comprar.');
+          this.avisos.error('No se encontró la presentación que quieres comprar.');
           this.cargando.set(false);
         },
       });
@@ -68,7 +69,6 @@ export class Comprar {
     if (!presentacion || !this.canSubmit()) return;
 
     this.isLoading.set(true);
-    this.error.set('');
     const { cantidad, destinatario, ciudad, direccion } = this.compraForm.getRawValue();
 
     this.comprasServicio
@@ -81,13 +81,15 @@ export class Comprar {
       .subscribe({
         next: (compra) => {
           this.compra.set(compra);
+          this.avisos.exito(`Compra registrada. Número ${compra.id}, estado ${compra.estado}.`);
           this.isLoading.set(false);
         },
         error: (respuesta: HttpErrorResponse) => {
-          if (respuesta.status === 401 || respuesta.status === 403) {
-            this.error.set('Tienes que iniciar sesión como comprador para comprar.');
-          } else {
-            this.error.set(respuesta.error?.mensaje || 'No se pudo completar la compra.');
+          // El 401 (sesión vencida) ya lo atiende el interceptor con su propio aviso
+          if (respuesta.status === 403) {
+            this.avisos.error('Tu rol no puede comprar. Inicia sesión como comprador.');
+          } else if (respuesta.status !== 401) {
+            this.avisos.error(respuesta.error?.mensaje || 'No se pudo completar la compra.');
           }
           this.isLoading.set(false);
         },
