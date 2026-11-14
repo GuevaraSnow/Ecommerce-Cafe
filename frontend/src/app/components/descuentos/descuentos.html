@@ -1,0 +1,104 @@
+<div class="container mt-4">
+  <h2 class="mb-3"><i class="fa-solid fa-percent me-2"></i>Mis descuentos por temporada</h2>
+
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border mb-3"></div>
+      <p>Cargando tus presentaciones...</p>
+    </div>
+  } @else if (presentaciones().length === 0) {
+    <div class="text-center py-5 text-muted">
+      <i class="fa-solid fa-box-open fa-3x mb-3"></i>
+      <p class="h5">No tienes presentaciones publicadas.</p>
+    </div>
+  } @else {
+    <div class="row g-3">
+      <!-- Lista de presentaciones del vendedor -->
+      <div class="col-lg-6">
+        <div class="list-group shadow-sm">
+          @for (p of presentaciones(); track p.id) {
+            <button
+              type="button"
+              class="list-group-item list-group-item-action"
+              [class.active]="seleccionada()?.id === p.id"
+              (click)="seleccionar(p)"
+            >
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">{{ p.titulo }}</span>
+                @if (p.descuento) {
+                  <span class="badge bg-danger">-{{ p.descuento.porcentaje }}%</span>
+                }
+              </div>
+              <small>
+                {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+                @if (p.descuento) {
+                  · del {{ p.descuento.fechaInicio }} al {{ p.descuento.fechaFin }}
+                }
+              </small>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Formulario del descuento -->
+      <div class="col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            @if (seleccionada(); as s) {
+              Descuento de <strong>{{ s.titulo }}</strong>
+            } @else {
+              Elige una presentación de la lista
+            }
+          </div>
+          <div class="card-body">
+            <form [formGroup]="descuentoForm" (ngSubmit)="programar()">
+              <div class="mb-3">
+                <label for="porcentaje" class="form-label">Porcentaje (1 a 50)</label>
+                <input id="porcentaje" type="number" formControlName="porcentaje" class="form-control" />
+                @if (descuentoForm.controls.porcentaje.invalid && descuentoForm.controls.porcentaje.touched) {
+                  <div class="text-danger small mt-1">El porcentaje debe estar entre 1 y 50.</div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="fechaInicio" class="form-label">Fecha de inicio</label>
+                <input id="fechaInicio" type="date" formControlName="fechaInicio" class="form-control" />
+                @if (descuentoForm.controls.fechaInicio.invalid && descuentoForm.controls.fechaInicio.touched) {
+                  <div class="text-danger small mt-1">Elige la fecha de inicio.</div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="fechaFin" class="form-label">Fecha de fin</label>
+                <input id="fechaFin" type="date" formControlName="fechaFin" class="form-control" />
+                @if (descuentoForm.controls.fechaFin.invalid && descuentoForm.controls.fechaFin.touched) {
+                  <div class="text-danger small mt-1">Elige la fecha de fin.</div>
+                }
+              </div>
+
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="!canSubmit()">
+                  @if (isLoading()) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>Guardando...
+                  } @else {
+                    <i class="fa-solid fa-check me-2"></i>Programar descuento
+                  }
+                </button>
+                @if (seleccionada()?.descuento) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    [disabled]="isLoading()"
+                    (click)="quitar()"
+                  >
+                    <i class="fa-solid fa-trash me-1"></i>Quitar
+                  </button>
+                }
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
