@@ -35,4 +35,19 @@ describe('PresentacionesService', () => {
     expect(peticion.request.params.keys()).toEqual([]);
     peticion.flush({ contenido: [], pagina: 0, tamano: 10, totalElementos: 0, totalPaginas: 0 });
   });
+
+  it('programa el descuento con PUT y lo quita con DELETE', () => {
+    const descuento = { porcentaje: 20, fechaInicio: '2026-11-15', fechaFin: '2026-11-30' };
+
+    servicio.programarDescuento('pres-1', descuento).subscribe();
+    const put = http.expectOne(`${API_URL}/presentaciones/pres-1/descuento`);
+    expect(put.request.method).toBe('PUT');
+    expect(put.request.body).toEqual(descuento);
+    put.flush({});
+
+    servicio.quitarDescuento('pres-1').subscribe();
+    const borrar = http.expectOne(`${API_URL}/presentaciones/pres-1/descuento`);
+    expect(borrar.request.method).toBe('DELETE');
+    borrar.flush({});
+  });
 });
