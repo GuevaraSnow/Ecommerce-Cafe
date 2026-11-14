@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -14,6 +14,13 @@ export class Header {
 
   isLoggedIn = this.authService.isAuthenticated;
   nombreUsuario = this.authService.nombreUsuario;
+
+  // Los roles que publican presentaciones (todos menos el comprador) ven "Mis descuentos"
+  esVendedor = computed(
+    () =>
+      this.isLoggedIn() &&
+      ['CAFICULTOR', 'TOSTADOR', 'VENDEDOR_DERIVADOS'].includes(localStorage.getItem('rol') ?? ''),
+  );
 
   cerrarSesion(): void {
     this.authService.logout();

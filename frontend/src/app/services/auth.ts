@@ -19,6 +19,7 @@ export class AuthService {
     localStorage.setItem('token', respuesta.token);
     localStorage.setItem('rol', respuesta.usuario.rol);
     localStorage.setItem('nombre', respuesta.usuario.nombre);
+    localStorage.setItem('usuarioId', respuesta.usuario.id);
     this.nombreUsuario.set(respuesta.usuario.nombre);
     this.isAuthenticated.set(true);
   }
@@ -27,10 +28,15 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
+  getUsuarioId(): string {
+    return localStorage.getItem('usuarioId') ?? '';
+  }
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('rol');
     localStorage.removeItem('nombre');
+    localStorage.removeItem('usuarioId');
     this.nombreUsuario.set('');
     this.isAuthenticated.set(false);
   }
