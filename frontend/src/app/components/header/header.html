@@ -32,6 +32,13 @@
             <i class="fa-solid fa-store me-1"></i>Catálogo
           </a>
         </li>
+        @if (esVendedor()) {
+          <li class="nav-item">
+            <a routerLink="/descuentos" routerLinkActive="active" class="nav-link">
+              <i class="fa-solid fa-percent me-1"></i>Mis descuentos
+            </a>
+          </li>
+        }
         @if (!isLoggedIn()) {
           <li class="nav-item">
             <a routerLink="/registro" routerLinkActive="active" class="nav-link">
