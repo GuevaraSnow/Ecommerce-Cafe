@@ -57,6 +57,13 @@ export interface Presentacion {
   material?: string;
 }
 
+/** Cuerpo de PUT /presentaciones/{id}/descuento: porcentaje entre 1 y 50 y fechas yyyy-MM-dd. */
+export interface ProgramarDescuentoRequest {
+  porcentaje: number;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
 /** La primera página es la 0. */
 export interface Pagina<T> {
   contenido: T[];
@@ -68,6 +75,7 @@ export interface Pagina<T> {
 
 export interface FiltroCatalogo {
   titulo?: string;
+  vendedorId?: string;
   tipo?: TipoDePresentacion;
   pagina?: number;
   tamano?: number;
