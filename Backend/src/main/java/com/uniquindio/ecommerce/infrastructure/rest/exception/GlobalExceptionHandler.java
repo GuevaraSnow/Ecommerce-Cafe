@@ -19,6 +19,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
@@ -119,6 +120,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> manejarAutenticacionRequerida(AuthenticationException ex) {
         return construirRespuesta(HttpStatus.UNAUTHORIZED, MENSAJE_AUTENTICACION_REQUERIDA);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> manejarArchivoDemasiadoGrande(MaxUploadSizeExceededException ex) {
+        return construirRespuesta(HttpStatus.PAYLOAD_TOO_LARGE, "La imagen no puede superar 2 MB");
     }
 
     @ExceptionHandler(Exception.class)
