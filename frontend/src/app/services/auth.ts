@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_URL } from '../api';
 import { LoginRequest, LoginResponse } from '../models/auth';
+import { Rol } from '../models/usuario';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -10,6 +11,8 @@ export class AuthService {
 
   isAuthenticated = signal(!!localStorage.getItem('token'));
   nombreUsuario = signal(localStorage.getItem('nombre') || '');
+  /** Rol de quien tiene la sesión; null si no hay sesión. Lo usan el rolGuard y el header. */
+  rol = signal<Rol | null>((localStorage.getItem('rol') as Rol) || null);
 
   login(credenciales: LoginRequest) {
     return this.http.post<LoginResponse>(`${this.url}/login`, credenciales);
@@ -21,6 +24,7 @@ export class AuthService {
     localStorage.setItem('nombre', respuesta.usuario.nombre);
     localStorage.setItem('usuarioId', respuesta.usuario.id);
     this.nombreUsuario.set(respuesta.usuario.nombre);
+    this.rol.set(respuesta.usuario.rol);
     this.isAuthenticated.set(true);
   }
 
@@ -38,6 +42,7 @@ export class AuthService {
     localStorage.removeItem('nombre');
     localStorage.removeItem('usuarioId');
     this.nombreUsuario.set('');
+    this.rol.set(null);
     this.isAuthenticated.set(false);
   }
 }

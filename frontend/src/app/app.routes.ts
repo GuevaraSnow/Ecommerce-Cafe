@@ -7,6 +7,8 @@ import { Comprar } from './components/comprar/comprar';
 import { Descuentos } from './components/descuentos/descuentos';
 import { authGuard } from './guards/auth-guard';
 import { guestGuard } from './guards/guest-guard';
+import { rolGuard } from './guards/rol-guard';
+import { ROLES_VENDEDOR } from './models/usuario';
 
 export const routes: Routes = [
   { path: '', component: Inicio },
@@ -14,6 +16,6 @@ export const routes: Routes = [
   { path: 'registro', component: Registro },
   { path: 'catalogo', component: Catalogo },
   { path: 'comprar/:id', component: Comprar, canActivate: [authGuard] },
-  { path: 'descuentos', component: Descuentos },
+  { path: 'descuentos', component: Descuentos, canActivate: [rolGuard], data: { roles: ROLES_VENDEDOR } },
   { path: '**', pathMatch: 'full', redirectTo: '/' },
 ];
