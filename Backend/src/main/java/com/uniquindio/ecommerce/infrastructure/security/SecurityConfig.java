@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/presentaciones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/resenas").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/asistente").permitAll()
                         // El contenedor reenvía a /error al terminar una petición con error; si estuviera protegido, el
                         // 404 o el 500 reales quedarían tapados por un 401.
                         .requestMatchers("/error").permitAll()

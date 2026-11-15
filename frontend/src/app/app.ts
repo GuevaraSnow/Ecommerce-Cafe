@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Asistente } from './components/asistente/asistente';
 import { Footer } from './components/footer/footer';
 import { Header } from './components/header/header';
 import { Notificaciones } from './components/notificaciones/notificaciones';
 
 @Component({
-  imports: [RouterOutlet, Header, Footer, Notificaciones],
+  imports: [RouterOutlet, Header, Footer, Notificaciones, Asistente],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
