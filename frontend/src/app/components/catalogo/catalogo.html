@@ -1,8 +1,11 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 id="titulo-catalogo" class="h3 mb-0"><i class="fa-solid fa-store me-2"></i>Catálogo</h1>
+<section class="portada-seccion">
+  <div class="container">
+    <h1 id="titulo-catalogo" class="mb-2">Catálogo de café</h1>
+    <p class="lead text-secondary mb-0">Café verde, tostado, derivados y merchandising, con su origen a la vista.</p>
   </div>
+</section>
 
+<div class="container mt-4">
   <form class="row g-2 mb-4" (submit)="$event.preventDefault()">
     <div class="col-md-8">
       <input
@@ -42,27 +45,24 @@
       <div class="row g-3">
         @for (p of pag.contenido; track p.id) {
           <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card h-100">
               @if (fotoPrincipal(p); as foto) {
-                <img [src]="foto" [alt]="p.titulo" class="card-img-top" style="height: 12rem; object-fit: cover" loading="lazy" />
+                <img [src]="foto" [alt]="p.titulo" class="card-img-top" style="height: 14rem; object-fit: cover" loading="lazy" (error)="$any($event.target).hidden = true" />
               }
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">{{ p.titulo }}</span>
-                <span class="badge {{ badgeTipo(p.tipo) }}">{{ etiquetaDelTipo(p.tipo) }}</span>
-              </div>
               <div class="card-body">
-                <p class="mb-2">
-                  <i class="fa-solid fa-tag me-1"></i>
+                <span class="etiqueta-tipo">{{ etiquetaDelTipo(p.tipo) }}</span>
+                <h2 class="h5 mt-1 mb-3">{{ p.titulo }}</h2>
+                <p class="mb-2 d-flex align-items-baseline gap-2 flex-wrap">
                   @if (tieneDescuento(p)) {
-                    <s class="text-muted">
-                      {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
-                    </s>
-                    <strong>
+                    <strong class="precio">
                       {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
                     </strong>
-                    <span class="badge bg-danger ms-1">-{{ p.descuento?.porcentaje }}%</span>
+                    <s class="precio-tachado">
+                      {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+                    </s>
+                    <span class="insignia-descuento">-{{ p.descuento?.porcentaje }}%</span>
                   } @else {
-                    <strong>
+                    <strong class="precio">
                       {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
                     </strong>
                   }
