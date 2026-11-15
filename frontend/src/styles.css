@@ -421,3 +421,105 @@ h1, h2, h3, h4, .h1, .h2, .h3, .h4 {
   border-radius: 0 var(--cafe-radio-md) var(--cafe-radio-md) 0;
   color: var(--cafe-texto-suave);
 }
+
+/* Selector de dos o más opciones en forma de píldora (Comprador / Vendedor) */
+.selector-pills {
+  border: 1px solid var(--cafe-borde-fuerte);
+  border-radius: 999px;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+}
+
+.selector-pills .btn {
+  border: 0;
+  color: var(--cafe-texto);
+  flex: 1;
+}
+
+.selector-pills .btn.activo {
+  background: var(--cafe-primario);
+  color: var(--cafe-sobre-primario);
+}
+
+.etiqueta-pie {
+  color: var(--cafe-boton);
+  font-family: var(--cafe-fuente-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Usuario con sesión en la barra: círculo con la inicial y el rol */
+.usuario-barra {
+  align-items: center;
+  border: 1px solid var(--cafe-borde-marco);
+  border-radius: 999px;
+  color: var(--cafe-sobre-marco);
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 0.2rem 0.75rem 0.2rem 0.25rem;
+}
+
+.usuario-barra .inicial {
+  align-items: center;
+  background: var(--cafe-boton);
+  border-radius: 50%;
+  color: var(--cafe-sobre-boton);
+  display: inline-flex;
+  font-family: var(--cafe-fuente-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  height: 1.75rem;
+  justify-content: center;
+  width: 1.75rem;
+}
+
+.usuario-barra .rol {
+  color: var(--cafe-sobre-marco-suave);
+  font-size: 0.8rem;
+}
+
+/* Ruta de migas: Inicio › Catálogo */
+.migas {
+  color: var(--cafe-texto-suave);
+  font-size: 0.875rem;
+}
+
+.migas a {
+  color: var(--cafe-texto-suave);
+  text-decoration: none;
+}
+
+/* Caja verde de "Origen verificado" */
+.caja-origen {
+  background: var(--cafe-exito-fondo);
+  border: 1px solid color-mix(in srgb, var(--cafe-exito) 40%, transparent);
+  border-radius: var(--cafe-radio-md);
+  color: var(--cafe-exito);
+  padding: 1rem 1.25rem;
+}
+
+.miniatura {
+  border-radius: var(--cafe-radio-sm);
+  height: 3.5rem;
+  object-fit: cover;
+  width: 3.5rem;
+}
+
+/* Fila activa de una lista: usa el color de la marca en vez del azul de Bootstrap */
+.list-group-item.active .text-secondary {
+  color: inherit !important;
+}
+
+/* El pie siempre queda abajo, aunque la pantalla tenga poco contenido */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+app-footer {
+  margin-top: auto;
+}

@@ -1,15 +1,33 @@
 <footer class="pie-cafe py-5 mt-5">
   <div class="container">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-      <div class="d-flex align-items-center gap-2">
-        <span class="logo-cafe"><i class="fa-solid fa-mug-hot"></i></span>
-        <span class="fs-5" style="font-family: var(--cafe-fuente-titulo)">Café de Origen</span>
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="logo-cafe"><i class="fa-solid fa-mug-hot"></i></span>
+          <span class="fs-4" style="font-family: var(--cafe-fuente-titulo)">Café de Origen</span>
+        </div>
+        <p class="small mb-0" style="max-width: 24rem">
+          Café colombiano con origen verificado, precios claros y descuentos de temporada.
+        </p>
       </div>
-      <nav class="d-flex gap-4 small">
-        <a href="/catalogo">Catálogo</a>
-        <a href="/login">Ingresar</a>
-        <a href="/registro">Crear cuenta</a>
-      </nav>
+      <div class="col-6 col-lg-3">
+        <p class="etiqueta-pie">Tienda</p>
+        <ul class="list-unstyled small mb-0">
+          <li class="mb-2"><a routerLink="/">Inicio</a></li>
+          <li class="mb-2"><a routerLink="/catalogo">Catálogo</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-4">
+        <p class="etiqueta-pie">Cuenta</p>
+        <ul class="list-unstyled small mb-0">
+          @if (isLoggedIn()) {
+            <li class="mb-2"><a routerLink="/mis-compras">Mis compras</a></li>
+          } @else {
+            <li class="mb-2"><a routerLink="/login">Ingresar</a></li>
+            <li class="mb-2"><a routerLink="/registro">Crear cuenta</a></li>
+          }
+        </ul>
+      </div>
     </div>
     <hr style="border-color: var(--cafe-borde-marco)" />
     <p class="mb-0 small">

@@ -51,13 +51,6 @@
             </a>
           </li>
         }
-        @if (!isLoggedIn()) {
-          <li class="nav-item">
-            <a routerLink="/registro" routerLinkActive="active" class="nav-link">
-              <i class="fa-solid fa-user-plus me-1"></i>Registro
-            </a>
-          </li>
-        }
       </ul>
 
       <div class="d-flex align-items-center gap-2">
@@ -70,13 +63,20 @@
           <i class="fa-solid" [class.fa-moon]="!tema.oscuro()" [class.fa-sun]="tema.oscuro()"></i>
         </button>
         @if (isLoggedIn()) {
-          <span class="navbar-text">Hola, {{ nombreUsuario() }}</span>
+          <span class="usuario-barra">
+            <span class="inicial">{{ inicial() }}</span>
+            <span>{{ nombreUsuario() }}</span>
+            <span class="rol d-none d-sm-inline">· {{ etiquetaRol() }}</span>
+          </span>
           <button class="btn btn-sm boton-barra" (click)="cerrarSesion()">
             <i class="fa-solid fa-right-from-bracket me-1"></i>Cerrar sesión
           </button>
         } @else {
-          <a routerLink="/login" class="btn btn-sm btn-primary">
+          <a routerLink="/login" class="btn btn-sm boton-barra">
             <i class="fa-solid fa-right-to-bracket me-1"></i>Ingresar
+          </a>
+          <a routerLink="/registro" class="btn btn-sm btn-primary">
+            <i class="fa-solid fa-user-plus me-1"></i>Crear cuenta
           </a>
         }
       </div>

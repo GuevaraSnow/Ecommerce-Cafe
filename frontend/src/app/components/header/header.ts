@@ -27,6 +27,14 @@ export class Header {
     return this.isLoggedIn() && rol !== null && ROLES_VENDEDOR.includes(rol);
   });
 
+  inicial = computed(() => this.nombreUsuario().charAt(0).toUpperCase());
+
+  etiquetaRol = computed(() => {
+    const rol = this.authService.rol();
+    if (rol === 'COMPRADOR') return 'Comprador';
+    return rol === null ? '' : 'Vendedor';
+  });
+
   cerrarSesion(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

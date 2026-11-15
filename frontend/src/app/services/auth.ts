@@ -1,8 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_URL } from '../api';
-import { LoginRequest, LoginResponse } from '../models/auth';
-import { Rol } from '../models/usuario';
+import { LoginRequest, LoginResponse, RegistroRequest } from '../models/auth';
+import { Rol, UsuarioResponse } from '../models/usuario';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -16,6 +16,11 @@ export class AuthService {
 
   login(credenciales: LoginRequest) {
     return this.http.post<LoginResponse>(`${this.url}/login`, credenciales);
+  }
+
+  /** Crea la cuenta; el backend no inicia sesión, así que después se pasa por el login. */
+  registrar(datos: RegistroRequest) {
+    return this.http.post<UsuarioResponse>(`${this.url}/registro`, datos);
   }
 
   guardarSesion(respuesta: LoginResponse): void {

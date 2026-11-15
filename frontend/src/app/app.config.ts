@@ -1,9 +1,14 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth-interceptor';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideBrowserGlobalErrorListeners(), provideRouter(routes), provideHttpClient(withInterceptors([authInterceptor]))],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    // Cada pantalla nueva empieza arriba, no donde estaba el scroll de la anterior
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
+    provideHttpClient(withInterceptors([authInterceptor])),
+  ],
 };
