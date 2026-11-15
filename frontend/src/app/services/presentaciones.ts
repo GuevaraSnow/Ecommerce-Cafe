@@ -2,7 +2,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL } from '../api';
-import { FiltroCatalogo, Pagina, Presentacion, ProgramarDescuentoRequest } from '../models/catalogo';
+import {
+  FichaDeOrigen,
+  FiltroCatalogo,
+  Pagina,
+  Presentacion,
+  ProgramarDescuentoRequest,
+} from '../models/catalogo';
 
 @Injectable({ providedIn: 'root' })
 export class PresentacionesService {
@@ -22,6 +28,13 @@ export class PresentacionesService {
 
   consultar(id: string): Observable<Presentacion> {
     return this.http.get<Presentacion>(`${this.url}/${id}`);
+  }
+
+  /** Consulta la ficha de origen (finca, cosecha, lote y tostión) de una transformación. */
+  consultarFichaOrigen(transformacionId: string): Observable<FichaDeOrigen> {
+    return this.http.get<FichaDeOrigen>(
+      `${API_URL}/transformaciones/${transformacionId}/ficha-origen`,
+    );
   }
 
   /** Solo el dueño: programa (o reemplaza) el descuento por temporada. */
