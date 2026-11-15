@@ -1,13 +1,13 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { LoginRequest } from '../../models/auth';
 import { NotificacionesService } from '../../services/notificaciones';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   selector: 'app-login',
   styleUrl: './login.css',
   templateUrl: './login.html',
@@ -24,9 +24,14 @@ export class Login {
   });
 
   isLoading = signal(false);
+  verContrasena = signal(false);
 
   formStatus = toSignal (this.loginForm.statusChanges, { initialValue: 'INVALID' as const });
   canSubmit = computed(() => this.formStatus() === 'VALID' && !this.isLoading());
+
+  alternarContrasena(): void {
+    this.verContrasena.update((visible) => !visible);
+  }
 
   onSubmit(): void {
     if(!this.canSubmit()) return;

@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Presentacion } from '../../models/catalogo';
@@ -30,6 +30,9 @@ export class Inicio {
   ];
 
   destacadas = signal<Presentacion[]>([]);
+
+  // La primera destacada con descuento vigente, para la banda de temporada
+  conDescuento = computed(() => this.destacadas().find((p) => this.tieneDescuento(p)) ?? null);
 
   constructor() {
     // Las primeras presentaciones disponibles del catálogo público

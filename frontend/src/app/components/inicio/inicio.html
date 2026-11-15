@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="col-lg-5 d-none d-lg-flex justify-content-center">
-        <span class="sello-inicio"><i class="fa-solid fa-mug-hot"></i></span>
+        <img src="/img/latte-hoja.jpg" alt="Taza de café con arte latte" class="sello-inicio" />
       </div>
     </div>
   </div>
@@ -77,6 +77,38 @@
             </div>
           </div>
         }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Descuento de temporada: la primera presentación que tenga uno vigente -->
+@if (conDescuento(); as d) {
+  <section class="container py-5">
+    <div class="banda-descuento">
+      <div class="row g-0 align-items-stretch">
+        <div class="col-md-7 p-4 p-lg-5 d-flex flex-column justify-content-center">
+          <p class="etiqueta-tipo mb-2" style="color: var(--cafe-boton)">Descuentos de temporada</p>
+          <h2 class="mb-3">Hasta {{ d.descuento?.porcentaje }} % menos en presentaciones seleccionadas</h2>
+          <p class="mb-4 d-flex align-items-baseline gap-2 flex-wrap">
+            <span>{{ d.titulo }}</span>
+            <strong class="precio">
+              {{ d.precioVigente.monto | currency: d.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+            </strong>
+            <s class="precio-tachado" style="color: var(--cafe-sobre-marco-suave)">
+              {{ d.precio.monto | currency: d.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+            </s>
+            <span class="insignia-descuento">-{{ d.descuento?.porcentaje }}%</span>
+          </p>
+          <div>
+            <a [routerLink]="['/producto', d.id]" class="btn btn-primary">
+              Ver oferta <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-md-5 d-none d-md-block">
+          <img src="/img/latte-corazon.jpg" alt="Taza de café con arte latte en forma de corazón" />
+        </div>
       </div>
     </div>
   </section>
