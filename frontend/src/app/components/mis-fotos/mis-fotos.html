@@ -1,0 +1,97 @@
+<div class="container mt-4">
+  <h2 class="mb-3"><i class="fa-solid fa-images me-2"></i>Fotos de mis presentaciones</h2>
+
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border mb-3"></div>
+      <p>Cargando tus presentaciones...</p>
+    </div>
+  } @else if (presentaciones().length === 0) {
+    <div class="text-center py-5 text-muted">
+      <i class="fa-solid fa-box-open fa-3x mb-3"></i>
+      <p class="h5">No tienes presentaciones publicadas.</p>
+    </div>
+  } @else {
+    <div class="row g-3">
+      <!-- Lista de presentaciones del vendedor -->
+      <div class="col-lg-4">
+        <div class="list-group shadow-sm">
+          @for (p of presentaciones(); track p.id) {
+            <button
+              type="button"
+              class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+              [class.active]="seleccionada()?.id === p.id"
+              (click)="seleccionar(p)"
+            >
+              <span class="fw-semibold">{{ p.titulo }}</span>
+              <span class="badge text-bg-secondary">{{ p.galeria.length }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Galería de la presentación elegida -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            @if (seleccionada(); as s) {
+              Galería de <strong>{{ s.titulo }}</strong> ({{ fotos().length }} de {{ maxFotos }})
+            } @else {
+              Elige una presentación de la lista
+            }
+          </div>
+          <div class="card-body">
+            @if (seleccionada()) {
+              <div class="row g-3 mb-3">
+                @for (foto of fotos(); track foto.url; let i = $index) {
+                  <div class="col-6 col-md-4">
+                    <div class="card h-100" [class.border-primary]="foto.principal" [class.border-2]="foto.principal">
+                      <img [src]="foto.url" alt="Foto {{ i + 1 }}" class="card-img-top" style="height: 9rem; object-fit: cover" />
+                      <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                        @if (foto.principal) {
+                          <span class="badge text-bg-primary">Principal</span>
+                        } @else {
+                          <button type="button" class="btn btn-sm btn-outline-primary" (click)="hacerPrincipal(i)">
+                            Hacer principal
+                          </button>
+                        }
+                        <button type="button" class="btn btn-sm btn-outline-danger" aria-label="Quitar foto" (click)="quitar(i)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="text-muted mb-0">Esta presentación aún no tiene fotos. Sube la primera.</p>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="archivo" class="form-label">Agregar una foto (JPG, PNG o WebP, hasta 2 MB)</label>
+                <input
+                  id="archivo"
+                  type="file"
+                  class="form-control"
+                  accept="image/jpeg,image/png,image/webp"
+                  [disabled]="!puedeSubir()"
+                  (change)="elegirArchivo($event)"
+                />
+                @if (subiendo()) {
+                  <div class="text-muted small mt-1"><span class="spinner-border spinner-border-sm me-2"></span>Subiendo...</div>
+                }
+              </div>
+
+              <button type="button" class="btn btn-primary" [disabled]="!puedeGuardar()" (click)="guardar()">
+                @if (guardando()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>Guardando...
+                } @else {
+                  <i class="fa-solid fa-check me-2"></i>Guardar galería
+                }
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

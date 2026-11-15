@@ -50,4 +50,15 @@ describe('PresentacionesService', () => {
     expect(borrar.request.method).toBe('DELETE');
     borrar.flush({});
   });
+
+  it('reemplaza la galería con PUT y el cuerpo { galeria }', () => {
+    const galeria = [{ url: 'https://img/1.jpg', principal: true }];
+
+    servicio.reemplazarGaleria('pres-1', galeria).subscribe();
+
+    const put = http.expectOne(`${API_URL}/presentaciones/pres-1/galeria`);
+    expect(put.request.method).toBe('PUT');
+    expect(put.request.body).toEqual({ galeria });
+    put.flush({});
+  });
 });
