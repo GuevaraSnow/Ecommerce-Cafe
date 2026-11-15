@@ -18,21 +18,22 @@
     <div class="row g-4">
       <!-- Galería de imágenes -->
       <div class="col-lg-5">
-        <div class="card shadow-sm overflow-hidden">
+        <div class="card shadow-sm overflow-hidden h-100">
           @if (imagenActiva(); as urlPrincipal) {
             <img
               [src]="urlPrincipal"
               [alt]="p.titulo"
               class="card-img-top imagen-principal"
+              (error)="imagenActiva.set(null)"
             />
           } @else {
-            <div class="sin-imagen d-flex flex-column justify-content-center align-items-center text-muted bg-body-tertiary">
+            <div class="sin-imagen d-flex flex-column justify-content-center align-items-center text-muted bg-body-tertiary h-100">
               <i class="fa-solid fa-mug-hot fa-4x mb-2"></i>
               <span class="small">Sin imagen disponible</span>
             </div>
           }
 
-          @if (p.galeria.length > 1) {
+          @if (p.galeria.length > 1 && imagenActiva()) {
             <div class="card-body d-flex gap-2 flex-wrap justify-content-center bg-body-tertiary">
               @for (img of p.galeria; track img.url) {
                 <button
