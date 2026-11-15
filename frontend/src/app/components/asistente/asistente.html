@@ -1,0 +1,62 @@
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+  @if (abierto()) {
+    <div class="card shadow mb-2" style="width: 22rem; max-width: calc(100vw - 2rem)">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-mug-hot me-2"></i>Asesor de café</span>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="alternar()"></button>
+      </div>
+
+      <div #zonaMensajes class="card-body overflow-auto" style="height: 20rem">
+        @if (mensajes().length === 0) {
+          <p class="text-muted small mb-0">
+            Hola, soy el asesor de la tienda. Cuéntame qué café buscas y te recomiendo.
+          </p>
+        }
+        @for (m of mensajes(); track $index) {
+          <div class="d-flex mb-2" [class.justify-content-end]="m.rol === 'usuario'">
+            <div
+              class="rounded px-3 py-2 small"
+              [class.bg-primary]="m.rol === 'usuario'"
+              [class.text-white]="m.rol === 'usuario'"
+              [class.bg-body-secondary]="m.rol === 'asistente'"
+              style="max-width: 85%; white-space: pre-wrap"
+            >
+              {{ m.texto }}
+            </div>
+          </div>
+        }
+        @if (isLoading()) {
+          <div class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Escribiendo...</div>
+        }
+      </div>
+
+      <div class="card-footer">
+        <form [formGroup]="chatForm" (ngSubmit)="enviar()" class="d-flex gap-2">
+          <input
+            type="text"
+            formControlName="mensaje"
+            class="form-control"
+            placeholder="Escribe tu pregunta..."
+            maxlength="500"
+            aria-label="Mensaje para el asesor"
+          />
+          <button type="submit" class="btn btn-primary" [disabled]="!canSubmit()" aria-label="Enviar">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  }
+
+  <div class="text-end">
+    <button
+      type="button"
+      class="btn btn-primary rounded-circle shadow"
+      style="width: 3.5rem; height: 3.5rem"
+      (click)="alternar()"
+      aria-label="Abrir el asesor de café"
+    >
+      <i class="fa-solid" [class.fa-comments]="!abierto()" [class.fa-xmark]="abierto()"></i>
+    </button>
+  </div>
+</div>
