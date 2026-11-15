@@ -3,6 +3,8 @@ package com.uniquindio.ecommerce.infrastructure.persistence;
 import com.uniquindio.ecommerce.Domain.exception.ReglaDominioException;
 import com.uniquindio.ecommerce.Domain.repository.AsistenteIA;
 import com.uniquindio.ecommerce.Domain.valueobject.MensajeDeChat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ import java.util.Map;
 @Component
 public class AsistenteGroq implements AsistenteIA {
 
+    private static final Logger log = LoggerFactory.getLogger(AsistenteGroq.class);
     private static final String MENSAJE_NO_DISPONIBLE = "El asesor no está disponible en este momento, intenta más tarde";
 
     private final RestClient cliente;
@@ -50,13 +53,16 @@ public class AsistenteGroq implements AsistenteIA {
                     .body(Map.of(
                             "model", modelo,
                             "temperature", 0.4,
-                            "max_tokens", 400,
+                            "reasoning_effort", "low",
+                            "max_tokens", 1000,
                             "messages", mensajes(instrucciones, historial, mensaje)))
                     .retrieve()
                     .body(Map.class);
             return extraerTexto(respuesta);
         } catch (RestClientException | ClassCastException | NullPointerException e) {
             // Sin red, clave inválida, límite de Groq o respuesta rara: el dominio solo ve "no disponible"
+            // y el detalle real queda en el log del servidor (nunca la clave)
+            log.warn("Falló la consulta a Groq: {}", e.toString());
             throw new ReglaDominioException(MENSAJE_NO_DISPONIBLE);
         }
     }
