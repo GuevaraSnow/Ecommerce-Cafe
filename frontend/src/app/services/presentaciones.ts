@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_URL } from '../api';
 import {
   FichaDeOrigen,
+  Imagen,
   FiltroCatalogo,
   Pagina,
   Presentacion,
@@ -40,6 +41,11 @@ export class PresentacionesService {
   /** Solo el dueño: programa (o reemplaza) el descuento por temporada. */
   programarDescuento(id: string, descuento: ProgramarDescuentoRequest): Observable<Presentacion> {
     return this.http.put<Presentacion>(`${this.url}/${id}/descuento`, descuento);
+  }
+
+  /** Solo el dueño: reemplaza la galería (de 1 a 10 imágenes, con exactamente una principal). */
+  reemplazarGaleria(id: string, galeria: Imagen[]): Observable<Presentacion> {
+    return this.http.put<Presentacion>(`${this.url}/${id}/galeria`, { galeria });
   }
 
   /** Solo el dueño: quita el descuento programado. */

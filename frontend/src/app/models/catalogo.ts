@@ -84,6 +84,11 @@ export interface ProgramarDescuentoRequest {
   fechaFin: string;
 }
 
+/** Respuesta de POST /imagenes: la URL pública de la imagen guardada. */
+export interface ImagenSubida {
+  url: string;
+}
+
 /** La primera página es la 0. */
 export interface Pagina<T> {
   contenido: T[];
