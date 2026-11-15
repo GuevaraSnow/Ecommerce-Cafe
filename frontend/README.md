@@ -41,16 +41,16 @@ El sistema maneja una cuenta única (`Usuario`) diferenciada por su `Rol`:
 
 ### 1. Ejecutar el Backend (API REST Spring Boot)
 
-El backend se encuentra en la carpeta `backend/` del repositorio y expone su API en `http://localhost:8080/api` (documentación Swagger en `http://localhost:8080/swagger-ui.html`).
+El backend se encuentra en la carpeta `Backend/` del repositorio y expone su API en `http://localhost:8080/api` (documentación Swagger en `http://localhost:8080/swagger-ui.html`).
 
 #### Opción A: Con base de datos en memoria H2 (por defecto, recomendada para pruebas)
 
 Carga automáticamente los datos iniciales de prueba (`data-usuarios.sql`, fincas, lotes, transformaciones, presentaciones y compras).
 
-1. Abrir una terminal en la carpeta `backend/`:
+1. Abrir una terminal en la carpeta `Backend/`:
 
 ```powershell
-cd backend
+cd Backend
 ```
 
 2. Ejecutar el servidor Spring Boot:
@@ -66,10 +66,10 @@ En Windows (PowerShell):
 
 #### Opción B: Con MariaDB y Backend en Docker
 
-1. Abrir una terminal en la carpeta `backend/` y levantar los contenedores (`mariadb-ecommerce` y `ecommerce-app`):
+1. Abrir una terminal en la carpeta `Backend/` y levantar los contenedores (`mariadb-ecommerce` y `ecommerce-app`):
 
 ```powershell
-cd backend
+cd Backend
 docker compose up -d
 ```
 
@@ -130,7 +130,7 @@ Al iniciar el backend en modo **H2** (Opción A), se cargan automáticamente los
 | Pantalla | Ruta | Acceso / Roles permitidos | Descripción funcional                                                                                                                                                              |
 | :--- | :--- | :--- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Inicio** | `/` | Público (todos) | Página principal de bienvenida y presentación de **Café Trazado**.                                                                                                                 |
-| **Catálogo** | `/catalogo` | Público (todos) | Listado paginado de presentaciones disponibles con búsqueda por nombre y filtro por tipo (`CAFE_VERDE`, `CAFE_TOSTADO`, `DERIVADO_CONSUMIBLE`).                                     |
+| **Catálogo** | `/catalogo` | Público (todos) | Listado paginado de presentaciones disponibles con búsqueda por nombre y filtro por tipo (`CAFE_VERDE`, `CAFE_TOSTADO`, `DERIVADO_CONSUMIBLE`, `MERCHANDISING`).                                     |
 | **Detalle del producto** | `/producto/:id` | Público (trazabilidad completa autenticada) | Muestra galería, precio, precio vigente con descuento, nota de cata y la sección **"De dónde viene este café"** con la ficha de origen (`Finca → Cosecha → Lote → Tostión`).       |
 | **Registro** | `/registro` | Público / Invitados | Creación de cuenta nueva con selección de rol y validación de mayoría de edad.                                                                                                     |
 | **Iniciar sesión** | `/login` | Solo invitados (`guestGuard`) | Autenticación mediante correo y contraseña con emisión de token JWT.                                                                                                               |

@@ -18,6 +18,6 @@ export const routes: Routes = [
   { path: 'producto/:id', component: DetalleProducto },
   { path: 'comprar/:id', component: Comprar, canActivate: [authGuard] },
   { path: 'mis-compras', component: MisCompras, canActivate: [authGuard] },
-  { path: 'descuentos', component: Descuentos },
+  { path: 'descuentos', component: Descuentos, canActivate: [authGuard] },
   { path: '**', pathMatch: 'full', redirectTo: '/' },
 ];
