@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { ROLES_VENDEDOR } from '../../models/usuario';
 
 @Component({
   imports: [RouterLink, RouterLinkActive],
@@ -15,16 +16,14 @@ export class Header {
   isLoggedIn = this.authService.isAuthenticated;
   nombreUsuario = this.authService.nombreUsuario;
 
-  esComprador = computed(
-    () => this.isLoggedIn() && (localStorage.getItem('rol') ?? '') === 'COMPRADOR',
-  );
+  // Leen la señal del rol, así el menú cambia solo al iniciar o cerrar sesión.
+  esComprador = computed(() => this.isLoggedIn() && this.authService.rol() === 'COMPRADOR');
 
-  // Los roles que publican presentaciones (todos menos el comprador) ven "Mis descuentos"
-  esVendedor = computed(
-    () =>
-      this.isLoggedIn() &&
-      ['CAFICULTOR', 'TOSTADOR', 'VENDEDOR_DERIVADOS'].includes(localStorage.getItem('rol') ?? ''),
-  );
+  // Los roles que publican presentaciones (todos menos el comprador) ven "Mis descuentos".
+  esVendedor = computed(() => {
+    const rol = this.authService.rol();
+    return this.isLoggedIn() && rol !== null && ROLES_VENDEDOR.includes(rol);
+  });
 
   cerrarSesion(): void {
     this.authService.logout();
