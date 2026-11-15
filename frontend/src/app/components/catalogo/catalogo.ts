@@ -1,12 +1,16 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Subscription, debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { Pagina, Presentacion, TipoDePresentacion } from '../../models/catalogo';
 import { PresentacionesService } from '../../services/presentaciones';
 
 const TAMANO_PAGINA = 8;
+
+/** Milisegundos sin escribir antes de buscar: así no sale una petición por cada tecla. */
+const ESPERA_AL_ESCRIBIR = 300;
 
 @Component({
   imports: [CurrencyPipe, RouterLink],
@@ -30,15 +34,35 @@ export class Catalogo {
   cargando = signal(true);
   error = signal('');
 
+  /** Lo que el usuario va escribiendo en el buscador; cada tecla actualiza la señal. */
+  termino = signal('');
+
   private titulo = '';
   private tipo: TipoDePresentacion | undefined;
+  private peticion?: Subscription;
 
   constructor() {
     this.cargar(0);
+
+    // La señal se convierte en observable para esperar a que el usuario deje de escribir.
+    // skip(1) ignora el valor inicial (ya se cargó arriba) y distinctUntilChanged evita
+    // repetir la búsqueda si el texto quedó igual (por ejemplo, borrar y volver a escribir la misma letra).
+    toObservable(this.termino)
+      .pipe(
+        skip(1),
+        map((texto) => texto.trim()),
+        debounceTime(ESPERA_AL_ESCRIBIR),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((texto) => {
+        this.titulo = texto;
+        this.cargar(0);
+      });
   }
 
-  buscar(titulo: string, tipo: string): void {
-    this.titulo = titulo.trim();
+  /** El tipo se elige de una lista, así que filtra de inmediato, sin esperar. */
+  filtrarPorTipo(tipo: string): void {
     this.tipo = (tipo || undefined) as TipoDePresentacion | undefined;
     this.cargar(0);
   }
@@ -69,7 +93,9 @@ export class Catalogo {
   private cargar(numero: number): void {
     this.cargando.set(true);
     this.error.set('');
-    this.servicio
+    // Si llega una búsqueda nueva, se cancela la anterior para que una respuesta vieja no la pise.
+    this.peticion?.unsubscribe();
+    this.peticion = this.servicio
       .buscar({ titulo: this.titulo, tipo: this.tipo, pagina: numero, tamano: TAMANO_PAGINA })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
