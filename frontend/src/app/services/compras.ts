@@ -23,13 +23,22 @@ export class ComprasService {
     return this.http.put<Compra>(`${this.url}/${compraId}/confirmar`, direccion);
   }
 
+  /** Cancela una compra pendiente o confirmada antes del envío. */
+  cancelar(compraId: string): Observable<Compra> {
+    return this.http.put<Compra>(`${this.url}/${compraId}/cancelar`, {});
+  }
+
   /** Historial de compras del comprador del token. */
   historial(): Observable<Compra[]> {
     return this.http.get<Compra[]>(this.url);
   }
 
   /** El flujo completo de comprar una presentación: abrir carrito, agregarla y confirmar con la dirección. */
-  comprar(presentacionId: string, cantidad: Cantidad, direccion: DireccionDeEnvio): Observable<Compra> {
+  comprar(
+    presentacionId: string,
+    cantidad: Cantidad,
+    direccion: DireccionDeEnvio,
+  ): Observable<Compra> {
     return this.crearCarrito().pipe(
       switchMap((carrito) => this.agregarAlCarrito(carrito.id, { presentacionId, cantidad })),
       switchMap((carrito) => this.confirmar(carrito.id, direccion)),

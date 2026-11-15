@@ -15,6 +15,10 @@ export class Header {
   isLoggedIn = this.authService.isAuthenticated;
   nombreUsuario = this.authService.nombreUsuario;
 
+  esComprador = computed(
+    () => this.isLoggedIn() && (localStorage.getItem('rol') ?? '') === 'COMPRADOR',
+  );
+
   // Los roles que publican presentaciones (todos menos el comprador) ven "Mis descuentos"
   esVendedor = computed(
     () =>
