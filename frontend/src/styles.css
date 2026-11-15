@@ -314,3 +314,36 @@ h1, h2, h3, h4, .h1, .h2, .h3, .h4 {
   font-weight: 600;
   padding: 0.25rem 0.6rem;
 }
+
+/* Portada del Inicio: fondo oscuro de la marca */
+.portada-inicio {
+  background: radial-gradient(circle at 80% 20%, #3b2418 0%, var(--cafe-marco) 60%);
+  color: var(--cafe-sobre-marco);
+}
+
+.portada-inicio h1 {
+  color: var(--cafe-sobre-marco);
+}
+
+.sello-inicio {
+  align-items: center;
+  border: 2px solid var(--cafe-boton);
+  border-radius: 50%;
+  color: var(--cafe-boton);
+  display: inline-flex;
+  font-size: 5rem;
+  height: 16rem;
+  justify-content: center;
+  width: 16rem;
+}
+
+.icono-categoria {
+  align-items: center;
+  background: var(--cafe-superficie-alt);
+  border-radius: 50%;
+  color: var(--cafe-primario);
+  display: inline-flex;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
