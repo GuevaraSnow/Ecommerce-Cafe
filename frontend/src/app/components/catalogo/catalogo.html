@@ -79,7 +79,11 @@
                   </p>
                 }
               </div>
-              <div class="card-footer text-end">
+              <div class="card-footer d-flex justify-content-between align-items-center gap-2">
+                <a [routerLink]="['/producto', p.id]" class="btn btn-sm btn-outline-primary">
+                  <i class="fa-solid fa-eye me-1"></i>Ver detalle
+                </a>
+
                 @if (auth.isAuthenticated()) {
                   <a [routerLink]="['/comprar', p.id]" class="btn btn-sm btn-primary">
                     <i class="fa-solid fa-cart-shopping me-1"></i>Comprar

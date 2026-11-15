@@ -1,6 +1,7 @@
 // Espejos de los DTO del backend (PresentacionResponse y PaginaResponse). Mismos nombres que el JSON.
 
-export type TipoDePresentacion = 'CAFE_VERDE' | 'CAFE_TOSTADO' | 'DERIVADO_CONSUMIBLE' | 'MERCHANDISING';
+export type TipoDePresentacion =
+  'CAFE_VERDE' | 'CAFE_TOSTADO' | 'DERIVADO_CONSUMIBLE' | 'MERCHANDISING';
 
 export type EstadoDePublicacion = 'ACTIVA' | 'AGOTADA' | 'VENCIDA' | 'INACTIVA';
 
@@ -55,6 +56,25 @@ export interface Presentacion {
   notaCata?: string[] | null;
   descripcion?: string;
   material?: string;
+}
+
+export interface LoteResumen {
+  codigo: string;
+  fincaId: string;
+  cantidadDisponible: Cantidad;
+  procesoBeneficio: string;
+  estado: string;
+}
+
+/** Espejo de FichaDeOrigenResponse (GET /api/transformaciones/{id}/ficha-origen). */
+export interface FichaDeOrigen {
+  fincaNombre: string;
+  cosechaInfo: string;
+  lotesOrigen: LoteResumen[];
+  transformacionId: string;
+  tostadorId: string;
+  fechaTransformacion: string;
+  perfilTuesteResultante: PerfilTueste;
 }
 
 /** Cuerpo de PUT /presentaciones/{id}/descuento: porcentaje entre 1 y 50 y fechas yyyy-MM-dd. */

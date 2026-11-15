@@ -16,8 +16,10 @@ export class Header {
   isLoggedIn = this.authService.isAuthenticated;
   nombreUsuario = this.authService.nombreUsuario;
 
+  // Leen la señal del rol, así el menú cambia solo al iniciar o cerrar sesión.
+  esComprador = computed(() => this.isLoggedIn() && this.authService.rol() === 'COMPRADOR');
+
   // Los roles que publican presentaciones (todos menos el comprador) ven "Mis descuentos".
-  // Lee la señal del rol, así el menú cambia solo al iniciar o cerrar sesión.
   esVendedor = computed(() => {
     const rol = this.authService.rol();
     return this.isLoggedIn() && rol !== null && ROLES_VENDEDOR.includes(rol);
