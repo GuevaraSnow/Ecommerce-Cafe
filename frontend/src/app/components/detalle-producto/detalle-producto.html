@@ -1,0 +1,258 @@
+<div class="container py-4">
+  <div class="mb-3">
+    <a routerLink="/catalogo" class="btn btn-outline-secondary btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i>Volver al catálogo
+    </a>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <p>Cargando detalle del producto...</p>
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-danger">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ error() }}
+    </div>
+  } @else if (presentacion(); as p) {
+    <div class="row g-4">
+      <!-- Galería de imágenes -->
+      <div class="col-lg-5">
+        <div class="card shadow-sm overflow-hidden">
+          @if (imagenActiva(); as urlPrincipal) {
+            <img
+              [src]="urlPrincipal"
+              [alt]="p.titulo"
+              class="card-img-top imagen-principal"
+            />
+          } @else {
+            <div class="sin-imagen d-flex flex-column justify-content-center align-items-center text-muted bg-body-tertiary">
+              <i class="fa-solid fa-mug-hot fa-4x mb-2"></i>
+              <span class="small">Sin imagen disponible</span>
+            </div>
+          }
+
+          @if (p.galeria.length > 1) {
+            <div class="card-body d-flex gap-2 flex-wrap justify-content-center bg-body-tertiary">
+              @for (img of p.galeria; track img.url) {
+                <button
+                  type="button"
+                  class="btn p-0 border rounded overflow-hidden miniatura-btn"
+                  [class.border-primary]="imagenActiva() === img.url"
+                  [class.border-2]="imagenActiva() === img.url"
+                  (click)="seleccionarImagen(img)"
+                >
+                  <img [src]="img.url" [alt]="p.titulo" class="miniatura-img" />
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Información principal, precio y nota de cata -->
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <span class="badge bg-primary">{{ etiquetaDelTipo(p.tipo) }}</span>
+                <span class="badge bg-light text-dark border">{{ p.estado }}</span>
+              </div>
+
+              <h1 class="h3 mb-3">{{ p.titulo }}</h1>
+
+              <!-- Precios -->
+              <div class="mb-3 p-3 rounded bg-body-tertiary">
+                @if (tieneDescuento()) {
+                  <div class="d-flex align-items-baseline gap-2 flex-wrap">
+                    <span class="text-muted text-decoration-line-through fs-5">
+                      {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+                    </span>
+                    <span class="fs-3 fw-bold text-success">
+                      {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+                    </span>
+                    @if (p.descuento) {
+                      <span class="badge bg-danger">-{{ p.descuento.porcentaje }}% DCTO</span>
+                    }
+                  </div>
+                  @if (p.descuento) {
+                    <small class="text-muted d-block mt-1">
+                      Promoción vigente del {{ p.descuento.fechaInicio | date: 'mediumDate' }} al
+                      {{ p.descuento.fechaFin | date: 'mediumDate' }}
+                    </small>
+                  }
+                } @else {
+                  <span class="fs-3 fw-bold">
+                    {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+                  </span>
+                }
+              </div>
+
+              <!-- Disponibilidad y características -->
+              <ul class="list-unstyled mb-3">
+                <li class="mb-2">
+                  <i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>
+                  <strong>Disponibilidad:</strong>
+                  {{ p.cantidadDisponible.valor }} {{ p.cantidadDisponible.unidad }}
+                </li>
+                @if (p.perfilTueste) {
+                  <li class="mb-2">
+                    <i class="fa-solid fa-fire me-2 text-warning"></i>
+                    <strong>Perfil de tueste:</strong> {{ p.perfilTueste }}
+                  </li>
+                }
+                @if (p.fechaTueste) {
+                  <li class="mb-2">
+                    <i class="fa-regular fa-calendar-check me-2 text-success"></i>
+                    <strong>Fecha de tueste:</strong> {{ p.fechaTueste | date: 'mediumDate' }}
+                  </li>
+                }
+                @if (p.descripcion) {
+                  <li class="mb-2">
+                    <i class="fa-solid fa-align-left me-2 text-secondary"></i>
+                    <strong>Descripción:</strong> {{ p.descripcion }}
+                  </li>
+                }
+                @if (p.material) {
+                  <li class="mb-2">
+                    <i class="fa-solid fa-layer-group me-2 text-secondary"></i>
+                    <strong>Material:</strong> {{ p.material }}
+                  </li>
+                }
+              </ul>
+
+              <!-- Nota de cata -->
+              @if (p.notaCata?.length) {
+                <div class="mb-3">
+                  <h6 class="text-uppercase text-muted small mb-2">
+                    <i class="fa-solid fa-mug-hot me-1"></i>Nota de cata
+                  </h6>
+                  <div class="d-flex flex-wrap gap-2">
+                    @for (nota of p.notaCata; track nota) {
+                      <span class="badge rounded-pill text-bg-warning">
+                        {{ nota }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Acción de compra -->
+            <div class="pt-3 border-top d-flex justify-content-end">
+              @if (auth.isAuthenticated()) {
+                <a [routerLink]="['/comprar', p.id]" class="btn btn-primary">
+                  <i class="fa-solid fa-cart-shopping me-2"></i>Comprar ahora
+                </a>
+              } @else {
+                <a routerLink="/login" class="btn btn-outline-primary">
+                  <i class="fa-solid fa-right-to-bracket me-1"></i>Inicia sesión para comprar
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Trazabilidad: De dónde viene este café -->
+    @if (p.origen?.transformacionId || p.origen?.loteId) {
+      <div class="card shadow-sm mt-4 border-success">
+        <div class="card-header bg-success text-white d-flex align-items-center gap-2">
+          <i class="fa-solid fa-seedling"></i>
+          <h2 class="h5 mb-0">De dónde viene este café</h2>
+        </div>
+
+        <div class="card-body">
+          @if (!auth.isAuthenticated()) {
+            <div class="alert alert-info mb-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <span>
+                <i class="fa-solid fa-lock me-2"></i>
+                Inicia sesión para consultar la ficha completa de trazabilidad (finca, cosecha, lote y tostión).
+              </span>
+              <a routerLink="/login" class="btn btn-sm btn-primary">Ingresar</a>
+            </div>
+          } @else if (cargandoOrigen()) {
+            <div class="text-center py-3 text-muted">
+              <div class="spinner-border spinner-border-sm text-success me-2"></div>
+              Consultando trazabilidad desde la finca hasta la tostión...
+            </div>
+          } @else if (errorOrigen()) {
+            <div class="alert alert-warning mb-0">
+              <i class="fa-solid fa-circle-info me-2"></i>{{ errorOrigen() }}
+            </div>
+          } @else if (fichaOrigen(); as ficha) {
+            <!-- Recorrido visual Finca -> Lote -> Tostión -->
+            <div class="row g-3">
+              <!-- Paso 1: Finca y Cosecha -->
+              <div class="col-md-4">
+                <div class="p-3 border rounded h-100 bg-body-tertiary">
+                  <div class="text-success fw-semibold mb-2">
+                    <i class="fa-solid fa-mountain-sun me-2"></i>1. Finca y Cosecha
+                  </div>
+                  <p class="mb-1"><strong>Finca:</strong> {{ ficha.fincaNombre }}</p>
+                  <p class="mb-0 text-muted small">
+                    <strong>Cosecha:</strong> {{ ficha.cosechaInfo }}
+                  </p>
+                </div>
+              </div>
+
+            <!-- Paso 2: Lote y Proceso -->
+            <div class="col-md-4">
+              <div class="p-3 border rounded h-100 bg-body-tertiary">
+                <div class="text-success fw-semibold mb-2">
+                  <i class="fa-solid fa-barcode me-2"></i>2. Lote y Beneficio
+                </div>
+                @if (ficha.lotesOrigen.length) {
+                  @for (lote of ficha.lotesOrigen; track lote.codigo) {
+                    <div class="mb-2">
+                      <span class="badge bg-dark mb-1">{{ lote.codigo }}</span>
+                      @if (lote.procesoBeneficio) {
+                        <div class="small">
+                          <strong>Proceso:</strong> {{ lote.procesoBeneficio }}
+                        </div>
+                      }
+                      @if (lote.estado) {
+                        <div class="small text-muted">
+                          <strong>Estado:</strong> {{ lote.estado }}
+                        </div>
+                      }
+                    </div>
+                  }
+                } @else {
+                  <p class="text-muted small mb-0">Lote de origen verificado.</p>
+                }
+              </div>
+            </div>
+
+              <!-- Paso 3: Tostión / Transformación -->
+              <div class="col-md-4">
+                <div class="p-3 border rounded h-100 bg-body-tertiary">
+                  <div class="text-success fw-semibold mb-2">
+                    <i class="fa-solid fa-fire-burner me-2"></i>3. Tostión
+                  </div>
+                  <p class="mb-1">
+                    <strong>Perfil resultante:</strong> {{ ficha.perfilTuesteResultante }}
+                  </p>
+                  <p class="mb-1 small">
+                    <strong>Fecha de transformación:</strong>
+                    {{ ficha.fechaTransformacion | date: 'mediumDate' }}
+                  </p>
+                  <p class="mb-0 text-muted small">
+                    <strong>Tostador ID:</strong> <code>{{ ficha.tostadorId.slice(0, 8) }}</code>
+                  </p>
+                </div>
+              </div>
+            </div>
+          } @else if (p.origen?.loteId) {
+            <p class="mb-0">
+              <i class="fa-solid fa-leaf text-success me-2"></i>
+              Café verde directo del lote <code>{{ p.origen?.loteId }}</code>.
+            </p>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
