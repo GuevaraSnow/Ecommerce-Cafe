@@ -1,0 +1,143 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">
+        <i class="fa-solid fa-bag-shopping me-2 text-primary"></i>Mis compras
+      </h2>
+      <p class="text-muted mb-0">Consulta el estado de tus pedidos y gestiona tus compras pendientes.</p>
+    </div>
+    <a routerLink="/catalogo" class="btn btn-outline-primary btn-sm">
+      <i class="fa-solid fa-store me-1"></i>Seguir comprando
+    </a>
+  </div>
+
+  @if (mensajeExito()) {
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="fa-solid fa-circle-check me-2"></i>{{ mensajeExito() }}
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Cerrar"
+        (click)="mensajeExito.set(null)"
+      ></button>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+      <div>
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ error() }}
+      </div>
+      <button class="btn btn-sm btn-outline-danger" (click)="cargarCompras()">Reintentar</button>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando compras...</span>
+      </div>
+      <p class="text-muted mt-2">Cargando tu historial de compras...</p>
+    </div>
+  } @else if (compras().length === 0) {
+    <div class="card border-0 shadow-sm text-center py-5">
+      <div class="card-body">
+        <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+        <h4>Aún no tienes compras registradas</h4>
+        <p class="text-muted mb-4">
+          Explora nuestro catálogo de café de origen trazado y realiza tu primer pedido.
+        </p>
+        <a routerLink="/catalogo" class="btn btn-primary">
+          <i class="fa-solid fa-mug-hot me-2"></i>Ir al catálogo
+        </a>
+      </div>
+    </div>
+  } @else {
+    <div class="row g-3">
+      @for (compra of compras(); track compra.id) {
+        <div class="col-12">
+          <div class="card shadow-sm compra-card">
+            <div class="card-header bg-body-tertiary d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div>
+                <span class="fw-semibold">Compra #{{ compra.id.slice(0, 8) }}</span>
+                <span class="text-muted ms-2 small">
+                  <i class="fa-regular fa-calendar me-1"></i>
+                  {{ compra.fechaCompra | date: 'mediumDate' }}
+                </span>
+              </div>
+              <span class="badge rounded-pill" [class]="claseEstado(compra.estado)">
+                {{ compra.estado }}
+              </span>
+            </div>
+
+            <div class="card-body">
+              <div class="row g-3 align-items-center">
+                <div class="col-md-7">
+                  <h6 class="text-muted text-uppercase small mb-2">Detalle de productos</h6>
+                  @if (compra.detalles.length === 0) {
+                    <p class="text-muted fst-italic mb-0">Carrito vacío sin presentaciones agregadas.</p>
+                  } @else {
+                    <ul class="list-group list-group-flush">
+                      @for (item of compra.detalles; track item.presentacionId) {
+                        <li class="list-group-item px-0 py-1 d-flex justify-content-between align-items-center">
+                          <span>
+                            Presentación <code>{{ item.presentacionId.slice(0, 8) }}</code>
+                            <span class="text-muted ms-1">
+                              ({{ item.cantidad.valor }} {{ item.cantidad.unidad }})
+                            </span>
+                          </span>
+                          <span class="fw-medium">
+                            {{
+                              item.precioCongelado.monto * item.cantidad.valor
+                                | currency: item.precioCongelado.moneda : 'symbol-narrow' : '1.0-0'
+                            }}
+                          </span>
+                        </li>
+                      }
+                    </ul>
+                  }
+
+                  @if (compra.direccionEnvio) {
+                    <div class="mt-2 small text-muted">
+                      <i class="fa-solid fa-location-dot me-1"></i>
+                      Envío a <strong>{{ compra.direccionEnvio.destinatario }}</strong> —
+                      {{ compra.direccionEnvio.direccion }}, {{ compra.direccionEnvio.ciudad }}
+                    </div>
+                  }
+                </div>
+
+                <div class="col-md-5 text-md-end border-top border-md-top-0 pt-3 pt-md-0">
+                  <div class="mb-2">
+                    <span class="text-muted small d-block">Total</span>
+                    <span class="fs-5 fw-bold">
+                      {{
+                        calcularTotal(compra)
+                          | currency: obtenerMoneda(compra) : 'symbol-narrow' : '1.0-0'
+                      }}
+                    </span>
+                  </div>
+
+                  @if (compra.estado === 'PENDIENTE') {
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      [disabled]="cancelandoId() === compra.id"
+                      (click)="cancelarCompra(compra)"
+                    >
+                      @if (cancelandoId() === compra.id) {
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        Cancelando...
+                      } @else {
+                        <i class="fa-solid fa-ban me-1"></i>Cancelar compra
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
