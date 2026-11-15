@@ -5,6 +5,7 @@ import { Login } from './components/login/login';
 import { Catalogo } from './components/catalogo/catalogo';
 import { Comprar } from './components/comprar/comprar';
 import { Descuentos } from './components/descuentos/descuentos';
+import { MisFotos } from './components/mis-fotos/mis-fotos';
 import { MisCompras } from './components/mis-compras/mis-compras';
 import { DetalleProducto } from './components/detalle-producto/detalle-producto';
 import { authGuard } from './guards/auth-guard';
@@ -21,5 +22,6 @@ export const routes: Routes = [
   { path: 'comprar/:id', component: Comprar, canActivate: [authGuard] },
   { path: 'mis-compras', component: MisCompras, canActivate: [authGuard] },
   { path: 'descuentos', component: Descuentos, canActivate: [rolGuard], data: { roles: ROLES_VENDEDOR } },
+  { path: 'mis-fotos', component: MisFotos, canActivate: [rolGuard], data: { roles: ROLES_VENDEDOR } },
   { path: '**', pathMatch: 'full', redirectTo: '/' },
 ];

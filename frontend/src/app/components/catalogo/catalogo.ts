@@ -86,6 +86,11 @@ export class Catalogo {
     return colores[tipo] ?? 'bg-secondary';
   }
 
+  // La foto marcada como principal; sin galería, la tarjeta no muestra imagen
+  fotoPrincipal(p: Presentacion): string | null {
+    return (p.galeria.find((imagen) => imagen.principal) ?? p.galeria[0])?.url ?? null;
+  }
+
   tieneDescuento(p: Presentacion): boolean {
     return p.precioVigente.monto < p.precio.monto;
   }
