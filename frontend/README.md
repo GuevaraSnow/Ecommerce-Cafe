@@ -34,7 +34,7 @@ El sistema maneja una cuenta única (`Usuario`) diferenciada por su `Rol`:
 ### Requisitos previos
 
 * **Java 21** (JDK 21)
-* **Node.js 20+** y **npm**
+* **Node.js 22.22.3 o superior** (o 24.15+) y **npm**, que es lo que exige Angular 22
 * **Docker Desktop** (únicamente si se desea ejecutar el backend y MariaDB mediante contenedores)
 
 ---
@@ -66,20 +66,23 @@ En Windows (PowerShell):
 
 #### Opción B: Con MariaDB y Backend en Docker
 
-1. Abrir una terminal en la carpeta `Backend/` y levantar los contenedores (`mariadb-ecommerce` y `ecommerce-app`):
+1. Abrir una terminal en la carpeta `Backend/`, con **Docker Desktop encendido**, generar el jar y levantar los contenedores (`mariadb-ecommerce` y `ecommerce-app`):
 
 ```powershell
 cd Backend
-docker compose up -d
+.\gradlew bootJar
+docker compose up --build -d
 ```
 
-> Este comando levanta tanto la base de datos MariaDB como el servidor backend en `http://localhost:8080`, por lo que **no es necesario** ejecutar `bootRun` adicionalmente. En este modo la base de datos inicia vacía (se pueden crear usuarios desde la pantalla de registro).
+> Estos comandos levantan tanto la base de datos MariaDB como el servidor backend en `http://localhost:8080`, por lo que **no es necesario** ejecutar `bootRun` adicionalmente. En este modo la base **conserva los datos al apagar**, y la primera vez se cargan los mismos datos de ejemplo que en H2 (usuarios de prueba, productos con fotos y compras). Si cambió el código, repite `bootJar` y `--build`: sin ellos Docker reutiliza la imagen anterior. Las claves del chat con IA y de las fotos se explican en el README de la raíz (`.env.example`).
 
-2. Para detener y apagar los contenedores al finalizar:
+2. Para detener y apagar los contenedores al finalizar (los datos se conservan):
 
 ```powershell
 docker compose down
 ```
+
+   Para borrar también los datos y empezar de cero con los de ejemplo: `docker compose down -v`.
 
 ---
 
@@ -106,6 +109,8 @@ npm start
 ```
 
 4. Abrir en el navegador: **`http://localhost:4200/`**
+
+> **Chat de asesoría y fotos (opcionales):** para que el asesor con IA responda y para subir fotos, el Backend debe arrancar con las variables de entorno `GROQ_API_KEY` y `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (ver el README de la raíz). Sin ellas todo lo demás funciona y esas dos funciones avisan que no están disponibles.
 
 ---
 
@@ -136,4 +141,5 @@ Al iniciar el backend en modo **H2** (Opción A), se cargan automáticamente los
 | **Iniciar sesión** | `/login` | Solo invitados (`guestGuard`) | Autenticación mediante correo y contraseña con emisión de token JWT.                                                                                                               |
 | **Comprar presentación** | `/comprar/:id` | Autenticado — `COMPRADOR` (`authGuard`) | Flujo de compra directa de una presentación ingresando cantidad y dirección de envío.                                                                                              |
 | **Mis compras** | `/mis-compras` | Autenticado — `COMPRADOR` (`authGuard`) | Historial de compras del comprador con su estado actual (`PENDIENTE`, `CONFIRMADA`, `ENVIADA`, `ENTREGADA`, `CANCELADA`, `REEMBOLSADA`) y opción para cancelar pedidos pendientes. |
+| **Mis fotos** | `/mis-fotos` | Autenticado — `CAFICULTOR`, `TOSTADOR`, `VENDEDOR_DERIVADOS` (`rolGuard`) | Subida de fotos a Cloudinary (JPG, PNG o WebP de hasta 2 MB), elección de la foto principal y guardado de la galería de cada presentación propia. |
 | **Mis descuentos** | `/descuentos` | Autenticado — `CAFICULTOR`, `TOSTADOR`, `VENDEDOR_DERIVADOS` | Gestión de descuentos por temporada (1 % a 50 % entre fechas) sobre las presentaciones propias del vendedor.                                                                       |
