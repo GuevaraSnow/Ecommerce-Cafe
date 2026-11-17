@@ -1,54 +1,80 @@
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="card shadow-sm">
-        <div class="card-header text-center py-3">
-          <h5 class="mb-0">
-            <i class="fa-solid fa-right-to-bracket me-2"></i>Iniciar sesión
-          </h5>
-        </div>
-        <div class="card-body">
-          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-            <div class="mb-3">
-              <label for="email" class="form-label">Correo electrónico</label>
+<div class="row g-0 pantalla-acceso">
+  <!-- Panel con la foto: solo en pantallas grandes -->
+  <div class="col-lg-6 d-none d-lg-flex panel-foto" style="background-image: linear-gradient(0deg, rgba(18, 12, 9, 0.9) 0%, rgba(18, 12, 9, 0.2) 60%), url('/img/latte-corazon.jpg')">
+    <div class="mt-auto p-5">
+      <p class="etiqueta-tipo mb-2" style="color: var(--cafe-boton)">Café de Origen</p>
+      <h2 class="display-5 fw-bold mb-3" style="color: var(--cafe-sobre-marco)">Bienvenido de nuevo. Tu café con origen te espera.</h2>
+      <p class="mb-0" style="color: var(--cafe-sobre-marco-suave)">
+        Compradores y vendedores comparten una misma plataforma, con precios y descuentos claros.
+      </p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="col-lg-6 d-flex align-items-center justify-content-center p-4">
+    <div class="card tarjeta-acceso w-100">
+      <div class="card-body p-4 p-lg-5">
+        <h1 class="h2 mb-1">Ingresar</h1>
+        <p class="text-secondary mb-4">Usa tu correo y tu contraseña.</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold small">Correo electrónico</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
               <input
                 id="email"
                 type="email"
                 formControlName="email"
                 class="form-control"
-                placeholder="correo@ejemplo.com"
+                placeholder="tucorreo@ejemplo.com"
               />
-              @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-                <div class="text-danger small mt-1">Ingresa un correo electrónico válido.</div>
-              }
             </div>
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <div class="text-danger small mt-1">Ingresa un correo electrónico válido.</div>
+            }
+          </div>
 
-            <div class="mb-3">
-              <label for="contrasena" class="form-label">Contraseña</label>
+          <div class="mb-4">
+            <label for="contrasena" class="form-label fw-semibold small">Contraseña</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
               <input
                 id="contrasena"
-                type="password"
+                [type]="verContrasena() ? 'text' : 'password'"
                 formControlName="contrasena"
                 class="form-control"
                 placeholder="••••••••"
               />
-              @if (loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched) {
-                <!-- touched: el usuario ya pasó por este campo -->
-                <div class="text-danger small mt-1">Ingresa tu contraseña.</div>
-              }
-            </div>
-
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary" [disabled]="!canSubmit()">
-                @if (isLoading()) {
-                  <span class="spinner-border spinner-border-sm me-2"></span>Ingresando...
-                } @else {
-                  <i class="fa-solid fa-right-to-bracket me-2"></i>Ingresar
-                }
+              <button
+                type="button"
+                class="btn boton-ojo"
+                [attr.aria-label]="verContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                (click)="alternarContrasena()"
+              >
+                <i class="fa-regular" [class.fa-eye]="!verContrasena()" [class.fa-eye-slash]="verContrasena()"></i>
               </button>
             </div>
-          </form>
-        </div>
+            @if (loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched) {
+              <!-- touched: el usuario ya pasó por este campo -->
+              <div class="text-danger small mt-1">Ingresa tu contraseña.</div>
+            }
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primario-oscuro btn-lg" [disabled]="!canSubmit()">
+              @if (isLoading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>Ingresando...
+              } @else {
+                Ingresar
+              }
+            </button>
+          </div>
+        </form>
+
+        <p class="text-center text-secondary small mt-4 mb-0">
+          ¿No tienes cuenta? <a routerLink="/registro" class="fw-semibold">Crear cuenta</a>
+        </p>
       </div>
     </div>
   </div>

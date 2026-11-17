@@ -1,12 +1,525 @@
-/* You can add global styles to this file, and also import other style files */
+/*
+ * Diseño de Café de Origen (tomado del mockup de Figma).
+ * 1) Variables --cafe-* con los colores de cada modo.
+ * 2) Variables --bs-* de Bootstrap apuntando a las nuestras: así todo lo que ya usa Bootstrap cambia solo.
+ * 3) Unos pocos componentes propios (barra, pie, portada de sección).
+ */
+
+/* ---------- 1) Colores: claro (por defecto) y oscuro ---------- */
+:root,
+[data-bs-theme='light'] {
+  --cafe-fondo: #fbf7f2;
+  --cafe-superficie: #ffffff;
+  --cafe-superficie-alt: #f2e9de;
+  --cafe-texto: #2b1b12;
+  --cafe-texto-suave: #7a6658;
+  --cafe-primario: #4a2c1a;
+  --cafe-primario-rgb: 74, 44, 26;
+  --cafe-sobre-primario: #ffffff;
+  --cafe-acento: #c67c4e;
+  --cafe-acento-rgb: 198, 124, 78;
+  --cafe-borde: #e6dbcd;
+  --cafe-borde-fuerte: #8a7464;
+  --cafe-exito: #2e7d5b;
+  --cafe-exito-fondo: #e3f3ea;
+  --cafe-peligro: #c0392b;
+  --cafe-peligro-fondo: #fbe6e3;
+  --cafe-info: #2563a8;
+  --cafe-info-fondo: #e4eefa;
+  --cafe-descuento-rgb: 192, 57, 43;
+  --cafe-marco: #1a110c;
+  --cafe-foco: #2563a8;
+}
+
+[data-bs-theme='dark'] {
+  --cafe-fondo: #15100d;
+  --cafe-superficie: #211915;
+  --cafe-superficie-alt: #2d231d;
+  --cafe-texto: #f5ebdd;
+  --cafe-texto-suave: #b8a596;
+  --cafe-primario: #c67c4e;
+  --cafe-primario-rgb: 198, 124, 78;
+  --cafe-sobre-primario: #1a0f08;
+  --cafe-acento: #e3a877;
+  --cafe-acento-rgb: 227, 168, 119;
+  --cafe-borde: #3b2e26;
+  --cafe-borde-fuerte: #8f7c6d;
+  --cafe-exito: #6fcf9f;
+  --cafe-exito-fondo: #17352a;
+  --cafe-peligro: #ee7b6d;
+  --cafe-peligro-fondo: #3a1a16;
+  --cafe-info: #7db4ee;
+  --cafe-info-fondo: #172a40;
+  --cafe-descuento-rgb: 232, 96, 79;
+  --cafe-marco: #120c09;
+  --cafe-foco: #7db4ee;
+}
+
+/* Iguales en los dos modos */
+:root {
+  --cafe-boton: #c67c4e;
+  --cafe-sobre-boton: #1a0f08;
+  --cafe-sobre-marco: #f5ebdd;
+  --cafe-sobre-marco-suave: #cdbcab;
+  --cafe-borde-marco: #4a3a2f;
+  --cafe-radio-sm: 10px;
+  --cafe-radio-md: 16px;
+  --cafe-radio-lg: 24px;
+  --cafe-fuente-titulo: 'Playfair Display', Georgia, serif;
+  --cafe-fuente-cuerpo: 'DM Sans', system-ui, sans-serif;
+  --cafe-fuente-ui: 'Sora', 'DM Sans', system-ui, sans-serif;
+}
+
+/* ---------- 2) Bootstrap leyendo nuestros colores ---------- */
+:root,
+[data-bs-theme='light'],
+[data-bs-theme='dark'] {
+  --bs-body-bg: var(--cafe-fondo);
+  --bs-body-color: var(--cafe-texto);
+  --bs-body-font-family: var(--cafe-fuente-cuerpo);
+  --bs-heading-color: var(--cafe-texto);
+  --bs-emphasis-color: var(--cafe-texto);
+  --bs-secondary-color: var(--cafe-texto-suave);
+  --bs-secondary-bg: var(--cafe-superficie-alt);
+  --bs-tertiary-bg: var(--cafe-superficie-alt);
+  --bs-border-color: var(--cafe-borde);
+  --bs-primary: var(--cafe-primario);
+  --bs-primary-rgb: var(--cafe-primario-rgb);
+  --bs-link-color-rgb: var(--cafe-primario-rgb);
+  --bs-link-hover-color-rgb: var(--cafe-acento-rgb);
+  --bs-danger-rgb: var(--cafe-descuento-rgb);
+  --bs-focus-ring-color: color-mix(in srgb, var(--cafe-foco) 30%, transparent);
+  --bs-success-text-emphasis: var(--cafe-exito);
+  --bs-success-bg-subtle: var(--cafe-exito-fondo);
+  --bs-success-border-subtle: color-mix(in srgb, var(--cafe-exito) 35%, transparent);
+  --bs-danger-text-emphasis: var(--cafe-peligro);
+  --bs-danger-bg-subtle: var(--cafe-peligro-fondo);
+  --bs-danger-border-subtle: color-mix(in srgb, var(--cafe-peligro) 35%, transparent);
+  --bs-info-text-emphasis: var(--cafe-info);
+  --bs-info-bg-subtle: var(--cafe-info-fondo);
+  --bs-info-border-subtle: color-mix(in srgb, var(--cafe-info) 35%, transparent);
+}
+
+body {
+  font-family: var(--cafe-fuente-cuerpo);
+}
+
+h1, h2, h3, h4, .h1, .h2, .h3, .h4 {
+  font-family: var(--cafe-fuente-titulo);
+  font-weight: 600;
+}
+
+/* Botones: redondeados del todo; el principal es caramelo, como en el mockup */
+.btn {
+  --bs-btn-border-radius: 999px;
+  --bs-btn-font-weight: 600;
+  font-family: var(--cafe-fuente-ui);
+}
+
+.btn-primary {
+  --bs-btn-color: var(--cafe-sobre-boton);
+  --bs-btn-bg: var(--cafe-boton);
+  --bs-btn-border-color: var(--cafe-boton);
+  --bs-btn-hover-color: var(--cafe-sobre-boton);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--cafe-boton) 88%, black);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--cafe-boton) 88%, black);
+  --bs-btn-active-color: var(--cafe-sobre-boton);
+  --bs-btn-active-bg: color-mix(in srgb, var(--cafe-boton) 80%, black);
+  --bs-btn-active-border-color: color-mix(in srgb, var(--cafe-boton) 80%, black);
+  --bs-btn-disabled-color: var(--cafe-sobre-boton);
+  --bs-btn-disabled-bg: var(--cafe-boton);
+  --bs-btn-disabled-border-color: var(--cafe-boton);
+}
+
+.btn-outline-primary,
+.btn-outline-secondary {
+  --bs-btn-color: var(--cafe-texto);
+  --bs-btn-border-color: var(--cafe-borde-fuerte);
+  --bs-btn-hover-color: var(--cafe-fondo);
+  --bs-btn-hover-bg: var(--cafe-texto);
+  --bs-btn-hover-border-color: var(--cafe-texto);
+  --bs-btn-active-color: var(--cafe-fondo);
+  --bs-btn-active-bg: var(--cafe-texto);
+  --bs-btn-active-border-color: var(--cafe-texto);
+  --bs-btn-disabled-color: var(--cafe-texto-suave);
+  --bs-btn-disabled-border-color: var(--cafe-borde);
+}
+
+/* Tarjetas, listas, formularios */
+.card {
+  --bs-card-bg: var(--cafe-superficie);
+  --bs-card-border-color: var(--cafe-borde);
+  --bs-card-border-radius: var(--cafe-radio-md);
+  --bs-card-inner-border-radius: calc(var(--cafe-radio-md) - 1px);
+  --bs-card-cap-bg: transparent;
+  overflow: hidden;
+}
+
+.list-group {
+  --bs-list-group-bg: var(--cafe-superficie);
+  --bs-list-group-border-color: var(--cafe-borde);
+  --bs-list-group-border-radius: var(--cafe-radio-md);
+  --bs-list-group-action-hover-bg: var(--cafe-superficie-alt);
+  --bs-list-group-active-bg: var(--cafe-primario);
+  --bs-list-group-active-border-color: var(--cafe-primario);
+  --bs-list-group-active-color: var(--cafe-sobre-primario);
+}
+
+.form-control,
+.form-select {
+  background-color: var(--cafe-superficie);
+  border-color: var(--cafe-borde-fuerte);
+  border-radius: var(--cafe-radio-md);
+  color: var(--cafe-texto);
+}
+
+.form-control::placeholder {
+  color: var(--cafe-texto-suave);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--cafe-superficie);
+  color: var(--cafe-texto);
+}
+
+.badge {
+  font-family: var(--cafe-fuente-ui);
+  font-weight: 600;
+}
+
+.alert {
+  border-radius: var(--cafe-radio-md);
+}
 
 /* Campos del formulario: rojo si son inválidos y verde si son válidos, solo después de tocarlos */
 .ng-invalid.ng-touched:not(form) {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  border-color: var(--cafe-peligro);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--cafe-peligro) 25%, transparent);
 }
 
 .ng-valid.ng-touched:not(form) {
-  border-color: #198754;
-  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+  border-color: var(--cafe-exito);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--cafe-exito) 25%, transparent);
+}
+
+/* ---------- 3) Componentes propios ---------- */
+
+/* Barra superior y pie: siempre oscuros, en los dos modos */
+.barra-cafe {
+  background: var(--cafe-marco);
+  --bs-navbar-color: var(--cafe-sobre-marco-suave);
+  --bs-navbar-hover-color: var(--cafe-sobre-marco);
+  --bs-navbar-active-color: var(--cafe-sobre-marco);
+  --bs-navbar-brand-color: var(--cafe-sobre-marco);
+  --bs-navbar-brand-hover-color: var(--cafe-sobre-marco);
+}
+
+.barra-cafe .navbar-brand {
+  font-family: var(--cafe-fuente-titulo);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.barra-cafe .nav-link {
+  border-bottom: 2px solid transparent;
+  padding-bottom: 0.25rem;
+}
+
+.barra-cafe .nav-link.active {
+  border-bottom-color: var(--cafe-boton);
+}
+
+.barra-cafe .navbar-toggler {
+  border-color: var(--cafe-borde-marco);
+}
+
+.barra-cafe .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+.logo-cafe {
+  align-items: center;
+  background: var(--cafe-boton);
+  border-radius: 50%;
+  color: var(--cafe-sobre-boton);
+  display: inline-flex;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
+
+.boton-barra {
+  border: 1px solid var(--cafe-borde-marco);
+  color: var(--cafe-sobre-marco);
+}
+
+.boton-barra:hover {
+  background: var(--cafe-borde-marco);
+  color: var(--cafe-sobre-marco);
+}
+
+.pie-cafe {
+  background: var(--cafe-marco);
+  color: var(--cafe-sobre-marco-suave);
+}
+
+.pie-cafe a {
+  color: var(--cafe-sobre-marco-suave);
+  text-decoration: none;
+}
+
+.pie-cafe a:hover {
+  color: var(--cafe-sobre-marco);
+}
+
+/* Franja con el título de cada sección */
+.portada-seccion {
+  background: var(--cafe-superficie-alt);
+  padding: 2.5rem 0;
+}
+
+.portada-seccion h1 {
+  font-size: 2.75rem;
+  font-weight: 700;
+}
+
+.etiqueta-tipo {
+  color: var(--cafe-texto-suave);
+  font-family: var(--cafe-fuente-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.precio {
+  font-family: var(--cafe-fuente-ui);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.precio-tachado {
+  color: var(--cafe-texto-suave);
+  font-family: var(--cafe-fuente-ui);
+  font-size: 0.875rem;
+}
+
+.insignia-descuento {
+  background: rgb(var(--cafe-descuento-rgb));
+  border-radius: 999px;
+  color: #fff;
+  font-family: var(--cafe-fuente-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+}
+
+/* Portada del Inicio: fondo oscuro de la marca */
+.portada-inicio {
+  background:
+    linear-gradient(90deg, rgba(18, 12, 9, 0.94) 0%, rgba(18, 12, 9, 0.7) 55%, rgba(18, 12, 9, 0.45) 100%),
+    url('/img/granos.jpg') center / cover no-repeat;
+  color: var(--cafe-sobre-marco);
+}
+
+.portada-inicio h1 {
+  color: var(--cafe-sobre-marco);
+}
+
+.sello-inicio {
+  border: 2px solid var(--cafe-boton);
+  border-radius: 50%;
+  height: 22rem;
+  object-fit: cover;
+  padding: 0.6rem;
+  width: 22rem;
+}
+
+/* Banda de descuentos: texto a la izquierda y foto a la derecha */
+.banda-descuento {
+  background: var(--cafe-marco);
+  border-radius: var(--cafe-radio-lg);
+  color: var(--cafe-sobre-marco);
+  overflow: hidden;
+}
+
+.banda-descuento h2 {
+  color: var(--cafe-sobre-marco);
+}
+
+.banda-descuento img {
+  height: 100%;
+  min-height: 14rem;
+  object-fit: cover;
+  width: 100%;
+}
+
+.icono-categoria {
+  align-items: center;
+  background: var(--cafe-superficie-alt);
+  border-radius: 50%;
+  color: var(--cafe-primario);
+  display: inline-flex;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
+
+/* Pantallas de acceso (login): foto a la izquierda y tarjeta a la derecha */
+.pantalla-acceso {
+  min-height: calc(100vh - 4rem);
+}
+
+.panel-foto {
+  background-position: center;
+  background-size: cover;
+}
+
+.tarjeta-acceso {
+  --bs-card-border-radius: var(--cafe-radio-lg);
+  max-width: 28rem;
+}
+
+.btn-primario-oscuro {
+  --bs-btn-color: var(--cafe-sobre-primario);
+  --bs-btn-bg: var(--cafe-primario);
+  --bs-btn-border-color: var(--cafe-primario);
+  --bs-btn-hover-color: var(--cafe-sobre-primario);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--cafe-primario) 85%, black);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--cafe-primario) 85%, black);
+  --bs-btn-disabled-color: var(--cafe-sobre-primario);
+  --bs-btn-disabled-bg: var(--cafe-primario);
+  --bs-btn-disabled-border-color: var(--cafe-primario);
+}
+
+/* Campos con icono: el grupo se ve como un solo campo redondeado */
+.input-group > .input-group-text {
+  background: var(--cafe-superficie);
+  border-color: var(--cafe-borde-fuerte);
+  border-radius: var(--cafe-radio-md) 0 0 var(--cafe-radio-md);
+  color: var(--cafe-texto-suave);
+}
+
+.input-group > .form-control {
+  border-left: 0;
+}
+
+.input-group > .form-control:not(:last-child) {
+  border-radius: 0;
+  border-right: 0;
+}
+
+.input-group > .form-control:last-child {
+  border-radius: 0 var(--cafe-radio-md) var(--cafe-radio-md) 0;
+}
+
+.input-group > .boton-ojo {
+  background: var(--cafe-superficie);
+  border: 1px solid var(--cafe-borde-fuerte);
+  border-left: 0;
+  border-radius: 0 var(--cafe-radio-md) var(--cafe-radio-md) 0;
+  color: var(--cafe-texto-suave);
+}
+
+/* Selector de dos o más opciones en forma de píldora (Comprador / Vendedor) */
+.selector-pills {
+  border: 1px solid var(--cafe-borde-fuerte);
+  border-radius: 999px;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+}
+
+.selector-pills .btn {
+  border: 0;
+  color: var(--cafe-texto);
+  flex: 1;
+}
+
+.selector-pills .btn.activo {
+  background: var(--cafe-primario);
+  color: var(--cafe-sobre-primario);
+}
+
+.etiqueta-pie {
+  color: var(--cafe-boton);
+  font-family: var(--cafe-fuente-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Usuario con sesión en la barra: círculo con la inicial y el rol */
+.usuario-barra {
+  align-items: center;
+  border: 1px solid var(--cafe-borde-marco);
+  border-radius: 999px;
+  color: var(--cafe-sobre-marco);
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 0.2rem 0.75rem 0.2rem 0.25rem;
+}
+
+.usuario-barra .inicial {
+  align-items: center;
+  background: var(--cafe-boton);
+  border-radius: 50%;
+  color: var(--cafe-sobre-boton);
+  display: inline-flex;
+  font-family: var(--cafe-fuente-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  height: 1.75rem;
+  justify-content: center;
+  width: 1.75rem;
+}
+
+.usuario-barra .rol {
+  color: var(--cafe-sobre-marco-suave);
+  font-size: 0.8rem;
+}
+
+/* Ruta de migas: Inicio › Catálogo */
+.migas {
+  color: var(--cafe-texto-suave);
+  font-size: 0.875rem;
+}
+
+.migas a {
+  color: var(--cafe-texto-suave);
+  text-decoration: none;
+}
+
+/* Caja verde de "Origen verificado" */
+.caja-origen {
+  background: var(--cafe-exito-fondo);
+  border: 1px solid color-mix(in srgb, var(--cafe-exito) 40%, transparent);
+  border-radius: var(--cafe-radio-md);
+  color: var(--cafe-exito);
+  padding: 1rem 1.25rem;
+}
+
+.miniatura {
+  border-radius: var(--cafe-radio-sm);
+  height: 3.5rem;
+  object-fit: cover;
+  width: 3.5rem;
+}
+
+/* Fila activa de una lista: usa el color de la marca en vez del azul de Bootstrap */
+.list-group-item.active .text-secondary {
+  color: inherit !important;
+}
+
+/* El pie siempre queda abajo, aunque la pantalla tenga poco contenido */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+app-footer {
+  margin-top: auto;
 }

@@ -38,6 +38,23 @@ export class Descuentos {
     () => this.formStatus() === 'VALID' && !this.isLoading() && this.seleccionada() !== null,
   );
 
+  // Resumen de arriba: cuántas presentaciones tienen descuento y cuál es el mayor
+  conDescuento = computed(() => this.presentaciones().filter((p) => p.descuento !== null));
+  mayorDescuento = computed(() => Math.max(0, ...this.conDescuento().map((p) => p.descuento?.porcentaje ?? 0)));
+
+  // Vista previa del precio con el porcentaje que se está escribiendo
+  porcentajeElegido = toSignal(this.descuentoForm.controls.porcentaje.valueChanges, { initialValue: 10 });
+  vistaPrevia = computed(() => {
+    const p = this.seleccionada();
+    const porcentaje = Number(this.porcentajeElegido());
+    if (!p || !(porcentaje >= 1 && porcentaje <= 50)) return null;
+    return { normal: p.precio.monto, conDescuento: Math.round(p.precio.monto * (1 - porcentaje / 100)), porcentaje, moneda: p.precio.moneda };
+  });
+
+  fotoPrincipal(p: Presentacion): string | null {
+    return (p.galeria.find((imagen) => imagen.principal) ?? p.galeria[0])?.url ?? null;
+  }
+
   constructor() {
     // Solo las presentaciones del vendedor que inició sesión
     this.presentacionesServicio

@@ -1,1 +1,145 @@
-<p>registro works!</p>
+<div class="row g-0 pantalla-acceso">
+  <!-- Panel con la foto: solo en pantallas grandes -->
+  <div class="col-lg-6 d-none d-lg-flex panel-foto" style="background-image: linear-gradient(0deg, rgba(18, 12, 9, 0.9) 0%, rgba(18, 12, 9, 0.2) 60%), url('/img/latte-corazon.jpg')">
+    <div class="mt-auto p-5">
+      <p class="etiqueta-tipo mb-2" style="color: var(--cafe-boton)">Café de Origen</p>
+      <h2 class="display-5 fw-bold mb-3" style="color: var(--cafe-sobre-marco)">Crea tu cuenta y descubre de dónde viene tu café.</h2>
+      <p class="mb-0" style="color: var(--cafe-sobre-marco-suave)">
+        Compradores y vendedores comparten una misma plataforma, con precios y descuentos claros.
+      </p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="col-lg-6 d-flex align-items-center justify-content-center p-4">
+    <div class="card tarjeta-acceso w-100">
+      <div class="card-body p-4 p-lg-5">
+        <h1 class="h2 mb-1">Crear cuenta</h1>
+        <p class="text-secondary mb-4">Completa tus datos para empezar.</p>
+
+        <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="nombre" class="form-label fw-semibold small">Nombre</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+              <input id="nombre" type="text" formControlName="nombre" class="form-control" placeholder="Nombre completo" />
+            </div>
+            @if (registroForm.controls.nombre.invalid && registroForm.controls.nombre.touched) {
+              <div class="text-danger small mt-1">Ingresa tu nombre (máximo 100 caracteres).</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold small">Correo electrónico</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+              <input id="email" type="email" formControlName="email" class="form-control" placeholder="tucorreo@ejemplo.com" />
+            </div>
+            @if (registroForm.controls.email.invalid && registroForm.controls.email.touched) {
+              <div class="text-danger small mt-1">Ingresa un correo electrónico válido.</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="contrasena" class="form-label fw-semibold small">Contraseña</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+              <input
+                id="contrasena"
+                [type]="verContrasena() ? 'text' : 'password'"
+                formControlName="contrasena"
+                class="form-control"
+                placeholder="Mínimo 8 caracteres"
+              />
+              <button
+                type="button"
+                class="btn boton-ojo"
+                [attr.aria-label]="verContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                (click)="alternarContrasena()"
+              >
+                <i class="fa-regular" [class.fa-eye]="!verContrasena()" [class.fa-eye-slash]="verContrasena()"></i>
+              </button>
+            </div>
+            <div
+              class="small mt-1"
+              [class.text-danger]="registroForm.controls.contrasena.invalid && registroForm.controls.contrasena.touched"
+              [class.text-secondary]="!(registroForm.controls.contrasena.invalid && registroForm.controls.contrasena.touched)"
+            >
+              <i class="fa-solid fa-circle-info me-1"></i>Usa 8 o más caracteres, con una mayúscula y un número.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="confirmar" class="form-label fw-semibold small">Confirmar contraseña</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+              <input
+                id="confirmar"
+                [type]="verContrasena() ? 'text' : 'password'"
+                formControlName="confirmar"
+                class="form-control"
+                placeholder="Repite la contraseña"
+              />
+            </div>
+            @if (registroForm.controls.confirmar.hasError('noCoincide') && registroForm.controls.confirmar.touched) {
+              <div class="text-danger small mt-1">Las contraseñas no coinciden.</div>
+            }
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="telefono" class="form-label fw-semibold small">Teléfono</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                <input id="telefono" type="tel" formControlName="telefono" class="form-control" placeholder="3001234567" maxlength="10" />
+              </div>
+              @if (registroForm.controls.telefono.invalid && registroForm.controls.telefono.touched) {
+                <div class="text-danger small mt-1">Ingresa 10 dígitos.</div>
+              }
+            </div>
+            <div class="col-sm-6">
+              <label for="fechaNacimiento" class="form-label fw-semibold small">Fecha de nacimiento</label>
+              <input id="fechaNacimiento" type="date" formControlName="fechaNacimiento" class="form-control" />
+              @if (registroForm.controls.fechaNacimiento.invalid && registroForm.controls.fechaNacimiento.touched) {
+                <div class="text-danger small mt-1">
+                  @if (registroForm.controls.fechaNacimiento.hasError('menorDeEdad')) { Debes ser mayor de edad. } @else { Elige tu fecha. }
+                </div>
+              }
+            </div>
+          </div>
+
+          <p class="form-label fw-semibold small mb-2">Quiero usar la plataforma como</p>
+          <div class="selector-pills mb-3" role="group" aria-label="Tipo de cuenta">
+            <button type="button" class="btn" [class.activo]="tipoCuenta() === 'COMPRADOR'" (click)="elegirTipo('COMPRADOR')">Comprador</button>
+            <button type="button" class="btn" [class.activo]="tipoCuenta() === 'VENDEDOR'" (click)="elegirTipo('VENDEDOR')">Vendedor</button>
+          </div>
+
+          @if (tipoCuenta() === 'VENDEDOR') {
+            <div class="mb-3">
+              <label for="rolVendedor" class="form-label fw-semibold small">¿Qué vendes?</label>
+              <select id="rolVendedor" formControlName="rolVendedor" class="form-select">
+                @for (v of vendedores; track v.valor) {
+                  <option [value]="v.valor">{{ v.etiqueta }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primario-oscuro btn-lg" [disabled]="!canSubmit()">
+              @if (isLoading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>Creando cuenta...
+              } @else {
+                Crear cuenta
+              }
+            </button>
+          </div>
+        </form>
+
+        <p class="text-center text-secondary small mt-4 mb-0">
+          ¿Ya tienes cuenta? <a routerLink="/login" class="fw-semibold">Ingresar</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

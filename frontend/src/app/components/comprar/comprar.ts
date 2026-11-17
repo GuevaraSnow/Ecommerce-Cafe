@@ -43,6 +43,19 @@ export class Comprar {
     () => this.formStatus() === 'VALID' && !this.isLoading() && this.presentacion() !== null,
   );
 
+  // Lo que el comprador va escribiendo en la cantidad, para el resumen del pedido
+  cantidadElegida = toSignal(this.compraForm.controls.cantidad.valueChanges, { initialValue: 1 });
+
+  // Resumen antes de confirmar: precio de lista, ahorro por descuento y total con el precio vigente
+  resumen = computed(() => {
+    const p = this.presentacion();
+    const cantidad = Number(this.cantidadElegida()) || 0;
+    if (!p) return null;
+    const subtotal = p.precio.monto * cantidad;
+    const total = p.precioVigente.monto * cantidad;
+    return { cantidad, subtotal, ahorro: subtotal - total, total, moneda: p.precioVigente.moneda };
+  });
+
   // Total de la compra confirmada: precio congelado por cantidad de cada línea
   total = computed(() =>
     (this.compra()?.detalles ?? []).reduce((suma, d) => suma + d.precioCongelado.monto * d.cantidad.valor, 0),
@@ -62,6 +75,17 @@ export class Comprar {
           this.cargando.set(false);
         },
       });
+  }
+
+  readonly etiquetasTipo: Record<string, string> = {
+    CAFE_VERDE: 'Café verde',
+    CAFE_TOSTADO: 'Café tostado',
+    DERIVADO_CONSUMIBLE: 'Derivado',
+    MERCHANDISING: 'Merchandising',
+  };
+
+  fotoPrincipal(p: Presentacion): string | null {
+    return (p.galeria.find((imagen) => imagen.principal) ?? p.galeria[0])?.url ?? null;
   }
 
   onSubmit(): void {

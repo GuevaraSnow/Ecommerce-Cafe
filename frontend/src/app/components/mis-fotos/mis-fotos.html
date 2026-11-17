@@ -1,5 +1,9 @@
-<div class="container mt-4">
-  <h2 class="mb-3"><i class="fa-solid fa-images me-2"></i>Fotos de mis presentaciones</h2>
+<div class="container py-4">
+  <nav class="migas mb-3" aria-label="Ruta">
+    <span>Panel del vendedor</span> <i class="fa-solid fa-chevron-right mx-2 small"></i> <span>Fotos</span>
+  </nav>
+  <h1 class="mb-2" style="font-size: 2.5rem">Fotos de mis presentaciones</h1>
+  <p class="text-secondary mb-4">Sube hasta 10 fotos por presentación y elige cuál se ve primero en el catálogo.</p>
 
   @if (cargando()) {
     <div class="text-center py-5 text-muted">
@@ -15,7 +19,7 @@
     <div class="row g-3">
       <!-- Lista de presentaciones del vendedor -->
       <div class="col-lg-4">
-        <div class="list-group shadow-sm">
+        <div class="list-group">
           @for (p of presentaciones(); track p.id) {
             <button
               type="button"
@@ -32,12 +36,12 @@
 
       <!-- Galería de la presentación elegida -->
       <div class="col-lg-8">
-        <div class="card shadow-sm">
-          <div class="card-header">
+        <div class="card">
+          <div class="card-header py-3">
             @if (seleccionada(); as s) {
-              Galería de <strong>{{ s.titulo }}</strong> ({{ fotos().length }} de {{ maxFotos }})
+              <h2 class="h5 mb-0">Galería de {{ s.titulo }} <span class="text-secondary fs-6">({{ fotos().length }} de {{ maxFotos }})</span></h2>
             } @else {
-              Elige una presentación de la lista
+              <h2 class="h5 mb-0">Elige una presentación de la lista</h2>
             }
           </div>
           <div class="card-body">
