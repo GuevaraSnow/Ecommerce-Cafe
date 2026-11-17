@@ -123,8 +123,12 @@ class PresentacionRepositorioJpaTest {
         PresentacionTrazable conDescuento = assertInstanceOf(PresentacionTrazable.class,
                 repositorio.buscarPorId("pres-cafe-3").orElseThrow());
 
-        assertEquals(List.of(new ImagenDePresentacion("http://img/cafe-1-principal.png", true),
-                new ImagenDePresentacion("http://img/cafe-1-detalle.png", false)), tostada.getGaleria().imagenes());
+        // La galería de ejemplo apunta a fotos reales en Cloudinary: se comprueba la forma, no la URL exacta
+        List<ImagenDePresentacion> galeria = tostada.getGaleria().imagenes();
+        assertEquals(2, galeria.size());
+        assertTrue(galeria.get(0).principal());
+        assertFalse(galeria.get(1).principal());
+        assertTrue(galeria.stream().allMatch(imagen -> imagen.url().startsWith("https://res.cloudinary.com/")));
         assertEquals(new NotaDeCata(List.of("Chocolate", "Panela")), tostada.getNotaDeCata());
         assertNull(tostada.getDescuento());
         assertEquals(20, conDescuento.getDescuento().porcentaje());

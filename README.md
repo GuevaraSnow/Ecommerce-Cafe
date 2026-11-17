@@ -8,11 +8,23 @@
   <img src="https://img.shields.io/badge/Seguridad-JWT_HS256-black?style=flat-square&logo=jsonwebtokens&logoColor=white"/>
   <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff&style=flat-square"/>
   <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat-square&logo=swagger&logoColor=black"/>
-  <img src="https://img.shields.io/badge/Pruebas-875-brightgreen?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Pruebas_backend-883-brightgreen?style=flat-square"/>
 </p>
 
 <p align="center">
-  Backend de un marketplace de café con trazabilidad completa — Spring Boot, JPA con H2, Spring Security con JWT y una arquitectura por capas con el dominio puro en el centro.
+  <img src="https://img.shields.io/badge/Angular-22-DD0031?style=flat-square&logo=angular&logoColor=white"/>
+  <img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?style=flat-square&logo=typescript&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat-square&logo=bootstrap&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Signals-RxJS_7.8-B7178C?style=flat-square&logo=reactivex&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Vitest-5-6E9F18?style=flat-square&logo=vitest&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Dise%C3%B1o-Figma-F24E1E?style=flat-square&logo=figma&logoColor=white"/>
+  <img src="https://img.shields.io/badge/IA-Groq-F55036?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Im%C3%A1genes-Cloudinary-3448C5?style=flat-square&logo=cloudinary&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Pruebas_frontend-27-brightgreen?style=flat-square"/>
+</p>
+
+<p align="center">
+  Marketplace de café con trazabilidad completa: una API en Spring Boot con arquitectura hexagonal y una aplicación web en Angular, con asesor de ventas con IA y fotos de los productos en la nube.
 </p>
 
 ---
@@ -24,6 +36,9 @@ puede seguir hacia atrás por la cadena **Finca → Lote → Transformación →
 vendedores son quienes cultivan y transforman el café (Caficultor, Tostador y Vendedor de Derivados), y su
 diferenciador es la transparencia total sobre tierra, cosecha, proceso y tueste. El comprador final arma un carrito,
 compra, pide reembolsos y reseña lo que recibió.
+
+El proyecto tiene dos partes que se ejecutan por separado: el **Backend** (`Backend/`, la API REST) y el **Frontend**
+(`frontend/`, la aplicación web que la consume).
 
 ```
 Finca ─► Lote ─► Transformación ─► Presentación ─► Compra ─► Reseña / Reembolso
@@ -41,11 +56,18 @@ Finca ─► Lote ─► Transformación ─► Presentación ─► Compra ─�
 - **Compras** — carrito que congela el precio vigente, confirmación que descuenta el stock (todo o nada), envío, entrega y cancelación.
 - **Reembolsos y reseñas** — reembolso por Presentación dentro de las 48 horas, y reseñas que solo deja quien recibió el café.
 - **Usuarios y seguridad** — registro, inicio de sesión con JWT, recuperación de contraseña por código, roles y propiedad de cada recurso.
+- **Asesor de ventas con IA** — un chat que recomienda productos reales del catálogo con su precio vigente. Habla con Groq a través del puerto `AsistenteIA`; solo recomienda y no modifica nada.
+- **Imágenes de las Presentaciones** — los vendedores suben fotos (JPG, PNG o WebP de hasta 2 MB) a Cloudinary a través del puerto `AlmacenDeImagenes`; en la base solo se guardan las URLs de la galería.
+- **Aplicación web** — inicio, catálogo con búsqueda y filtro por tipo, detalle con la ficha de origen, registro e inicio de sesión, compra con resumen del pedido, historial de compras con cancelación, descuentos por temporada y fotos de cada producto para los vendedores.
+- **Modo claro y oscuro** — el visitante elige el tema y se recuerda; el diseño se adapta a celular, tableta y escritorio y sale de un diseño propio hecho en Figma.
+- **Acceso por rol en la interfaz** — *guards* por sesión y por rol (el comprador no ve las pantallas del vendedor) y un interceptor que cierra la sesión y avisa cuando el token vence. Es ayuda para el usuario: la seguridad real la aplica el backend.
 - **Errores uniformes** — toda respuesta de error trae `{ timestamp, status, mensaje }`: 400 datos mal formados, 401 sin token, 403 sin permiso, 404 no existe, 422 regla de negocio violada.
 
 ---
 
 ## Tecnologías
+
+### Backend
 
 - **Java 21** y **Spring Boot 4.1.1** (Gradle con wrapper)
 - **Spring Data JPA** con **H2** en memoria por defecto (las tablas las crea Hibernate y los datos de ejemplo se cargan al arrancar, `data-*.sql`) y **MariaDB** en un contenedor con el perfil `mariadb`
@@ -55,9 +77,35 @@ Finca ─► Lote ─► Transformación ─► Presentación ─► Compra ─�
 - **Lombok**, **Bean Validation**
 - **JUnit 5**, **Mockito**, `spring-security-test` y **Postman** para las pruebas
 
+### Frontend
+
+- **Angular 22** con componentes *standalone*, **signals** y formularios reactivos; **TypeScript 6** y **RxJS 7.8**
+- **Bootstrap 5.3** y **Font Awesome**, con una paleta propia en variables CSS (modo claro y oscuro con `data-bs-theme`) y las tipografías **Playfair Display**, **DM Sans** y **Sora**
+- **Guards** funcionales (`authGuard`, `guestGuard`, `rolGuard`) e **interceptor** de autenticación
+- **Vitest** para las pruebas
+- Diseño y mockups hechos en **Figma**
+
+### Servicios externos
+
+Cada uno entra por un **puerto** del dominio y se conecta con un **adaptador** de infraestructura; si falla, la aplicación no se cae y responde 422.
+
+| Servicio | Para qué | Puerto → Adaptador |
+|----------|----------|--------------------|
+| **Groq** (`openai/gpt-oss-120b`) | Asesor de ventas con IA | `AsistenteIA` → `AsistenteGroq` |
+| **Cloudinary** | Fotos de las Presentaciones | `AlmacenDeImagenes` → `AlmacenCloudinary` |
+
 ---
 
 ## Arquitectura
+
+```
+Ecommerce-Cafe/
+├── Backend/      # API REST en Spring Boot (arquitectura hexagonal)
+├── frontend/     # Aplicación web en Angular
+└── docs/         # Casos de uso, reglas de negocio, diagramas, DTO y lenguaje ubicuo
+```
+
+### Backend
 
 El dominio no conoce a Spring, a JPA ni a Lombok; todo apunta hacia él.
 
@@ -84,19 +132,59 @@ Backend/src/main/java/com/uniquindio/ecommerce/
   `ServicioDeReposicion`, `ServicioDeTransformacion`, `ServicioDeLote`, `ServicioDeAutenticacion`,
   `ServicioDeContrasena`, `VerificadorDeCompra` y `VerificadorDeEmail`).
 - Los **casos de uso** no llevan `if` de negocio: cargan, delegan y guardan.
+- Los **servicios externos** (Groq, Cloudinary, el correo) también son **puertos** en `Domain/repository`; sus adaptadores viven en `infrastructure/persistence` y son los únicos que conocen la API de afuera.
 - La documentación del dominio (casos de uso, reglas de negocio, clasificación de entidades y Value Objects,
   diagramas de agregado, DTO y lenguaje ubicuo) está en [`docs/`](./docs).
+
+### Frontend
+
+```
+frontend/src/app/
+├── components/     # Una pantalla o pieza por carpeta: inicio, catalogo, detalle-producto, login, registro,
+│                   # comprar, mis-compras, descuentos, mis-fotos, asistente (chat), header, footer, notificaciones
+├── services/       # Hablan con la API (presentaciones, compras, auth, imagenes, asistente) y el tema claro/oscuro
+├── guards/         # authGuard, guestGuard y rolGuard
+├── interceptors/   # Agrega el token y atiende el 401 (sesión vencida)
+└── models/         # Tipos que reflejan los DTO del backend
+```
+
+- El estado de cada pantalla vive en **signals**; los formularios son **reactivos** y los botones se habilitan con un `computed`.
+- Los **avisos** (éxito, error, información) salen de un solo servicio y se muestran arriba a la derecha.
+- La URL de la API se configura en `frontend/src/environments/`.
+
+### Pantallas
+
+| Pantalla | Ruta | Acceso |
+|----------|------|--------|
+| Inicio y Catálogo | `/`, `/catalogo` | Público |
+| Detalle del producto | `/producto/:id` | Público (la ficha de origen completa pide sesión) |
+| Registro e Ingresar | `/registro`, `/login` | Invitados |
+| Comprar y Mis compras | `/comprar/:id`, `/mis-compras` | Con sesión |
+| Mis descuentos y Mis fotos | `/descuentos`, `/mis-fotos` | Vendedores (`rolGuard`) |
+| Asesor de café | botón flotante en todas las pantallas | Público |
+
+El detalle de cada pantalla está en [`frontend/README.md`](./frontend/README.md).
 
 ---
 
 ## Cómo ejecutarlo
 
-**Requisitos:** Java 21.
+**Requisitos:** Java 21 para el Backend y **Node.js 22.22.3 o superior** (o 24.15+) para el Frontend.
+
+**Inicio rápido:** dos terminales, una para cada parte.
 
 ```bash
+# Terminal 1: la API (http://localhost:8080)
 cd Backend
 ./gradlew bootRun        # en Windows (PowerShell): .\gradlew bootRun
+
+# Terminal 2: la aplicación web (http://localhost:4200)
+cd frontend
+npm install
+npm start
 ```
+
+Abre `http://localhost:4200` e ingresa con uno de los [usuarios de prueba](#usuarios-de-prueba). El Frontend espera la API en `http://localhost:8080/api`.
 
 | Qué | Dónde |
 |-----|-------|
@@ -106,24 +194,38 @@ cd Backend
 | Colección de Postman | `Backend/postman/CafeTrazado.postman_collection.json` |
 
 - **Clave del JWT:** por defecto se usa una clave de desarrollo; para cambiarla, define la variable de entorno `JWT_SECRET` antes de arrancar.
+- **Asesor con IA e imágenes (opcionales):** la aplicación arranca y funciona sin estas variables; sin ellas, el chat y la subida de fotos responden que no están disponibles. Las claves **nunca** van en el repositorio: se definen como variables de entorno antes de arrancar.
+
+  | Variable | Para qué sirve |
+  |----------|----------------|
+  | `GROQ_API_KEY` | Clave de la API de Groq (se crea gratis en console.groq.com) para el asesor |
+  | `GROQ_MODEL` | Modelo de Groq; por defecto `openai/gpt-oss-120b` |
+  | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Credenciales de Cloudinary (Settings > API Keys) para subir las imágenes |
+
+  En PowerShell: `$env:GROQ_API_KEY = "..."` y luego `.\gradlew bootRun` en esa misma terminal.
 - **Probar con Swagger:** haz `POST /api/usuarios/login` con un usuario de la tabla de abajo, copia el `token` de la respuesta, pulsa **Authorize** y pégalo (sin la palabra `Bearer`).
 - **Postman:** importa la colección y córrela en orden con el Runner (`baseUrl` = `http://localhost:8080`); cada corrida registra usuarios nuevos, así que se puede repetir.
 - **Pruebas:** `./gradlew test` (ver [Pruebas](#pruebas)).
 
 ### Con MariaDB y Docker
 
-Con el perfil `mariadb` los datos **sobreviven al apagar** la aplicación. Requisito: Docker.
+Con el perfil `mariadb` los datos **sobreviven al apagar** la aplicación. Requisito: **Docker Desktop encendido**.
 
 ```bash
 cd Backend
-./gradlew bootJar                  # genera build/libs/*-SNAPSHOT.jar
-docker compose up --build -d       # MariaDB (puerto 3307) y la aplicación (puerto 8080)
+./gradlew bootJar                  # 1) genera build/libs/Backend-0.0.1-SNAPSHOT.jar
+docker compose up --build -d       # 2) MariaDB (puerto 3307) y la aplicación (puerto 8080)
+docker compose logs -f app         # opcional: ver el arranque; espera "Started EcommerceApplication"
 ```
 
-- La base empieza **vacía** (no se cargan los `data-*.sql`): registra usuarios con `POST /api/usuarios/registro`, eligiendo el rol, y luego inicia sesión.
-- `docker compose down` apaga todo y **conserva los datos** en el volumen; `docker compose down -v` los borra.
+> **Cada vez que cambie el código** hay que repetir los dos pasos. Sin `bootJar` y sin `--build`, Docker reutiliza la imagen anterior y arranca la versión vieja de la aplicación.
+
+- **Datos de ejemplo:** la primera vez se cargan los mismos usuarios, finca, lotes, productos con fotos y compras que en H2 (ver [Usuarios de prueba](#usuarios-de-prueba)). Con `DATOS_DE_EJEMPLO=never` la base empieza **vacía** y los usuarios se crean con `POST /api/usuarios/registro` o desde la pantalla de registro.
+- **Persistencia:** `docker compose down` apaga todo y **conserva los datos** en el volumen (usuarios nuevos, compras, stock); `docker compose down -v` los borra y la próxima vez vuelve a empezar con los datos de ejemplo. Al reiniciar con datos ya guardados, el log muestra unos avisos `Duplicate entry`: son los datos de ejemplo que ya existían y se omiten a propósito; no son un error.
+- **Claves del asesor y de las fotos:** no van en el repositorio. Define las variables de entorno antes de `docker compose up`, o copia `Backend/.env.example` como `Backend/.env` (ese archivo no se sube) y complétalo. Sin ellas todo funciona, menos el chat con IA y la subida de fotos.
+- **Otros ajustes:** los puertos se cambian con `APP_PORT` y `DB_PORT`, y la clave del JWT con `JWT_SECRET`.
 - Para correr la aplicación fuera de Docker contra un MariaDB ya levantado: `docker compose up -d mariadb` y luego `./gradlew bootRun --args='--spring.profiles.active=mariadb'`.
-- El perfil está en `Backend/src/main/resources/application-mariadb.properties`; la imagen se define en `Backend/Dockerfile` y los servicios en `Backend/docker-compose.yml`.
+- El perfil está en `Backend/src/main/resources/application-mariadb.properties`; la imagen se define en `Backend/Dockerfile` y los servicios en `Backend/docker-compose.yml`. La base usa `utf8mb4`, así que las tildes y la ñ se guardan bien.
 
 ---
 
@@ -231,6 +333,18 @@ los estados, para recorrer la trazabilidad de punta a punta. Por ejemplo, la Fic
 </details>
 
 <details>
+<summary><strong>Asesor con IA e imágenes</strong></summary>
+
+| Método | Ruta | Acceso | Caso de uso |
+|--------|------|--------|-------------|
+| `POST` | `/api/asistente` | Público | `ConsultarAsistente` |
+| `POST` | `/api/imagenes` | Vendedor | `SubirImagen` |
+
+`POST /api/asistente` recibe `{ mensaje, historial }` y responde `{ respuesta }`; `POST /api/imagenes` es `multipart/form-data` con el campo `archivo` y responde `{ url }`, que luego se guarda con `PUT /api/presentaciones/{id}/galeria`.
+
+</details>
+
+<details>
 <summary><strong>Reembolsos y reseñas</strong></summary>
 
 | Método | Ruta | Acceso | Caso de uso |
@@ -252,7 +366,7 @@ cd Backend
 ./gradlew test
 ```
 
-La suite tiene **875 pruebas** y todas pasan. Siguen el patrón AAA (preparar, ejecutar, verificar) y están en
+La suite del Backend tiene **883 pruebas** y todas pasan. Siguen el patrón AAA (preparar, ejecutar, verificar) y están en
 `Backend/src/test/java`; cuando una regla se rompe, la prueba también comprueba que el estado **no cambió** y que
 no se guardó nada.
 
@@ -261,14 +375,23 @@ no se guardó nada.
 | Capa | Mínimo pedido | Pruebas | Dónde están |
 |------|---------------|---------|-------------|
 | **Dominio** | 8 | **325** | Entidades (`LoteTest`, `CompraEstadoTest`, `PresentacionTest`...), Value Objects (`CosechaTest`, `CantidadTest`...) y Domain Services (`ServicioDeLoteTest`, `ServicioDeReembolsoTest`...) |
-| **Casos de uso** | 4 | **126** | `application/usecase`, con Mockito o con repositorios en memoria: `RegistrarLoteTest`, `ConfirmarCompraTest`, `EliminarPresentacionTest`, `IniciarSesionTest`... |
+| **Casos de uso** | 4 | **134** | `application/usecase`, con Mockito o con repositorios en memoria: `RegistrarLoteTest`, `ConfirmarCompraTest`, `EliminarPresentacionTest`, `IniciarSesionTest`... |
 | **Controladores** | 1 | **134** | `@WebMvcTest` de cada controlador: códigos 201, 200, 400, 401, 403, 404 y 422, y `verify(..., never())` para comprobar que el caso de uso no se llama si la petición es inválida |
 | **Repositorios** | 1 | **89** | `@DataJpaTest` y pruebas contra H2 (`LoteDataJpaTest`, `MasVendidasDataJpaTest`, `PresentacionRepositorioJpaTest`...), repositorios en memoria y los datos de ejemplo |
 | Seguridad y errores HTTP | — | 82 | 401, 403 y propiedad de cada recurso, el formato uniforme de los errores y el token JWT |
 | Mappers | — | 63 | Conversión entre capas (REST ⇄ dominio y dominio ⇄ entidades JPA) |
 | DTO | — | 38 | Validación de cada Request |
 | Integración, configuración y E2E | — | 18 | Flujo completo por HTTP, y que Spring arma bien los beans |
-| **Total** | | **875** | |
+| **Total** | | **883** | |
+
+### Frontend
+
+```bash
+cd frontend
+npm test            # Vitest; una sola corrida: npm test -- --watch=false
+```
+
+**27 pruebas** en 11 archivos: los *guards* (`authGuard`, `guestGuard`, `rolGuard`), el interceptor de sesión vencida, los servicios (`presentaciones`, `compras`, `asistente`, `imagenes`), el catálogo (búsqueda con espera y filtro por tipo) y el formulario de registro (contraseña, mayoría de edad y rol).
 
 ### Pruebas avanzadas
 
