@@ -1,8 +1,10 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
 import { Compra, ErrorApi, EstadoDeCompra } from '../../models/compra';
 import { ComprasService } from '../../services/compras';
+import { PresentacionesService } from '../../services/presentaciones';
 
 @Component({
   selector: 'app-mis-compras',
@@ -12,8 +14,11 @@ import { ComprasService } from '../../services/compras';
 })
 export class MisCompras implements OnInit {
   private comprasService = inject(ComprasService);
+  private presentacionesService = inject(PresentacionesService);
 
   compras = signal<Compra[]>([]);
+  // Título de cada presentación comprada, por su id; mientras llega (o si falla) se muestra el id corto
+  titulos = signal<Record<string, string>>({});
   cargando = signal<boolean>(true);
   cancelandoId = signal<string | null>(null);
   error = signal<string | null>(null);
@@ -31,6 +36,7 @@ export class MisCompras implements OnInit {
       next: (lista) => {
         this.compras.set(lista);
         this.cargando.set(false);
+        this.cargarTitulos(lista);
       },
       error: (err) => {
         const apiError = err?.error as ErrorApi | undefined;
@@ -39,6 +45,24 @@ export class MisCompras implements OnInit {
         );
         this.cargando.set(false);
       },
+    });
+  }
+
+  // La compra solo trae el id de la presentación: se consulta cada una una sola vez para mostrar su título
+  private cargarTitulos(lista: Compra[]): void {
+    const ids = [...new Set(lista.flatMap((c) => c.detalles.map((d) => d.presentacionId)))];
+    if (ids.length === 0) return;
+
+    forkJoin(
+      ids.map((id) =>
+        this.presentacionesService.consultar(id).pipe(catchError(() => of(null))),
+      ),
+    ).subscribe((presentaciones) => {
+      const titulos: Record<string, string> = {};
+      presentaciones.forEach((p, i) => {
+        if (p) titulos[ids[i]] = p.titulo;
+      });
+      this.titulos.set(titulos);
     });
   }
 
