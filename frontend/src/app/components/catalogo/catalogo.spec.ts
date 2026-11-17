@@ -27,7 +27,7 @@ describe('Catalogo: búsqueda reactiva', () => {
   afterEach(() => vi.useRealTimers());
 
   const escribir = (componente: Catalogo, texto: string) => {
-    componente.termino.set(texto);
+    componente.escribir(texto);
     TestBed.tick();
   };
 
@@ -44,6 +44,7 @@ describe('Catalogo: búsqueda reactiva', () => {
     expect(buscar).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(300);
+    TestBed.tick();
 
     expect(buscar).toHaveBeenCalledTimes(1);
     expect(buscar).toHaveBeenCalledWith(expect.objectContaining({ titulo: 'caf', pagina: 0 }));
@@ -55,6 +56,7 @@ describe('Catalogo: búsqueda reactiva', () => {
     buscar.mockClear();
 
     componente.filtrarPorTipo('CAFE_VERDE');
+    TestBed.tick();
 
     expect(buscar).toHaveBeenCalledTimes(1);
     expect(buscar).toHaveBeenCalledWith(expect.objectContaining({ tipo: 'CAFE_VERDE', pagina: 0 }));

@@ -1,8 +1,8 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { Component, computed, inject, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { Subscription, debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { Pagina, Presentacion, TipoDePresentacion } from '../../models/catalogo';
 import { PresentacionesService } from '../../services/presentaciones';
@@ -20,7 +20,6 @@ const ESPERA_AL_ESCRIBIR = 300;
 })
 export class Catalogo {
   private servicio = inject(PresentacionesService);
-  private destroyRef = inject(DestroyRef);
   protected auth = inject(AuthService);
 
   readonly tipos: { valor: TipoDePresentacion; etiqueta: string }[] = [
@@ -30,45 +29,67 @@ export class Catalogo {
     { valor: 'MERCHANDISING', etiqueta: 'Merchandising' },
   ];
 
-  pagina = signal<Pagina<Presentacion> | null>(null);
   cargando = signal(true);
   error = signal('');
 
   /** Lo que el usuario va escribiendo en el buscador; cada tecla actualiza la señal. */
   termino = signal('');
+  private tipo = signal<TipoDePresentacion | undefined>(undefined);
+  private numeroPagina = signal(0);
 
-  private titulo = '';
-  private tipo: TipoDePresentacion | undefined;
-  private peticion?: Subscription;
+  // El texto solo cuenta cuando el usuario deja de escribir: debounceTime espera la pausa
+  // y distinctUntilChanged evita repetir la búsqueda si el texto quedó igual.
+  private titulo = toSignal(
+    toObservable(this.termino).pipe(
+      map((texto) => texto.trim()),
+      debounceTime(ESPERA_AL_ESCRIBIR),
+      distinctUntilChanged(),
+    ),
+    { initialValue: '' },
+  );
 
-  constructor() {
-    this.cargar(0);
+  // Junta en un solo objeto todo lo que define la búsqueda: si cambia cualquiera, se busca de nuevo.
+  private consulta = computed(() => ({
+    titulo: this.titulo(),
+    tipo: this.tipo(),
+    pagina: this.numeroPagina(),
+  }));
 
-    // La señal se convierte en observable para esperar a que el usuario deje de escribir.
-    // skip(1) ignora el valor inicial (ya se cargó arriba) y distinctUntilChanged evita
-    // repetir la búsqueda si el texto quedó igual (por ejemplo, borrar y volver a escribir la misma letra).
-    toObservable(this.termino)
-      .pipe(
-        skip(1),
-        map((texto) => texto.trim()),
-        debounceTime(ESPERA_AL_ESCRIBIR),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((texto) => {
-        this.titulo = texto;
-        this.cargar(0);
-      });
+  // switchMap cancela la petición anterior cuando llega una consulta nueva,
+  // así una respuesta vieja nunca pisa a la más reciente.
+  pagina = toSignal(
+    toObservable(this.consulta).pipe(
+      tap(() => {
+        this.cargando.set(true);
+        this.error.set('');
+      }),
+      switchMap((c) =>
+        this.servicio.buscar({ ...c, tamano: TAMANO_PAGINA }).pipe(
+          catchError(() => {
+            this.error.set('No se pudo cargar el catálogo. Intenta de nuevo.');
+            return of(null);
+          }),
+        ),
+      ),
+      tap(() => this.cargando.set(false)),
+    ),
+    { initialValue: null as Pagina<Presentacion> | null },
+  );
+
+  /** Cada tecla guarda el texto y vuelve a la primera página. */
+  escribir(valor: string): void {
+    this.termino.set(valor);
+    this.numeroPagina.set(0);
   }
 
   /** El tipo se elige de una lista, así que filtra de inmediato, sin esperar. */
   filtrarPorTipo(tipo: string): void {
-    this.tipo = (tipo || undefined) as TipoDePresentacion | undefined;
-    this.cargar(0);
+    this.tipo.set((tipo || undefined) as TipoDePresentacion | undefined);
+    this.numeroPagina.set(0);
   }
 
   cambiarPagina(numero: number): void {
-    this.cargar(numero);
+    this.numeroPagina.set(numero);
   }
 
   etiquetaDelTipo(tipo: TipoDePresentacion): string {
@@ -93,25 +114,5 @@ export class Catalogo {
 
   tieneDescuento(p: Presentacion): boolean {
     return p.precioVigente.monto < p.precio.monto;
-  }
-
-  private cargar(numero: number): void {
-    this.cargando.set(true);
-    this.error.set('');
-    // Si llega una búsqueda nueva, se cancela la anterior para que una respuesta vieja no la pise.
-    this.peticion?.unsubscribe();
-    this.peticion = this.servicio
-      .buscar({ titulo: this.titulo, tipo: this.tipo, pagina: numero, tamano: TAMANO_PAGINA })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (pagina) => {
-          this.pagina.set(pagina);
-          this.cargando.set(false);
-        },
-        error: () => {
-          this.error.set('No se pudo cargar el catálogo. Intenta de nuevo.');
-          this.cargando.set(false);
-        },
-      });
   }
 }
