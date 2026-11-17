@@ -41,9 +41,9 @@ class PresentacionDataJpaTest {
     void cargaLosDatosDeEjemploYLosDevuelveOrdenadosPorTitulo() {
         var pagina = repositorio.buscarDisponibles(new FiltroDePresentaciones(null, null, null, null, null), 0, 10);
 
-        assertEquals(4, pagina.totalElementos());
-        assertEquals("pres-cafe-1", pagina.contenido().get(0).getId());
-        assertEquals("pres-taza-1", pagina.contenido().get(3).getId());
+        assertEquals(10, pagina.totalElementos());
+        assertEquals("pres-molido-1", pagina.contenido().get(0).getId());
+        assertEquals("pres-termo-1", pagina.contenido().get(9).getId());
     }
 
     private List<String> ids(Pagina<Presentacion> pagina) {
@@ -74,7 +74,7 @@ class PresentacionDataJpaTest {
                 new FiltroDePresentaciones(null, null, null, null, null), 5, 10);
 
         assertTrue(fuera.contenido().isEmpty());
-        assertEquals(4, fuera.totalElementos());
+        assertEquals(10, fuera.totalElementos());
     }
 
     @Test
@@ -108,7 +108,7 @@ class PresentacionDataJpaTest {
         repositorio.guardar(articulo);
 
         assertTrue(repositorio.buscarPorId("pres-dj").isPresent());
-        assertEquals(5, repositorio.buscarDisponibles(new FiltroDePresentaciones(null, null, null, null, null), 0, 10)
+        assertEquals(11, repositorio.buscarDisponibles(new FiltroDePresentaciones(null, null, null, null, null), 0, 10)
                 .totalElementos());
     }
 }

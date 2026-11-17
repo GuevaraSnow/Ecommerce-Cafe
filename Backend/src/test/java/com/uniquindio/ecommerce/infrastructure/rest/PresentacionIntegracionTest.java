@@ -80,16 +80,16 @@ class PresentacionIntegracionTest {
     }
 
     @Test
-    void elCatalogoDelSistemaTrae4PresentacionesDeEjemploYUnaNuevaSeSumaAEllas() throws Exception {
+    void elCatalogoDelSistemaTrae10PresentacionesDeEjemploYUnaNuevaSeSumaAEllas() throws Exception {
         mockMvc.perform(get("/api/presentaciones"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElementos").value(4))
-                .andExpect(jsonPath("$.contenido[0].id").value("pres-cafe-1"));
+                .andExpect(jsonPath("$.totalElementos").value(10))
+                .andExpect(jsonPath("$.contenido[0].id").value("pres-molido-1"));
 
         String id = publicarArticulo();
 
         mockMvc.perform(get("/api/presentaciones"))
-                .andExpect(jsonPath("$.totalElementos").value(5))
+                .andExpect(jsonPath("$.totalElementos").value(11))
                 .andExpect(jsonPath("$.contenido[*].id", hasItem(id)));
     }
 
@@ -98,9 +98,9 @@ class PresentacionIntegracionTest {
         mockMvc.perform(get("/api/presentaciones").param("tipo", "CAFE_TOSTADO").param("tamano", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.contenido.length()").value(1))
-                .andExpect(jsonPath("$.totalElementos").value(2))
-                .andExpect(jsonPath("$.totalPaginas").value(2))
-                .andExpect(jsonPath("$.contenido[0].id").value("pres-cafe-1"));
+                .andExpect(jsonPath("$.totalElementos").value(3))
+                .andExpect(jsonPath("$.totalPaginas").value(3))
+                .andExpect(jsonPath("$.contenido[0].id").value("pres-cafe-5"));
     }
 
     @Test
