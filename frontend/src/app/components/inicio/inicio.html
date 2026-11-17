@@ -1,1 +1,136 @@
-<p>inicio works!</p>
+<!-- Portada -->
+<section class="portada-inicio">
+  <div class="container py-5">
+    <div class="row align-items-center py-lg-5">
+      <div class="col-lg-7">
+        <p class="etiqueta-tipo text-warning-emphasis mb-3" style="color: var(--cafe-boton)">
+          Café colombiano · Trazabilidad verificada
+        </p>
+        <h1 class="display-3 fw-bold mb-3">Del cafetal a tu taza, con nombre y origen.</h1>
+        <p class="lead mb-4" style="color: var(--cafe-sobre-marco-suave)">
+          Café tostado y verde de Colombia, con origen verificado y precios claros. Conoce de dónde viene cada bolsa antes de comprarla.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a routerLink="/catalogo" class="btn btn-primary btn-lg">
+            Ver catálogo <i class="fa-solid fa-arrow-right ms-1"></i>
+          </a>
+          <a href="#trazabilidad" class="btn btn-lg boton-barra">Conocer el origen</a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+        <img src="/img/latte-hoja.jpg" alt="Taza de café con arte latte" class="sello-inicio" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Cuatro formas de disfrutar el café -->
+<section class="container py-5">
+  <p class="etiqueta-tipo mb-2">Explora</p>
+  <h2 class="mb-4">Cuatro formas de disfrutar el café</h2>
+  <div class="row g-3">
+    @for (c of categorias; track c.titulo) {
+      <div class="col-6 col-lg-3">
+        <a routerLink="/catalogo" class="card h-100 text-decoration-none p-3">
+          <span class="icono-categoria mb-3"><i class="fa-solid {{ c.icono }}"></i></span>
+          <h3 class="h5 mb-1">{{ c.titulo }}</h3>
+          <p class="text-secondary small mb-0">{{ c.detalle }}</p>
+        </a>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Lo más buscado -->
+@if (destacadas().length > 0) {
+  <section class="bg-body-tertiary py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <p class="etiqueta-tipo mb-2">Destacados</p>
+          <h2 class="mb-0">Lo más buscado esta temporada</h2>
+        </div>
+        <a routerLink="/catalogo" class="small">Ver todo el catálogo</a>
+      </div>
+      <div class="row g-3">
+        @for (p of destacadas(); track p.id) {
+          <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+              @if (fotoPrincipal(p); as foto) {
+                <img [src]="foto" [alt]="p.titulo" class="card-img-top" style="height: 11rem; object-fit: cover" loading="lazy" (error)="$any($event.target).hidden = true" />
+              }
+              <div class="card-body">
+                <h3 class="h5 mb-2">{{ p.titulo }}</h3>
+                <p class="mb-3 d-flex align-items-baseline gap-2 flex-wrap">
+                  <strong class="precio">
+                    {{ p.precioVigente.monto | currency: p.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+                  </strong>
+                  @if (tieneDescuento(p)) {
+                    <s class="precio-tachado">
+                      {{ p.precio.monto | currency: p.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+                    </s>
+                    <span class="insignia-descuento">-{{ p.descuento?.porcentaje }}%</span>
+                  }
+                </p>
+                <a [routerLink]="['/producto', p.id]" class="btn btn-primary w-100">Ver detalle</a>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Descuento de temporada: la primera presentación que tenga uno vigente -->
+@if (conDescuento(); as d) {
+  <section class="container py-5">
+    <div class="banda-descuento">
+      <div class="row g-0 align-items-stretch">
+        <div class="col-md-7 p-4 p-lg-5 d-flex flex-column justify-content-center">
+          <p class="etiqueta-tipo mb-2" style="color: var(--cafe-boton)">Descuentos de temporada</p>
+          <h2 class="mb-3">Hasta {{ d.descuento?.porcentaje }} % menos en presentaciones seleccionadas</h2>
+          <p class="mb-4 d-flex align-items-baseline gap-2 flex-wrap">
+            <span>{{ d.titulo }}</span>
+            <strong class="precio">
+              {{ d.precioVigente.monto | currency: d.precioVigente.moneda : 'symbol-narrow' : '1.0-0' }}
+            </strong>
+            <s class="precio-tachado" style="color: var(--cafe-sobre-marco-suave)">
+              {{ d.precio.monto | currency: d.precio.moneda : 'symbol-narrow' : '1.0-0' }}
+            </s>
+            <span class="insignia-descuento">-{{ d.descuento?.porcentaje }}%</span>
+          </p>
+          <div>
+            <a [routerLink]="['/producto', d.id]" class="btn btn-primary">
+              Ver oferta <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-md-5 d-none d-md-block">
+          <img src="/img/latte-corazon.jpg" alt="Taza de café con arte latte en forma de corazón" />
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Trazabilidad -->
+<section id="trazabilidad" class="container py-5 text-center">
+  <p class="etiqueta-tipo mb-2">Trazabilidad</p>
+  <h2 class="mb-2">Sabe de dónde viene cada taza</h2>
+  <p class="text-secondary mb-4">Cada presentación muestra su origen verificado antes de que compres.</p>
+  <div class="row g-3 text-start">
+    @for (paso of pasos; track paso.titulo; let i = $index) {
+      <div class="col-md-4">
+        <div class="card h-100 p-3">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="icono-categoria"><i class="fa-solid {{ paso.icono }}"></i></span>
+            <span class="text-secondary fw-semibold">0{{ i + 1 }}</span>
+          </div>
+          <h3 class="h5">{{ paso.titulo }}</h3>
+          <p class="text-secondary small mb-0">{{ paso.detalle }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</section>

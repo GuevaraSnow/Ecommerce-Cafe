@@ -1,7 +1,7 @@
-<nav class="navbar navbar-expand-md bg-body-tertiary shadow-sm">
+<nav class="navbar navbar-expand-md barra-cafe">
   <div class="container">
     <a routerLink="/" class="navbar-brand d-flex align-items-center gap-2">
-      <i class="fa-solid fa-mug-hot"></i>
+      <span class="logo-cafe"><i class="fa-solid fa-mug-hot"></i></span>
       <span>Café de Origen</span>
     </a>
 
@@ -51,24 +51,32 @@
             </a>
           </li>
         }
-        @if (!isLoggedIn()) {
-          <li class="nav-item">
-            <a routerLink="/registro" routerLinkActive="active" class="nav-link">
-              <i class="fa-solid fa-user-plus me-1"></i>Registro
-            </a>
-          </li>
-        }
       </ul>
 
       <div class="d-flex align-items-center gap-2">
+        <button
+          type="button"
+          class="btn btn-sm boton-barra"
+          [attr.aria-label]="tema.oscuro() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+          (click)="tema.alternar()"
+        >
+          <i class="fa-solid" [class.fa-moon]="!tema.oscuro()" [class.fa-sun]="tema.oscuro()"></i>
+        </button>
         @if (isLoggedIn()) {
-          <span class="navbar-text">Hola, {{ nombreUsuario() }}</span>
-          <button class="btn btn-outline-danger btn-sm" (click)="cerrarSesion()">
+          <span class="usuario-barra">
+            <span class="inicial">{{ inicial() }}</span>
+            <span>{{ nombreUsuario() }}</span>
+            <span class="rol d-none d-sm-inline">· {{ etiquetaRol() }}</span>
+          </span>
+          <button class="btn btn-sm boton-barra" (click)="cerrarSesion()">
             <i class="fa-solid fa-right-from-bracket me-1"></i>Cerrar sesión
           </button>
         } @else {
-          <a routerLink="/login" class="btn btn-outline-primary btn-sm">
+          <a routerLink="/login" class="btn btn-sm boton-barra">
             <i class="fa-solid fa-right-to-bracket me-1"></i>Ingresar
+          </a>
+          <a routerLink="/registro" class="btn btn-sm btn-primary">
+            <i class="fa-solid fa-user-plus me-1"></i>Crear cuenta
           </a>
         }
       </div>

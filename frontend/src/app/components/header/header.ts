@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { TemaService } from '../../services/tema';
 import { ROLES_VENDEDOR } from '../../models/usuario';
 
 @Component({
@@ -12,6 +13,7 @@ import { ROLES_VENDEDOR } from '../../models/usuario';
 export class Header {
   private authService = inject(AuthService);
   private router = inject(Router);
+  protected tema = inject(TemaService);
 
   isLoggedIn = this.authService.isAuthenticated;
   nombreUsuario = this.authService.nombreUsuario;
@@ -23,6 +25,14 @@ export class Header {
   esVendedor = computed(() => {
     const rol = this.authService.rol();
     return this.isLoggedIn() && rol !== null && ROLES_VENDEDOR.includes(rol);
+  });
+
+  inicial = computed(() => this.nombreUsuario().charAt(0).toUpperCase());
+
+  etiquetaRol = computed(() => {
+    const rol = this.authService.rol();
+    if (rol === 'COMPRADOR') return 'Comprador';
+    return rol === null ? '' : 'Vendedor';
   });
 
   cerrarSesion(): void {
