@@ -60,7 +60,7 @@ class SeguridadTransformacionTest {
                 .andExpect(jsonPath("$.cantidadResultante.valor").value(17.0));
 
         mockMvc.perform(get("/api/lotes/LOT-2026-001").with(usuario("usr-ana", "COMPRADOR")))
-                .andExpect(jsonPath("$.cantidadDisponible.valor").value(185.0));
+                .andExpect(jsonPath("$.cantidadDisponible.valor").value(145.0));
     }
 
     @Test

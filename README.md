@@ -371,7 +371,7 @@ cd Backend
 ./gradlew test
 ```
 
-La suite del Backend tiene **883 pruebas** y todas pasan. Siguen el patrón AAA (preparar, ejecutar, verificar) y están en
+La suite del Backend tiene **885 pruebas** y todas pasan. Siguen el patrón AAA (preparar, ejecutar, verificar) y están en
 `Backend/src/test/java`; cuando una regla se rompe, la prueba también comprueba que el estado **no cambió** y que
 no se guardó nada.
 
@@ -380,14 +380,14 @@ no se guardó nada.
 | Capa | Mínimo pedido | Pruebas | Dónde están |
 |------|---------------|---------|-------------|
 | **Dominio** | 8 | **325** | Entidades (`LoteTest`, `CompraEstadoTest`, `PresentacionTest`...), Value Objects (`CosechaTest`, `CantidadTest`...) y Domain Services (`ServicioDeLoteTest`, `ServicioDeReembolsoTest`...) |
-| **Casos de uso** | 4 | **134** | `application/usecase`, con Mockito o con repositorios en memoria: `RegistrarLoteTest`, `ConfirmarCompraTest`, `EliminarPresentacionTest`, `IniciarSesionTest`... |
+| **Casos de uso** | 4 | **136** | `application/usecase`, con Mockito o con repositorios en memoria: `RegistrarLoteTest`, `ConfirmarCompraTest`, `EliminarPresentacionTest`, `IniciarSesionTest`... |
 | **Controladores** | 1 | **134** | `@WebMvcTest` de cada controlador: códigos 201, 200, 400, 401, 403, 404 y 422, y `verify(..., never())` para comprobar que el caso de uso no se llama si la petición es inválida |
 | **Repositorios** | 1 | **89** | `@DataJpaTest` y pruebas contra H2 (`LoteDataJpaTest`, `MasVendidasDataJpaTest`, `PresentacionRepositorioJpaTest`...), repositorios en memoria y los datos de ejemplo |
 | Seguridad y errores HTTP | — | 82 | 401, 403 y propiedad de cada recurso, el formato uniforme de los errores y el token JWT |
 | Mappers | — | 63 | Conversión entre capas (REST ⇄ dominio y dominio ⇄ entidades JPA) |
 | DTO | — | 38 | Validación de cada Request |
 | Integración, configuración y E2E | — | 18 | Flujo completo por HTTP, y que Spring arma bien los beans |
-| **Total** | | **883** | |
+| **Total** | | **885** | |
 
 ### Frontend
 
@@ -403,7 +403,7 @@ npm test            # Vitest; una sola corrida: npm test -- --watch=false
 | Punto | Qué comprueba | Dónde está |
 |---|---|---|
 | 0.1 Repositorio | Guardar y recuperar una Presentación con su Value Object (precio, cantidad, galería, descuento) contra H2 | `PresentacionRepositorioJpaTest` |
-| 0.2 Repositorio | Paginación y orden con los datos de `data-presentacion.sql`: 4 disponibles, páginas de 3, ordenadas por título | `PresentacionRepositorioJpaTest` |
+| 0.2 Repositorio | Paginación y orden con los datos de `data-presentacion.sql`: 10 disponibles, páginas de 3, ordenadas por título | `PresentacionRepositorioJpaTest` |
 | 1 Seguridad | Sin token 401, rol u otro vendedor 403, dueño con el rol correcto 200 | `SeguridadPresentacionTest` |
 | 2 `@DataJpaTest` | La misma capa de persistencia con una prueba por capa | `PresentacionDataJpaTest` |
 | 3 Integración | Controlador, caso de uso, repositorio y base de datos sin simular nada | `PresentacionIntegracionTest` |

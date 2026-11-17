@@ -61,6 +61,7 @@ public class ConsultarAsistente {
                 - Responde siempre en español, de forma amable y en pocas frases.
                 - Recomienda solo productos del catálogo; no inventes productos, precios ni datos.
                 - Usa solo los datos de cada línea (nombre, tipo, precio, disponibilidad): no describas sabores, notas de cata ni propiedades que no aparezcan ahí.
+                - Si un producto tiene descuento vigente, destácalo al recomendarlo: di su precio normal, el precio con descuento y hasta cuándo rige. Si piden ofertas o descuentos, recomienda primero los que lo tienen.
                 - Menciona el precio de lo que recomiendas e invita a verlo y comprarlo en el catálogo.
                 - Escribe en texto plano, sin markdown ni asteriscos.
                 - Si la pregunta no tiene que ver con el café o la tienda, di que solo puedes ayudar con el café.
@@ -70,12 +71,19 @@ public class ConsultarAsistente {
                 """ + lineas;
     }
 
+    // Una línea por producto; si tiene un descuento que rige hoy, la línea trae el precio normal, el porcentaje y la fecha final
     private String describir(Presentacion presentacion) {
-        Precio precio = presentacion.precioVigente(LocalDate.now());
-        return "- %s | %s | %.0f %s | disponible: %.0f %s".formatted(
+        Precio vigente = presentacion.precioVigente(LocalDate.now());
+        Precio normal = presentacion.getPrecio();
+        String precio = vigente.monto() < normal.monto()
+                ? "%.0f %s, ahora %.0f %s con %d %% de descuento hasta %s".formatted(
+                        normal.monto(), normal.moneda(), vigente.monto(), vigente.moneda(),
+                        presentacion.getDescuento().porcentaje(), presentacion.getDescuento().fechaFin())
+                : "%.0f %s".formatted(vigente.monto(), vigente.moneda());
+        return "- %s | %s | %s | disponible: %.0f %s".formatted(
                 presentacion.getTitulo(),
                 presentacion.getTipoPresentacion(),
-                precio.monto(), precio.moneda(),
+                precio,
                 presentacion.getCantidadDisponible().valor(), presentacion.getCantidadDisponible().unidad());
     }
 }

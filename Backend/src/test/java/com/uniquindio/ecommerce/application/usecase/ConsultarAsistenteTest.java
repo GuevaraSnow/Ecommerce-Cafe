@@ -6,6 +6,7 @@ import com.uniquindio.ecommerce.Domain.repository.AsistenteIA;
 import com.uniquindio.ecommerce.Domain.repository.FiltroDePresentaciones;
 import com.uniquindio.ecommerce.Domain.repository.Pagina;
 import com.uniquindio.ecommerce.Domain.repository.PresentacionRepositorio;
+import com.uniquindio.ecommerce.Domain.valueobject.Descuento;
 import com.uniquindio.ecommerce.Domain.valueobject.MensajeDeChat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,10 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +59,35 @@ class ConsultarAsistenteTest {
         verify(asistente).responder(instrucciones.capture(), anyList(), eq("¿Qué me recomiendas?"));
         assertTrue(instrucciones.getValue().contains("Café Verde"));
         assertTrue(instrucciones.getValue().contains("28000"));
+    }
+
+    @Test
+    void unProductoConDescuentoVigenteLlevaSuPrecioNormalElPorcentajeYLaFechaFinal() {
+        Presentacion conDescuento = PresentacionesDePrueba.cafeVerde("pres-d");
+        LocalDate fin = LocalDate.now().plusDays(5);
+        conDescuento.programarDescuento(new Descuento(20, LocalDate.now().minusDays(1), fin));
+        when(presentaciones.buscarDisponibles(any(FiltroDePresentaciones.class), anyInt(), anyInt()))
+                .thenReturn(new Pagina<>(List.of(conDescuento), 0, 30, 1));
+
+        consultarAsistente.ejecutar("¿Hay ofertas?", List.of());
+
+        ArgumentCaptor<String> instrucciones = ArgumentCaptor.forClass(String.class);
+        verify(asistente).responder(instrucciones.capture(), anyList(), eq("¿Hay ofertas?"));
+        assertTrue(instrucciones.getValue().contains("28000 COP, ahora 22400 COP con 20 % de descuento hasta " + fin));
+    }
+
+    @Test
+    void unProductoSinDescuentoNoMencionaDescuentoEnSuLinea() {
+        Presentacion sinDescuento = PresentacionesDePrueba.cafeVerde("pres-s");
+        when(presentaciones.buscarDisponibles(any(FiltroDePresentaciones.class), anyInt(), anyInt()))
+                .thenReturn(new Pagina<>(List.of(sinDescuento), 0, 30, 1));
+
+        consultarAsistente.ejecutar("hola", List.of());
+
+        ArgumentCaptor<String> instrucciones = ArgumentCaptor.forClass(String.class);
+        verify(asistente).responder(instrucciones.capture(), anyList(), eq("hola"));
+        assertTrue(instrucciones.getValue().contains("- Café Verde | CAFE_VERDE | 28000 COP | disponible: 200 kg"));
+        assertFalse(instrucciones.getValue().contains("ahora"));
     }
 
     @Test

@@ -22,9 +22,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Prueba el repositorio de Presentación contra H2 de verdad y con los datos de data-presentacion.sql.
  * Pide el puerto del dominio, no el adaptador. Cada prueba deshace lo que guarda (@Transactional).
  *
- * Datos disponibles para la venta, ordenados por título:
- * pres-cafe-1 (Cafe tostado Huila), pres-cafe-3 (Cafe tostado Narino), pres-cafe-2 (Cafe verde Quindio)
- * y pres-taza-1 (Taza de ceramica). Las demás filas (vencida, pausada, agotada, eliminada) no deben aparecer.
+ * Datos disponibles para la venta (diez), ordenados por título:
+ * pres-molido-1 (Cafe molido para filtro), pres-cafe-5 (Cafe tostado Calarca), pres-cafe-1 (Cafe tostado Huila),
+ * pres-cafe-3 (Cafe tostado Narino), pres-cafe-4 (Cafe verde Caturra especial), pres-cafe-2 (Cafe verde Quindio),
+ * pres-filtro-1 (Filtro de tela reutilizable), pres-molinillo-1 (Molinillo manual), pres-taza-1 (Taza de ceramica)
+ * y pres-termo-1 (Termo cafetero). Las demás filas (vencida, pausada, agotada, eliminada) no deben aparecer.
  */
 @SpringBootTest
 @Transactional
@@ -106,7 +108,7 @@ class PresentacionRepositorioJpaTest {
 
         assertEquals(new Precio(35000, "COP"), recuperada.getPrecio());
         assertEquals(new Cantidad(150, "kg"), recuperada.getCantidadDisponible());
-        assertEquals(4, repositorio.buscarDisponibles(SIN_FILTROS, 0, 10).totalElementos());
+        assertEquals(10, repositorio.buscarDisponibles(SIN_FILTROS, 0, 10).totalElementos());
     }
 
     @Test
@@ -138,11 +140,12 @@ class PresentacionRepositorioJpaTest {
     // ----- búsqueda: solo lo disponible, ordenado y paginado -----
 
     @Test
-    void sinFiltrosListaSoloLasCuatroDisponiblesOrdenadasPorTitulo() {
+    void sinFiltrosListaSoloLasDiezDisponiblesOrdenadasPorTitulo() {
         Pagina<Presentacion> pagina = repositorio.buscarDisponibles(SIN_FILTROS, 0, 10);
 
-        assertEquals(List.of("pres-cafe-1", "pres-cafe-3", "pres-cafe-2", "pres-taza-1"), ids(pagina.contenido()));
-        assertEquals(4, pagina.totalElementos());
+        assertEquals(List.of("pres-molido-1", "pres-cafe-5", "pres-cafe-1", "pres-cafe-3", "pres-cafe-4", "pres-cafe-2",
+                "pres-filtro-1", "pres-molinillo-1", "pres-taza-1", "pres-termo-1"), ids(pagina.contenido()));
+        assertEquals(10, pagina.totalElementos());
         assertEquals(1, pagina.totalPaginas());
     }
 
@@ -151,10 +154,10 @@ class PresentacionRepositorioJpaTest {
         Pagina<Presentacion> primera = repositorio.buscarDisponibles(SIN_FILTROS, 0, 3);
         Pagina<Presentacion> segunda = repositorio.buscarDisponibles(SIN_FILTROS, 1, 3);
 
-        assertEquals(List.of("pres-cafe-1", "pres-cafe-3", "pres-cafe-2"), ids(primera.contenido()));
-        assertEquals(List.of("pres-taza-1"), ids(segunda.contenido()));
-        assertEquals(4, primera.totalElementos());
-        assertEquals(2, primera.totalPaginas());
+        assertEquals(List.of("pres-molido-1", "pres-cafe-5", "pres-cafe-1"), ids(primera.contenido()));
+        assertEquals(List.of("pres-cafe-3", "pres-cafe-4", "pres-cafe-2"), ids(segunda.contenido()));
+        assertEquals(10, primera.totalElementos());
+        assertEquals(4, primera.totalPaginas());
     }
 
     @Test
@@ -162,7 +165,7 @@ class PresentacionRepositorioJpaTest {
         Pagina<Presentacion> pagina = repositorio.buscarDisponibles(SIN_FILTROS, 5, 3);
 
         assertTrue(pagina.contenido().isEmpty());
-        assertEquals(4, pagina.totalElementos());
+        assertEquals(10, pagina.totalElementos());
     }
 
     @Test
@@ -192,7 +195,7 @@ class PresentacionRepositorioJpaTest {
         vaciarLaMemoriaDeJpa();
 
         assertFalse(ids(repositorio.buscarDisponibles(SIN_FILTROS, 0, 10).contenido()).contains("pres-taza-1"));
-        assertEquals(3, repositorio.buscarDisponibles(SIN_FILTROS, 0, 10).totalElementos());
+        assertEquals(9, repositorio.buscarDisponibles(SIN_FILTROS, 0, 10).totalElementos());
         assertTrue(repositorio.buscarPorId("pres-taza-1").orElseThrow().isEliminada());
     }
 
@@ -200,9 +203,9 @@ class PresentacionRepositorioJpaTest {
 
     @Test
     void filtraPorTipoYPorVendedor() {
-        assertEquals(List.of("pres-cafe-1", "pres-cafe-3"), ids(repositorio.buscarDisponibles(
+        assertEquals(List.of("pres-cafe-5", "pres-cafe-1", "pres-cafe-3"), ids(repositorio.buscarDisponibles(
                 new FiltroDePresentaciones(null, TipoDePresentacion.CAFE_TOSTADO, null, null, null), 0, 10).contenido()));
-        assertEquals(List.of("pres-cafe-1", "pres-cafe-3"), ids(repositorio.buscarDisponibles(
+        assertEquals(List.of("pres-cafe-5", "pres-cafe-1", "pres-cafe-3"), ids(repositorio.buscarDisponibles(
                 new FiltroDePresentaciones(null, null, "usr-tostador", null, null), 0, 10).contenido()));
     }
 
@@ -233,9 +236,11 @@ class PresentacionRepositorioJpaTest {
 
     @Test
     void sugiereLasDisponiblesQueContienenElTextoOrdenadasYLimitadas() {
-        assertEquals(List.of("pres-cafe-1", "pres-cafe-3", "pres-cafe-2"),
+        // "caf" está en los cinco cafés y también en "Termo cafetero"
+        assertEquals(List.of("pres-molido-1", "pres-cafe-5", "pres-cafe-1", "pres-cafe-3", "pres-cafe-4", "pres-cafe-2",
+                        "pres-termo-1"),
                 ids(repositorio.sugerirDisponiblesPorTitulo("caf", 10)));
-        assertEquals(List.of("pres-cafe-1", "pres-cafe-3"), ids(repositorio.sugerirDisponiblesPorTitulo("caf", 2)));
+        assertEquals(List.of("pres-molido-1", "pres-cafe-5"), ids(repositorio.sugerirDisponiblesPorTitulo("caf", 2)));
         assertEquals(List.of("pres-taza-1"), ids(repositorio.sugerirDisponiblesPorTitulo("TAZ", 10)));
         assertTrue(repositorio.sugerirDisponiblesPorTitulo("xyz", 10).isEmpty());
     }
