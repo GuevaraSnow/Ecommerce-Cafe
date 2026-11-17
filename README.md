@@ -8,7 +8,6 @@
   <img src="https://img.shields.io/badge/Seguridad-JWT_HS256-black?style=flat-square&logo=jsonwebtokens&logoColor=white"/>
   <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff&style=flat-square"/>
   <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat-square&logo=swagger&logoColor=black"/>
-  <img src="https://img.shields.io/badge/Pruebas_backend-883-brightgreen?style=flat-square"/>
 </p>
 
 <p align="center">
@@ -20,7 +19,6 @@
   <img src="https://img.shields.io/badge/Dise%C3%B1o-Figma-F24E1E?style=flat-square&logo=figma&logoColor=white"/>
   <img src="https://img.shields.io/badge/IA-Groq-F55036?style=flat-square"/>
   <img src="https://img.shields.io/badge/Im%C3%A1genes-Cloudinary-3448C5?style=flat-square&logo=cloudinary&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Pruebas_frontend-27-brightgreen?style=flat-square"/>
 </p>
 
 <p align="center">
