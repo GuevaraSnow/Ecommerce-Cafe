@@ -74,7 +74,7 @@ cd Backend
 docker compose up --build -d
 ```
 
-> Estos comandos levantan tanto la base de datos MariaDB como el servidor backend en `http://localhost:8080`, por lo que **no es necesario** ejecutar `bootRun` adicionalmente. En este modo la base **conserva los datos al apagar**, y la primera vez se cargan los mismos datos de ejemplo que en H2 (usuarios de prueba, productos con fotos y compras). Si cambió el código, repite `bootJar` y `--build`: sin ellos Docker reutiliza la imagen anterior. Las claves del chat con IA y de las fotos se explican en el README de la raíz (`.env.example`).
+> Estos comandos levantan tanto la base de datos MariaDB como el servidor backend en `http://localhost:8080`, por lo que **no es necesario** ejecutar `bootRun` adicionalmente. En este modo la base **conserva los datos al apagar**, y la primera vez se cargan los mismos datos de ejemplo que en H2 (usuarios de prueba, productos con fotos y compras). Si cambió el código, repite `bootJar` y `--build`: sin ellos Docker reutiliza la imagen anterior. Las claves del chat con IA y de las fotos se explican en el README de la raíz (archivo `Backend/.env`).
 
 2. Para detener y apagar los contenedores al finalizar (los datos se conservan):
 

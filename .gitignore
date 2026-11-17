@@ -36,5 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 
-# Claves locales de docker compose (se copian de Backend/.env.example)
+# Claves locales (Groq y Cloudinary) que leen docker compose y bootRun: Backend/.env
 .env

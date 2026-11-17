@@ -4,7 +4,7 @@
 # Borrar todo, datos incluidos: docker compose down -v
 #
 # Las claves de Groq y Cloudinary NO van aqui: se toman de las variables de entorno del equipo
-# o de un archivo .env junto a este (ver .env.example). Sin ellas todo funciona, menos el chat y las fotos.
+# o de un archivo .env junto a este (ver el README). Sin ellas todo funciona, menos el chat y las fotos.
 services:
   mariadb:
     image: mariadb:11

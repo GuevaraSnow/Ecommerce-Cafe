@@ -222,7 +222,14 @@ docker compose logs -f app         # opcional: ver el arranque; espera "Started 
 
 - **Datos de ejemplo:** la primera vez se cargan los mismos usuarios, finca, lotes, productos con fotos y compras que en H2 (ver [Usuarios de prueba](#usuarios-de-prueba)). Con `DATOS_DE_EJEMPLO=never` la base empieza **vacía** y los usuarios se crean con `POST /api/usuarios/registro` o desde la pantalla de registro.
 - **Persistencia:** `docker compose down` apaga todo y **conserva los datos** en el volumen (usuarios nuevos, compras, stock); `docker compose down -v` los borra y la próxima vez vuelve a empezar con los datos de ejemplo. Al reiniciar con datos ya guardados, el log muestra unos avisos `Duplicate entry`: son los datos de ejemplo que ya existían y se omiten a propósito; no son un error.
-- **Claves del asesor y de las fotos:** no van en el repositorio. Define las variables de entorno antes de `docker compose up`, o copia `Backend/.env.example` como `Backend/.env` (ese archivo no se sube) y complétalo. Sin ellas todo funciona, menos el chat con IA y la subida de fotos.
+- **Claves del asesor y de las fotos:** no van en el repositorio. Crea el archivo `Backend/.env` (junto a `docker-compose.yml`; no se sube al repositorio) con las cuatro claves, **sin comillas ni espacios**; sirve igual para Docker y para `./gradlew bootRun`. Sin ellas todo funciona, menos el chat con IA y la subida de fotos.
+
+  ```
+  GROQ_API_KEY=tu_clave_de_groq
+  CLOUDINARY_CLOUD_NAME=tu_nube
+  CLOUDINARY_API_KEY=tu_clave_de_cloudinary
+  CLOUDINARY_API_SECRET=tu_secreto_de_cloudinary
+  ```
 - **Otros ajustes:** los puertos se cambian con `APP_PORT` y `DB_PORT`, y la clave del JWT con `JWT_SECRET`.
 - Para correr la aplicación fuera de Docker contra un MariaDB ya levantado: `docker compose up -d mariadb` y luego `./gradlew bootRun --args='--spring.profiles.active=mariadb'`.
 - El perfil está en `Backend/src/main/resources/application-mariadb.properties`; la imagen se define en `Backend/Dockerfile` y los servicios en `Backend/docker-compose.yml`. La base usa `utf8mb4`, así que las tildes y la ñ se guardan bien.
