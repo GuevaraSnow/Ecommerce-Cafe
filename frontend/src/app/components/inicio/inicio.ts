@@ -50,6 +50,12 @@ export class Inicio {
     return (p.galeria.find((imagen) => imagen.principal) ?? p.galeria[0])?.url ?? null;
   }
 
+  // Baja con suavidad a la sección de trazabilidad. Un href="#trazabilidad" no sirve aquí:
+  // el router de Angular atiende el enlace y devuelve la página arriba.
+  irATrazabilidad(): void {
+    document.getElementById('trazabilidad')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   tieneDescuento(p: Presentacion): boolean {
     return p.descuento !== null && p.precioVigente.monto < p.precio.monto;
   }
